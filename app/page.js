@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { BRAND } from "@/lib/constants";
+import { BRAND, EQUIPO_HABILITADO } from "@/lib/constants";
 import { loadData, saveData } from "@/lib/storage";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
@@ -86,7 +86,7 @@ export default function TuEquipoIA() {
     <div className="w-full h-screen flex" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
       <Sidebar business={business} active={section} onChange={setSection} isAdmin={isAdmin} />
       <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-6">
-        {section === "equipo" && <EquipoSection business={business} />}
+        {section === "equipo" && EQUIPO_HABILITADO && <EquipoSection business={business} />}
         {section === "recursos" && <RecursosSection isAdmin={isAdmin} />}
         {section === "marketing" && <MarketingSection />}
         {section === "ventas" && <VentasSection />}
