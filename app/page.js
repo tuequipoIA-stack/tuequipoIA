@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { loadData, saveData } from "@/lib/storage";
 import { uid } from "@/lib/helpers";
+import { createClient } from "@/lib/supabase/client";
 import Sidebar from "@/components/Sidebar";
 import Onboarding from "@/components/Onboarding";
 import DashboardSection from "@/components/sections/DashboardSection";
@@ -16,17 +17,32 @@ import FinanzasSection from "@/components/sections/FinanzasSection";
 import EstrategiaSection from "@/components/sections/EstrategiaSection";
 import TableroSection from "@/components/sections/TableroSection";
 import PerfilSection from "@/components/sections/PerfilSection";
+import AdminSection from "@/components/sections/AdminSection";
 
 export default function TuEquipoIA() {
   const [stage, setStage] = useState("loading");
   const [business, setBusiness] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [section, setSection] = useState("dashboard");
 
   useEffect(() => {
     (async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      let admin = false;
+      if (user) {
+        const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+        admin = !!profile?.is_admin;
+      }
+      setIsAdmin(admin);
+
       const perfil = await loadData("negocio-perfil", null);
       if (perfil && perfil.nombre) {
         setBusiness(perfil);
+        setStage("app");
+      } else if (admin) {
+        // los administradores no necesitan completar el onboarding de negocio
+        setSection("admin");
         setStage("app");
       } else {
         setStage("onboarding");
@@ -68,7 +84,7 @@ export default function TuEquipoIA() {
 
   return (
     <div className="w-full h-screen flex" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
-      <Sidebar business={business} active={section} onChange={setSection} />
+      <Sidebar business={business} active={section} onChange={setSection} isAdmin={isAdmin} />
       <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-6">
         {section === "equipo" && <EquipoSection business={business} />}
         {section === "recursos" && <RecursosSection />}
@@ -79,6 +95,7 @@ export default function TuEquipoIA() {
         {section === "dashboard" && <DashboardSection business={business} />}
         {section === "tablero" && <TableroSection />}
         {section === "perfil" && <PerfilSection business={business} onBusinessUpdate={setBusiness} />}
+        {section === "admin" && isAdmin && <AdminSection />}
       </div>
     </div>
   );

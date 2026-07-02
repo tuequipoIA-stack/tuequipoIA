@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Sparkles } from "lucide-react";
+import { LogOut, Shield, Sparkles } from "lucide-react";
 import { BRAND, NAV_ITEMS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { logoUrl } from "@/lib/logo";
 
-export default function Sidebar({ business, active, onChange }) {
+export default function Sidebar({ business, active, onChange, isAdmin }) {
   const router = useRouter();
   const [logoSrc, setLogoSrc] = useState(null);
   const [logoError, setLogoError] = useState(false);
@@ -59,6 +59,14 @@ export default function Sidebar({ business, active, onChange }) {
             </button>
           );
         })}
+        {isAdmin && (
+          <button onClick={() => onChange("admin")}
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left mt-2"
+            style={active === "admin" ? { background: BRAND.teal, color: BRAND.navy } : { background: "transparent", color: "#a9a9b8" }}>
+            <Shield size={16} />
+            Admin
+          </button>
+        )}
       </div>
       <button onClick={cerrarSesion}
         className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-left"

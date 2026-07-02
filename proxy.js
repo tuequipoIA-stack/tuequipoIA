@@ -50,14 +50,14 @@ export async function proxy(request) {
   if (user && !isPublic && !isApi && !isSubscriptionExempt) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("subscription_status, trial_ends_at")
+      .select("subscription_status, trial_ends_at, is_admin")
       .eq("id", user.id)
       .maybeSingle();
 
     const enTrial = profile?.subscription_status === "trial" && profile?.trial_ends_at && new Date(profile.trial_ends_at) > new Date();
     const activa = profile?.subscription_status === "active";
 
-    if (!activa && !enTrial) {
+    if (!activa && !enTrial && !profile?.is_admin) {
       const url = request.nextUrl.clone();
       url.pathname = "/suscripcion";
       return NextResponse.redirect(url);
