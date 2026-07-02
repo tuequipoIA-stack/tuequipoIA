@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/signup", "/auth/callback", "/reset-password"];
 // El usuario tiene que poder llegar a /suscripcion (y pagar) aunque su
 // suscripción esté vencida — si no, quedaría trabado sin forma de pagar.
 const SUBSCRIPTION_EXEMPT_PATHS = ["/suscripcion"];

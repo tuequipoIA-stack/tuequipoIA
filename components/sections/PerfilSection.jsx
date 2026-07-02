@@ -9,6 +9,7 @@ import { logoUrl } from "@/lib/logo";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import CambiarTarjetaForm from "@/components/perfil/CambiarTarjetaForm";
+import PasswordInput from "@/components/PasswordInput";
 
 const ESTADO_LABEL = { trial: "Prueba gratis", active: "Activa", past_due: "Pago vencido", canceled: "Cancelada" };
 const ESTADO_COLOR = {
@@ -248,11 +249,15 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
       <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">Cambiar contraseña</div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Nueva contraseña</span>
-        <input type="password" value={nuevaPassword} onChange={(e) => setNuevaPassword(e.target.value)}
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+        <div className="mb-3">
+          <PasswordInput dark={false} value={nuevaPassword} onChange={(e) => setNuevaPassword(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+        </div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Repetí la contraseña</span>
-        <input type="password" value={confirmarPassword} onChange={(e) => setConfirmarPassword(e.target.value)}
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+        <div className="mb-3">
+          <PasswordInput dark={false} value={confirmarPassword} onChange={(e) => setConfirmarPassword(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+        </div>
         {passwordError && <p className="text-xs mb-3" style={{ color: "#b3453f" }}>{passwordError}</p>}
         {passwordMsg && <p className="text-xs mb-3" style={{ color: "#127a79" }}>{passwordMsg}</p>}
         <button onClick={cambiarPassword} disabled={cambiandoPassword || !nuevaPassword}

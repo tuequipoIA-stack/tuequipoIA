@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import BrandHeader from "@/components/BrandHeader";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -39,8 +40,11 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-3">
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
             className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={{ background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }} />
-          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña"
-            className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={{ background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }} />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" required />
+
+          <div className="text-right -mt-1">
+            <Link href="/reset-password" className="text-xs" style={{ color: "#8b8b9a" }}>¿Olvidaste tu contraseña?</Link>
+          </div>
 
           {error && <p className="text-xs" style={{ color: "#e08a86" }}>{error}</p>}
 
