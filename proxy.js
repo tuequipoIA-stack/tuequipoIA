@@ -2,10 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/signup", "/auth/callback", "/reset-password"];
-// El usuario tiene que poder llegar a /suscripcion (y pagar) aunque su
-// suscripción esté vencida — si no, quedaría trabado sin forma de pagar.
-const SUBSCRIPTION_EXEMPT_PATHS = ["/suscripcion"];
 
+// El gating por estado de suscripción (nunca se suscribió vs. suscripción
+// vencida) se resuelve del lado del cliente en app/page.js, no acá: un
+// suscriptor cuyo pago venció tiene que poder seguir viendo la app (grisada,
+// con un cartel) en vez de que lo rebotemos afuera — y eso necesita lógica
+// de UI, no solo un redirect. Acá solo se valida que haya sesión.
 export async function proxy(request) {
   let response = NextResponse.next({ request });
 
@@ -42,26 +44,6 @@ export async function proxy(request) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
-  }
-
-  // Gating por suscripción: solo para páginas de la app, no para /api/*
-  // (esas rutas ya validan sesión por su cuenta) ni para el propio /suscripcion.
-  const isSubscriptionExempt = SUBSCRIPTION_EXEMPT_PATHS.some((p) => path.startsWith(p));
-  if (user && !isPublic && !isApi && !isSubscriptionExempt) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("subscription_status, trial_ends_at, is_admin")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    const enTrial = profile?.subscription_status === "trial" && profile?.trial_ends_at && new Date(profile.trial_ends_at) > new Date();
-    const activa = profile?.subscription_status === "active";
-
-    if (!activa && !enTrial && !profile?.is_admin) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/suscripcion";
-      return NextResponse.redirect(url);
-    }
   }
 
   return response;

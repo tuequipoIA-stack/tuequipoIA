@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { money } from "@/lib/helpers";
+
+const ESTADO_LABEL = { trial: "Prueba", active: "Activa", past_due: "Vencida", canceled: "Cancelada" };
 
 function Bloque({ titulo, children }) {
   return (
@@ -21,15 +23,37 @@ function Vacio() {
 export default function AdminUserDetail({ userId, onBack }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [cambiando, setCambiando] = useState(false);
+  const [mensaje, setMensaje] = useState("");
 
-  useEffect(() => {
+  const cargar = () => {
     fetch(`/api/admin/users/${userId}`)
       .then((r) => r.json())
       .then((d) => {
         if (d.error) setError(d.error);
         else setData(d);
       });
-  }, [userId]);
+  };
+
+  useEffect(() => { cargar(); }, [userId]);
+
+  const cambiarEstado = async (status) => {
+    setCambiando(true);
+    setMensaje("");
+    const res = await fetch(`/api/admin/users/${userId}/subscription`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const resData = await res.json();
+    setCambiando(false);
+    if (resData.error) {
+      setMensaje(resData.error);
+      return;
+    }
+    setMensaje(`Estado actualizado a "${ESTADO_LABEL[status] || status}" ✓`);
+    cargar();
+  };
 
   if (error) return <p style={{ color: "#b3453f" }} className="text-sm">{error}</p>;
   if (!data) return <p style={{ color: "#8a8578" }} className="text-sm">Cargando...</p>;
@@ -62,9 +86,35 @@ export default function AdminUserDetail({ userId, onBack }) {
             background: profile.subscription_status === "active" ? "#eef7f6" : "#f0ece2",
             color: profile.subscription_status === "active" ? "#127a79" : "#6b6759",
           }}>
-          {profile.subscription_status}
+          {ESTADO_LABEL[profile.subscription_status] || profile.subscription_status}
         </span>
       </div>
+
+      <Bloque titulo="Suscripción">
+        <p style={{ color: "#8a8578" }} className="text-xs mb-3">
+          Cambiá el estado a mano si el pago se hizo en efectivo, transferencia, o para destrabar a alguien puntualmente.
+          {profile.mercadopago_subscription_id && " Esto no cancela ni modifica la suscripción en MercadoPago, solo el acceso en la app."}
+        </p>
+        <div className="flex flex-wrap gap-2 mb-2">
+          <button onClick={() => cambiarEstado("active")} disabled={cambiando}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-50"
+            style={{ background: "#eef7f6", color: "#127a79" }}>
+            {cambiando && <Loader2 size={12} className="animate-spin" />}
+            Activar manualmente
+          </button>
+          <button onClick={() => cambiarEstado("past_due")} disabled={cambiando}
+            className="rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-50"
+            style={{ background: "#fdf0e6", color: "#b3703f" }}>
+            Marcar como vencida
+          </button>
+          <button onClick={() => cambiarEstado("canceled")} disabled={cambiando}
+            className="rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-50"
+            style={{ background: "#fbeceb", color: "#b3453f" }}>
+            Cancelar
+          </button>
+        </div>
+        {mensaje && <p className="text-xs" style={{ color: mensaje.includes("✓") ? "#127a79" : "#b3453f" }}>{mensaje}</p>}
+      </Bloque>
 
       <Bloque titulo="Negocio">
         {perfil.nombre ? (

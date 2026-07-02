@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BRAND } from "@/lib/constants";
+import { BRAND, MEMBRESIA_PRECIO_ARS } from "@/lib/constants";
 import { money } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
 import BrandHeader from "@/components/BrandHeader";
-
-const PRECIO_ARS = 60500;
 
 export default function SuscripcionPage() {
   const [loading, setLoading] = useState(false);
@@ -46,8 +44,8 @@ export default function SuscripcionPage() {
         </p>
 
         <div className="rounded-xl p-5 mb-6" style={{ background: "#242440", border: "1px solid #35354f" }}>
-          <div style={{ color: BRAND.teal }} className="text-3xl font-semibold">{money(PRECIO_ARS)}</div>
-          <div style={{ color: "#8b8b9a" }} className="text-xs mt-1">por mes, IVA incluido</div>
+          <div style={{ color: BRAND.teal }} className="text-3xl font-semibold">{money(MEMBRESIA_PRECIO_ARS)}</div>
+          <div style={{ color: "#8b8b9a" }} className="text-xs mt-1">por mes</div>
         </div>
 
         {error && <p className="text-xs mb-4" style={{ color: "#e08a86" }}>{error}</p>}
