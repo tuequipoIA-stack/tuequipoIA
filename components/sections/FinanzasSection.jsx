@@ -3,20 +3,22 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { BRAND, GASTO_CATEGORIAS } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
 import CostosSection from "@/components/finanzas/CostosSection";
 
 export default function FinanzasSection({ business }) {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [vista, setVista] = useState("movimientos");
   const [gastos, setGastos] = useState([]);
   const [ventas, setVentas] = useState([]);
   const [form, setForm] = useState({ fecha: new Date().toISOString().slice(0, 10), categoria: GASTO_CATEGORIAS[0], monto: "", nota: "" });
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("gastos-registro", []).then(setGastos);
     loadData("ventas-registro", []).then(setVentas);
-  }, []);
+  }, [unidadId]);
 
   const agregar = async () => {
     if (!form.monto) return;

@@ -3,17 +3,19 @@
 import { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 
 export default function PropuestaValorTab() {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [data, setData] = useState({ propuesta: "", diferenciadores: [] });
   const [loaded, setLoaded] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [nuevoDiferenciador, setNuevoDiferenciador] = useState("");
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("marketing-valor", { propuesta: "", diferenciadores: [] }).then((d) => { setData(d); setLoaded(true); });
-  }, []);
+  }, [unidadId]);
 
   const guardar = async (actualizado) => {
     setData(actualizado);

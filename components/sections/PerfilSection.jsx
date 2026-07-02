@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { BRAND, TIPOS_NEGOCIO } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
+import { useUnidad } from "@/components/UnidadProvider";
 import { money } from "@/lib/helpers";
 import { logoUrl } from "@/lib/logo";
 import { createClient } from "@/lib/supabase/client";
@@ -100,6 +101,8 @@ function SuscripcionBlock() {
 }
 
 export default function PerfilSection({ business, onBusinessUpdate }) {
+  const { saveData } = useUnidadStorage();
+  const { unidadId, renombrarUnidad } = useUnidad();
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState(null);
   const [nombre, setNombre] = useState(business?.nombre || "");
@@ -107,6 +110,13 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
   const [tipoNegocio, setTipoNegocio] = useState(business?.tipoNegocio || "productos");
   const [guardandoDatos, setGuardandoDatos] = useState(false);
   const [guardadoDatos, setGuardadoDatos] = useState(false);
+
+  // Si cambia la unidad activa (o llega el business recién cargado), sincronizar el formulario.
+  useEffect(() => {
+    setNombre(business?.nombre || "");
+    setRubro(business?.rubro || "");
+    setTipoNegocio(business?.tipoNegocio || "productos");
+  }, [business, unidadId]);
 
   const [logoSrc, setLogoSrc] = useState(null);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
@@ -134,6 +144,9 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
     setGuardandoDatos(true);
     const actualizado = { ...business, nombre, rubro, tipoNegocio };
     await saveData("negocio-perfil", actualizado);
+    if (unidadId) {
+      try { await renombrarUnidad(unidadId, { nombre, rubro, tipoNegocio }); } catch (e) { /* no bloquea el guardado principal */ }
+    }
     onBusinessUpdate?.(actualizado);
     setGuardandoDatos(false);
     setGuardadoDatos(true);

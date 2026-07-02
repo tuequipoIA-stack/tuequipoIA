@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { ListChecks, Megaphone, Compass } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { loadData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { isThisMonth, money } from "@/lib/helpers";
 
 export default function DashboardSection({ business }) {
+  const { loadData, unidadId } = useUnidadStorage();
   const [ventas, setVentas] = useState([]);
   const [gastos, setGastos] = useState([]);
   const [tareas, setTareas] = useState([]);
@@ -16,6 +17,8 @@ export default function DashboardSection({ business }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    if (!unidadId) return;
+    setLoaded(false);
     Promise.all([
       loadData("ventas-registro", []),
       loadData("gastos-registro", []),
@@ -27,7 +30,7 @@ export default function DashboardSection({ business }) {
       setVentas(v); setGastos(g); setTareas(t); setCalendario(c); setEstrategia(e); setPlan(p);
       setLoaded(true);
     });
-  }, []);
+  }, [unidadId]);
 
   const ventasMes = ventas.filter((v) => isThisMonth(v.fecha)).reduce((s, v) => s + Number(v.precio || 0) * Number(v.cantidad || 1), 0);
   const gastosMes = gastos.filter((g) => isThisMonth(g.fecha)).reduce((s, g) => s + Number(g.monto || 0), 0);

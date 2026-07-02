@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money } from "@/lib/helpers";
 import InsumosTab from "./InsumosTab";
 
@@ -73,6 +73,7 @@ function ArmadorDeReceta({ insumos, ingredientes, onChange }) {
 }
 
 function ProductosTab({ business }) {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [costos, setCostos] = useState({ productos: [], fijos: [] });
   const [insumos, setInsumos] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -81,11 +82,13 @@ function ProductosTab({ business }) {
   const [expandido, setExpandido] = useState(null);
 
   useEffect(() => {
+    if (!unidadId) return;
+    setLoaded(false);
     Promise.all([
       loadData("finanzas-costos", { productos: [], fijos: [] }),
       loadData("finanzas-insumos", []),
     ]).then(([c, i]) => { setCostos(c); setInsumos(i); setLoaded(true); });
-  }, []);
+  }, [unidadId]);
 
   const totalReceta = nuevosIngredientes.reduce((s, ing) => s + Number(ing.costoUnitario || 0) * Number(ing.cantidad || 0), 0);
 
@@ -227,13 +230,16 @@ function ProductosTab({ business }) {
 }
 
 function FijosTab() {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [costos, setCostos] = useState({ productos: [], fijos: [] });
   const [loaded, setLoaded] = useState(false);
   const [nuevoFijo, setNuevoFijo] = useState({ concepto: "", monto: "", fecha: new Date().toISOString().slice(0, 10) });
 
   useEffect(() => {
+    if (!unidadId) return;
+    setLoaded(false);
     loadData("finanzas-costos", { productos: [], fijos: [] }).then((d) => { setCostos(d); setLoaded(true); });
-  }, []);
+  }, [unidadId]);
 
   const agregarFijo = async () => {
     if (!nuevoFijo.concepto.trim() || !nuevoFijo.monto) return;
@@ -290,18 +296,20 @@ function FijosTab() {
 }
 
 export default function CostosSection({ business }) {
+  const { loadData, unidadId } = useUnidadStorage();
   const esServicios = business?.tipoNegocio === "servicios";
   const [vista, setVista] = useState("fijos");
   const [resumen, setResumen] = useState({ totalFijos: 0, valorInventario: 0 });
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("finanzas-costos", { productos: [], fijos: [] }).then((c) => {
       setResumen({
         totalFijos: (c.fijos || []).reduce((s, f) => s + Number(f.monto || 0), 0),
         valorInventario: (c.productos || []).reduce((s, p) => s + Number(p.costo || 0) * Number(p.cantidad ?? 1), 0),
       });
     });
-  }, [vista]);
+  }, [vista, unidadId]);
 
   return (
     <div>

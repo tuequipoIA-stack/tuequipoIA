@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, X } from "lucide-react";
 import { BRAND, COLUMNAS_BASE, MAX_COLUMNAS_EXTRA } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, migrarColumna } from "@/lib/helpers";
 
 // Colores pastel por columna: semana (naranja clarito), hoy (celeste), hecho (verde clarito).
@@ -16,6 +16,7 @@ const COLUMNA_COLOR = {
 const COLUMNA_COLOR_DEFAULT = { bg: "#f0ece2", header: "#6b6759", border: "#e4dfd3" };
 
 export default function TableroSection() {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [columnas, setColumnas] = useState(COLUMNAS_BASE);
   const [tareas, setTareas] = useState([]);
   const [nuevaTarea, setNuevaTarea] = useState("");
@@ -24,6 +25,7 @@ export default function TableroSection() {
   const [arrastrando, setArrastrando] = useState(null);
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("tablero-columnas", COLUMNAS_BASE).then(setColumnas);
     loadData("tablero-tareas", []).then(async (d) => {
       const migradas = d.map((t) => ({ ...t, columna: migrarColumna(t.columna) }));
@@ -31,7 +33,7 @@ export default function TableroSection() {
       const huboCambios = d.some((t, i) => t.columna !== migradas[i].columna);
       if (huboCambios) await saveData("tablero-tareas", migradas);
     });
-  }, []);
+  }, [unidadId]);
 
   const columnasExtra = columnas.filter((c) => !c.fija).length;
 

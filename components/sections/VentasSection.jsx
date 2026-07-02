@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
 
 const OTRO = "__otro__";
 
 export default function VentasSection({ business }) {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [ventas, setVentas] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [fechaActiva, setFechaActiva] = useState(new Date().toISOString().slice(0, 10));
@@ -18,11 +19,15 @@ export default function VentasSection({ business }) {
   const usaCatalogo = business?.tipoNegocio !== "servicios";
 
   useEffect(() => {
+    if (!unidadId) return;
+    setLoaded(false);
     loadData("ventas-registro", []).then((d) => { setVentas(d); setLoaded(true); });
     if (usaCatalogo) {
       loadData("finanzas-costos", { productos: [], fijos: [] }).then((c) => setCatalogo(c.productos || []));
+    } else {
+      setCatalogo([]);
     }
-  }, [usaCatalogo]);
+  }, [usaCatalogo, unidadId]);
 
   const productoElegido = catalogo.find((p) => p.id === fila.productoId);
   const mostrarLibre = !usaCatalogo || fila.productoId === OTRO || catalogo.length === 0;

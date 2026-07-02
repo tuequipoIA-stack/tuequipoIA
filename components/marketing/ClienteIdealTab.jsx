@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 
 export default function ClienteIdealTab() {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [data, setData] = useState({ nombre: "", descripcion: "", dolores: "" });
   const [loaded, setLoaded] = useState(false);
   const [guardado, setGuardado] = useState(false);
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("marketing-cliente", { nombre: "", descripcion: "", dolores: "" }).then((d) => { setData(d); setLoaded(true); });
-  }, []);
+  }, [unidadId]);
 
   const guardar = async () => {
     await saveData("marketing-cliente", data);

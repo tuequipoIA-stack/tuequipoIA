@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { Calculator, Check, Loader2, Sparkles } from "lucide-react";
 import { BRAND, CADENCIAS } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money } from "@/lib/helpers";
 import { planSystemPrompt } from "@/lib/businessContext";
 import { askClaude } from "@/lib/chat";
 
 export default function PlanNegocio({ business }) {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [form, setForm] = useState({
     vision: "", productoPrincipal: "", costoUnitario: "", margenDeseado: "50", sueldoObjetivo: "", diasHabiles: "24",
   });
@@ -18,11 +19,12 @@ export default function PlanNegocio({ business }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("plan-negocio", null).then((d) => {
       if (d) { setForm((prev) => d.form || prev); setPlan(d.plan || null); }
       setLoaded(true);
     });
-  }, []);
+  }, [unidadId]);
 
   const guardarForm = async (nuevoForm) => {
     setForm(nuevoForm);

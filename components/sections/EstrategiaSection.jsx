@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { Check, Plus, Trash2 } from "lucide-react";
 import { BRAND, PLAZOS } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid } from "@/lib/helpers";
 import PlanNegocio from "@/components/estrategia/PlanNegocio";
 
 export default function EstrategiaSection({ business }) {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [vista, setVista] = useState("vision");
   const [data, setData] = useState({ vision: "", objetivos: [] });
   const [visionDraft, setVisionDraft] = useState("");
@@ -15,11 +16,12 @@ export default function EstrategiaSection({ business }) {
   const [savedVision, setSavedVision] = useState(false);
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("estrategia-data", { vision: "", objetivos: [] }).then((d) => {
       setData(d);
       setVisionDraft(d.vision || "");
     });
-  }, []);
+  }, [unidadId]);
 
   const guardarVision = async () => {
     const actualizado = { ...data, vision: visionDraft };

@@ -5,8 +5,10 @@ import { ArrowLeft, Send } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { buildBusinessContext } from "@/lib/businessContext";
 import { askClaude } from "@/lib/chat";
+import { useUnidad } from "@/components/UnidadProvider";
 
 export default function ChatView({ agent, business, onBack }) {
+  const { unidadId } = useUnidad();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,8 +17,9 @@ export default function ChatView({ agent, business, onBack }) {
   const Icon = agent.icon;
 
   useEffect(() => {
-    buildBusinessContext(business).then(setContextText);
-  }, [business]);
+    if (!unidadId) return;
+    buildBusinessContext(business, unidadId).then(setContextText);
+  }, [business, unidadId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

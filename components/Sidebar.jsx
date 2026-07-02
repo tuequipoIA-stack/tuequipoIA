@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, LogOut, Shield } from "lucide-react";
 import { BRAND, NAV_ITEMS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
-import { logoUrl } from "@/lib/logo";
 import LogoMark from "@/components/LogoMark";
+import UnidadSwitcher from "@/components/UnidadSwitcher";
 
 const COLLAPSE_KEY = "tuequipoia-sidebar-collapsed";
 const ANCHO_EXPANDIDO = 208;
@@ -32,10 +32,8 @@ function NavButton({ active, collapsed, onClick, icon: Icon, label }) {
   );
 }
 
-export default function Sidebar({ business, active, onChange, isAdmin }) {
+export default function Sidebar({ active, onChange, isAdmin }) {
   const router = useRouter();
-  const [logoSrc, setLogoSrc] = useState(null);
-  const [logoError, setLogoError] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [hidratado, setHidratado] = useState(false);
 
@@ -52,20 +50,6 @@ export default function Sidebar({ business, active, onChange, isAdmin }) {
       return nuevo;
     });
   };
-
-  useEffect(() => {
-    if (!business?.logoUpdatedAt) {
-      setLogoSrc(null);
-      return;
-    }
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) {
-        setLogoError(false);
-        setLogoSrc(logoUrl(data.user.id, business.logoUpdatedAt));
-      }
-    });
-  }, [business?.logoUpdatedAt]);
 
   const cerrarSesion = async () => {
     const supabase = createClient();
@@ -108,15 +92,7 @@ export default function Sidebar({ business, active, onChange, isAdmin }) {
         )}
       </div>
 
-      {!collapsed && business?.nombre && (
-        <div className="flex items-center gap-1.5 px-1 mb-5">
-          {logoSrc && !logoError && (
-            <img src={logoSrc} alt="Logo" className="w-4 h-4 object-contain rounded-sm shrink-0" onError={() => setLogoError(true)} />
-          )}
-          <div style={{ color: "#8686a0" }} className="text-[11px] truncate">{business.nombre}</div>
-        </div>
-      )}
-      {collapsed && <div className="mb-5" />}
+      <UnidadSwitcher collapsed={collapsed} />
 
       <div className="flex flex-col gap-1.5 mt-1 flex-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => (

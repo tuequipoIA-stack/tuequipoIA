@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { BRAND, TIPOS_PUBLICACION, DIAS_SEMANA, MESES, colorTipo } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, fechaISO, getGrillaMes } from "@/lib/helpers";
 
 export default function CalendarioContenidoTab() {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const hoy = new Date();
   const [publicaciones, setPublicaciones] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -16,8 +17,9 @@ export default function CalendarioContenidoTab() {
   const [arrastrando, setArrastrando] = useState(null);
 
   useEffect(() => {
+    if (!unidadId) return;
     loadData("marketing-calendario", []).then((d) => { setPublicaciones(d); setLoaded(true); });
-  }, []);
+  }, [unidadId]);
 
   const agregar = async () => {
     if (!diaSeleccionado) return;

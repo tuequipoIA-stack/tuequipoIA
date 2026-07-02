@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { BRAND, UNIDADES_INSUMO } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
+import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money } from "@/lib/helpers";
 
 // Catálogo de insumos/materias primas reutilizables entre recetas de
@@ -11,13 +11,16 @@ import { uid, money } from "@/lib/helpers";
 // actualiza acá una sola vez y las recetas que lo usan lo reflejan al
 // recalcular (no se propaga solo — hay que tocar "Recalcular" en la receta).
 export default function InsumosTab() {
+  const { loadData, saveData, unidadId } = useUnidadStorage();
   const [insumos, setInsumos] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [form, setForm] = useState({ nombre: "", unidad: UNIDADES_INSUMO[0], costoUnitario: "" });
 
   useEffect(() => {
+    if (!unidadId) return;
+    setLoaded(false);
     loadData("finanzas-insumos", []).then((d) => { setInsumos(d); setLoaded(true); });
-  }, []);
+  }, [unidadId]);
 
   const agregar = async () => {
     if (!form.nombre.trim() || !form.costoUnitario) return;
