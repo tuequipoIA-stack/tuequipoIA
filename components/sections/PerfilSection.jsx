@@ -4,8 +4,99 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { loadData, saveData } from "@/lib/storage";
+import { money } from "@/lib/helpers";
 import { logoUrl } from "@/lib/logo";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import CambiarTarjetaForm from "@/components/perfil/CambiarTarjetaForm";
+
+const ESTADO_LABEL = { trial: "Prueba gratis", active: "Activa", past_due: "Pago vencido", canceled: "Cancelada" };
+const ESTADO_COLOR = {
+  trial: { bg: "#f0ece2", text: "#6b6759" },
+  active: { bg: "#eef7f6", text: "#127a79" },
+  past_due: { bg: "#fdf0e6", text: "#b3703f" },
+  canceled: { bg: "#fbeceb", text: "#b3453f" },
+};
+
+function SuscripcionBlock() {
+  const [sub, setSub] = useState(null);
+  const [error, setError] = useState("");
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+
+  const cargar = () => {
+    fetch("/api/mercadopago/subscription")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) setError(d.error);
+        else setSub(d);
+      });
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  if (error) return null;
+  if (!sub) {
+    return (
+      <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <p style={{ color: "#8a8578" }} className="text-sm">Cargando suscripción...</p>
+      </div>
+    );
+  }
+
+  const estado = ESTADO_COLOR[sub.subscriptionStatus] || ESTADO_COLOR.trial;
+  const diasTrial = sub.trialEndsAt ? Math.max(0, Math.ceil((new Date(sub.trialEndsAt) - new Date()) / 86400000)) : null;
+
+  return (
+    <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="flex items-center justify-between mb-3">
+        <div style={{ color: BRAND.navy }} className="text-sm font-semibold">Suscripción</div>
+        <span className="text-xs px-2 py-1 rounded-full font-semibold" style={{ background: estado.bg, color: estado.text }}>
+          {ESTADO_LABEL[sub.subscriptionStatus] || sub.subscriptionStatus}
+        </span>
+      </div>
+
+      <div className="text-xs space-y-1 mb-3" style={{ color: "#4a4740" }}>
+        <p><b>Membresía:</b> {money(sub.precio)}/mes</p>
+        {sub.subscriptionStatus === "trial" && diasTrial !== null && (
+          <p>Te quedan <b>{diasTrial}</b> {diasTrial === 1 ? "día" : "días"} de prueba.</p>
+        )}
+        {sub.mercadopago?.paymentMethodId && (
+          <p><b>Medio de pago:</b> {sub.mercadopago.paymentMethodId}</p>
+        )}
+        {sub.mercadopago?.nextPaymentDate && (
+          <p><b>Próximo cobro:</b> {new Date(sub.mercadopago.nextPaymentDate).toLocaleDateString("es-AR")}</p>
+        )}
+      </div>
+
+      {mensaje && <p className="text-xs mb-3" style={{ color: "#127a79" }}>{mensaje}</p>}
+
+      {!sub.mercadopago ? (
+        <Link href="/suscripcion"
+          className="inline-block rounded-lg px-4 py-2 text-sm font-semibold"
+          style={{ background: BRAND.teal, color: BRAND.navy }}>
+          Activar suscripción
+        </Link>
+      ) : !mostrarForm ? (
+        <button onClick={() => setMostrarForm(true)}
+          className="rounded-lg px-4 py-2 text-sm font-semibold"
+          style={{ background: BRAND.navy, color: BRAND.cream }}>
+          Cambiar medio de pago
+        </button>
+      ) : (
+        <CambiarTarjetaForm
+          onCancel={() => setMostrarForm(false)}
+          onSuccess={() => {
+            setMostrarForm(false);
+            setMensaje("Medio de pago actualizado ✓");
+            cargar();
+            setTimeout(() => setMensaje(""), 3000);
+          }}
+        />
+      )}
+    </div>
+  );
+}
 
 export default function PerfilSection({ business, onBusinessUpdate }) {
   const [email, setEmail] = useState("");
@@ -107,6 +198,9 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-1">Cuenta</div>
         <p style={{ color: "#8a8578" }} className="text-sm">{email || "—"}</p>
       </div>
+
+      {/* Suscripción */}
+      <SuscripcionBlock />
 
       {/* Logo */}
       <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
