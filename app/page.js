@@ -87,7 +87,7 @@ export default function TuEquipoIA() {
       <Sidebar business={business} active={section} onChange={setSection} isAdmin={isAdmin} />
       <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-6">
         {section === "equipo" && <EquipoSection business={business} />}
-        {section === "recursos" && <RecursosSection />}
+        {section === "recursos" && <RecursosSection isAdmin={isAdmin} />}
         {section === "marketing" && <MarketingSection />}
         {section === "ventas" && <VentasSection />}
         {section === "finanzas" && <FinanzasSection />}

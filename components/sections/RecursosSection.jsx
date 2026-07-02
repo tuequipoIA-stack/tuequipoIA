@@ -3,37 +3,45 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Plus, Trash2 } from "lucide-react";
 import { BRAND, RECURSO_CATEGORIAS } from "@/lib/constants";
-import { loadData, saveData } from "@/lib/storage";
-import { uid } from "@/lib/helpers";
+import { createClient } from "@/lib/supabase/client";
 
-export default function RecursosSection() {
+export default function RecursosSection({ isAdmin }) {
   const [recursos, setRecursos] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [filtro, setFiltro] = useState("todos");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ categoria: "marketing", titulo: "", contenido: "" });
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    loadData("recursos-biblioteca", []).then((d) => {
-      setRecursos(d);
-      setLoaded(true);
-    });
-  }, []);
+  const cargar = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase.from("recursos").select("*").order("created_at", { ascending: false });
+    if (error) setError(error.message);
+    else setRecursos(data || []);
+    setLoaded(true);
+  };
+
+  useEffect(() => { cargar(); }, []);
 
   const agregar = async () => {
     if (!form.titulo.trim() || !form.contenido.trim()) return;
-    const nuevo = { id: uid(), ...form, fecha: new Date().toISOString().slice(0, 10) };
-    const actualizado = [nuevo, ...recursos];
-    setRecursos(actualizado);
-    await saveData("recursos-biblioteca", actualizado);
+    const supabase = createClient();
+    const { error } = await supabase.from("recursos").insert({
+      categoria: form.categoria,
+      titulo: form.titulo.trim(),
+      contenido: form.contenido.trim(),
+    });
+    if (error) { setError(error.message); return; }
     setForm({ categoria: "marketing", titulo: "", contenido: "" });
     setShowForm(false);
+    cargar();
   };
 
   const eliminar = async (id) => {
-    const actualizado = recursos.filter((r) => r.id !== id);
-    setRecursos(actualizado);
-    await saveData("recursos-biblioteca", actualizado);
+    const supabase = createClient();
+    const { error } = await supabase.from("recursos").delete().eq("id", id);
+    if (error) { setError(error.message); return; }
+    cargar();
   };
 
   const visibles = filtro === "todos" ? recursos : recursos.filter((r) => r.categoria === filtro);
@@ -42,16 +50,22 @@ export default function RecursosSection() {
     <div>
       <div className="flex items-center justify-between mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Recursos</h2>
-        <button onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold"
-          style={{ background: BRAND.teal, color: BRAND.navy }}>
-          <Plus size={14} /> Nuevo recurso
-        </button>
+        {isAdmin && (
+          <button onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold"
+            style={{ background: BRAND.teal, color: BRAND.navy }}>
+            <Plus size={14} /> Nuevo recurso
+          </button>
+        )}
       </div>
-      <p style={{ color: "#6b6759" }} className="text-sm mb-1">Contenido cargado para que los emprendedores lo consulten.</p>
-      <p style={{ color: "#a89f88" }} className="text-xs mb-5">Lo que publiques acá lo ven todos los usuarios de la app.</p>
+      <p style={{ color: "#6b6759" }} className="text-sm mb-1">Contenido curado para vos, semana a semana.</p>
+      <p style={{ color: "#a89f88" }} className="text-xs mb-5">
+        {isAdmin ? "Lo que publiques acá lo ven todos los usuarios de la app." : "Biblioteca compartida — la actualiza el equipo de Tu Equipo IA."}
+      </p>
 
-      {showForm && (
+      {error && <p className="text-xs mb-4" style={{ color: "#b3453f" }}>{error}</p>}
+
+      {isAdmin && showForm && (
         <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
           <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
             className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" style={{ border: "1px solid #e4dfd3" }}>
@@ -92,8 +106,10 @@ export default function RecursosSection() {
                   {cat?.label}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span style={{ color: "#8a8578" }} className="text-xs">{r.fecha}</span>
-                  <button onClick={() => eliminar(r.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
+                  <span style={{ color: "#8a8578" }} className="text-xs">{new Date(r.created_at).toLocaleDateString("es-AR")}</span>
+                  {isAdmin && (
+                    <button onClick={() => eliminar(r.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
+                  )}
                 </div>
               </div>
               <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{r.titulo}</div>
