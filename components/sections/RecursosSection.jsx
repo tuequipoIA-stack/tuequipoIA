@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, ExternalLink, FileText, Link2, Loader2, Plus, Trash2, Upload } from "lucide-react";
+import { BookOpen, ExternalLink, FileText, Lightbulb, Link2, Loader2, Plus, Trash2, Upload } from "lucide-react";
 import { BRAND, RECURSO_CATEGORIAS } from "@/lib/constants";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
@@ -10,9 +10,24 @@ const TIPOS = [
   { id: "nota", label: "Nota de texto" },
   { id: "link", label: "Link (web, podcast, video...)" },
   { id: "archivo", label: "Archivo (PDF, doc, imagen...)" },
+  { id: "hack", label: "Hack accionable de la semana" },
 ];
 
-const FORM_VACIO = { categoria: "marketing", titulo: "", descripcion: "", tipo: "nota", url: "" };
+const hoyISO = () => new Date().toISOString().slice(0, 10);
+const FORM_VACIO = { categoria: "marketing", titulo: "", descripcion: "", tipo: "nota", url: "", fechaSemana: hoyISO() };
+
+// Lunes de la semana a la que pertenece una fecha (para agrupar los hacks).
+function inicioSemana(fechaStr) {
+  const d = new Date((fechaStr || hoyISO()) + "T00:00:00");
+  const dia = d.getDay(); // 0=domingo
+  const diff = dia === 0 ? -6 : 1 - dia;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+function labelSemana(mondayISO) {
+  const d = new Date(mondayISO + "T00:00:00");
+  return `Semana del ${d.toLocaleDateString("es-AR", { day: "numeric", month: "long" })}`;
+}
 
 export default function RecursosSection({ isAdmin }) {
   const [recursos, setRecursos] = useState([]);
@@ -39,6 +54,7 @@ export default function RecursosSection({ isAdmin }) {
     if (!form.titulo.trim()) return;
     if (form.tipo === "link" && !form.url.trim()) return;
     if (form.tipo === "archivo" && !archivo) return;
+    if (form.tipo === "hack" && !form.descripcion.trim()) return;
 
     setError("");
     setSubiendo(true);
@@ -66,6 +82,7 @@ export default function RecursosSection({ isAdmin }) {
         tipo: form.tipo,
         url,
         nombre_archivo: nombreArchivo,
+        fecha_semana: form.tipo === "hack" ? form.fechaSemana : null,
       });
       if (insertError) throw insertError;
 
@@ -88,7 +105,17 @@ export default function RecursosSection({ isAdmin }) {
     cargar();
   };
 
-  const visibles = filtro === "todos" ? recursos : recursos.filter((r) => r.categoria === filtro);
+  const filtrados = filtro === "todos" ? recursos : recursos.filter((r) => r.categoria === filtro);
+  const documentos = filtrados.filter((r) => r.tipo !== "hack");
+  const hacks = filtrados.filter((r) => r.tipo === "hack");
+
+  const hacksPorSemana = {};
+  hacks.forEach((h) => {
+    const semana = inicioSemana(h.fecha_semana || h.created_at?.slice(0, 10));
+    if (!hacksPorSemana[semana]) hacksPorSemana[semana] = [];
+    hacksPorSemana[semana].push(h);
+  });
+  const semanasOrdenadas = Object.keys(hacksPorSemana).sort((a, b) => (a < b ? 1 : -1));
 
   return (
     <div>
@@ -102,7 +129,7 @@ export default function RecursosSection({ isAdmin }) {
           </button>
         )}
       </div>
-      <p style={{ color: "#6b6759" }} className="text-sm mb-1">Contenido curado para vos, semana a semana.</p>
+      <p style={{ color: "#6b6759" }} className="text-sm mb-1">Documentos, links y hacks accionables, semana a semana.</p>
       <p style={{ color: "#a89f88" }} className="text-xs mb-5">
         {isAdmin ? "Lo que publiques acá lo ven todos los usuarios de la app." : "Biblioteca compartida — la actualiza el equipo de Tu Equipo IA."}
       </p>
@@ -125,6 +152,14 @@ export default function RecursosSection({ isAdmin }) {
           <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título"
             className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" style={{ border: "1px solid #e4dfd3" }} />
 
+          {form.tipo === "hack" && (
+            <div className="mb-2">
+              <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Semana a la que corresponde</span>
+              <input type="date" value={form.fechaSemana} onChange={(e) => setForm({ ...form, fechaSemana: e.target.value })}
+                className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            </div>
+          )}
+
           {form.tipo === "link" && (
             <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })}
               placeholder="https://..."
@@ -144,8 +179,8 @@ export default function RecursosSection({ isAdmin }) {
           )}
 
           <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            placeholder={form.tipo === "nota" ? "Contenido" : "Descripción (opcional)"}
-            rows={form.tipo === "nota" ? 5 : 3}
+            placeholder={form.tipo === "nota" ? "Contenido" : form.tipo === "hack" ? "El accionable: qué tiene que hacer esta semana" : "Descripción (opcional)"}
+            rows={form.tipo === "nota" || form.tipo === "hack" ? 5 : 3}
             className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" style={{ border: "1px solid #e4dfd3" }} />
 
           <button onClick={agregar} disabled={subiendo}
@@ -157,7 +192,7 @@ export default function RecursosSection({ isAdmin }) {
         </div>
       )}
 
-      <div className="flex gap-1.5 mb-4 flex-wrap">
+      <div className="flex gap-1.5 mb-5 flex-wrap">
         <button onClick={() => setFiltro("todos")} className="px-3 py-1.5 rounded-md text-xs font-medium"
           style={filtro === "todos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>Todos</button>
         {RECURSO_CATEGORIAS.map((c) => (
@@ -166,49 +201,100 @@ export default function RecursosSection({ isAdmin }) {
         ))}
       </div>
 
-      {loaded && visibles.length === 0 && (
-        <div className="rounded-xl p-6 text-center" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
-          <BookOpen size={20} color="#b3ab98" className="mx-auto mb-2" />
-          <p style={{ color: "#8a8578" }} className="text-sm">Todavía no hay recursos en esta categoría.</p>
-        </div>
-      )}
-      <div className="space-y-3">
-        {visibles.map((r) => {
-          const cat = RECURSO_CATEGORIAS.find((c) => c.id === r.categoria);
-          return (
-            <div key={r.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: cat?.color, color: BRAND.cream }}>
-                  {cat?.label}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span style={{ color: "#8a8578" }} className="text-xs">{new Date(r.created_at).toLocaleDateString("es-AR")}</span>
-                  {isAdmin && (
-                    <button onClick={() => eliminar(r.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Columna izquierda: documentos y links */}
+        <div>
+          <div className="flex items-center gap-1.5 mb-3">
+            <BookOpen size={15} color={BRAND.navy} />
+            <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Documentos y links ({documentos.length})</span>
+          </div>
+
+          {loaded && documentos.length === 0 && (
+            <div className="rounded-xl p-6 text-center" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+              <p style={{ color: "#8a8578" }} className="text-sm">Todavía no hay recursos en esta categoría.</p>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {documentos.map((r) => {
+              const cat = RECURSO_CATEGORIAS.find((c) => c.id === r.categoria);
+              return (
+                <div key={r.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: cat?.color, color: BRAND.cream }}>
+                      {cat?.label}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span style={{ color: "#8a8578" }} className="text-xs">{new Date(r.created_at).toLocaleDateString("es-AR")}</span>
+                      {isAdmin && (
+                        <button onClick={() => eliminar(r.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{r.titulo}</div>
+
+                  {r.tipo === "link" && r.url && (
+                    <a href={r.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-sm mb-1" style={{ color: "#127a79" }}>
+                      <Link2 size={13} /> {r.url}
+                    </a>
+                  )}
+                  {r.tipo === "archivo" && r.url && (
+                    <a href={r.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-sm mb-1" style={{ color: "#127a79" }}>
+                      <FileText size={13} /> {r.nombre_archivo || "Descargar archivo"} <ExternalLink size={11} />
+                    </a>
+                  )}
+
+                  {r.descripcion && (
+                    <p style={{ color: "#4a4740" }} className="text-sm leading-relaxed whitespace-pre-wrap">{r.descripcion}</p>
                   )}
                 </div>
-              </div>
-              <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{r.titulo}</div>
+              );
+            })}
+          </div>
+        </div>
 
-              {r.tipo === "link" && r.url && (
-                <a href={r.url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-sm mb-1" style={{ color: "#127a79" }}>
-                  <Link2 size={13} /> {r.url}
-                </a>
-              )}
-              {r.tipo === "archivo" && r.url && (
-                <a href={r.url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-sm mb-1" style={{ color: "#127a79" }}>
-                  <FileText size={13} /> {r.nombre_archivo || "Descargar archivo"} <ExternalLink size={11} />
-                </a>
-              )}
+        {/* Columna derecha: hacks accionables, agrupados por semana */}
+        <div>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Lightbulb size={15} color={BRAND.navy} />
+            <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Hacks de la semana ({hacks.length})</span>
+          </div>
 
-              {r.descripcion && (
-                <p style={{ color: "#4a4740" }} className="text-sm leading-relaxed whitespace-pre-wrap">{r.descripcion}</p>
-              )}
+          {loaded && hacks.length === 0 && (
+            <div className="rounded-xl p-6 text-center" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+              <p style={{ color: "#8a8578" }} className="text-sm">Todavía no hay hacks en esta categoría.</p>
             </div>
-          );
-        })}
+          )}
+
+          {semanasOrdenadas.map((semana) => (
+            <div key={semana} className="mb-4">
+              <div style={{ color: "#8a8578" }} className="text-xs font-semibold uppercase tracking-wide mb-2">{labelSemana(semana)}</div>
+              <div className="space-y-3">
+                {hacksPorSemana[semana].map((h) => {
+                  const cat = RECURSO_CATEGORIAS.find((c) => c.id === h.categoria);
+                  return (
+                    <div key={h.id} className="rounded-xl p-4" style={{ background: "#eef7f6", border: "1px solid #d3ece9" }}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: cat?.color, color: BRAND.cream }}>
+                          {cat?.label}
+                        </span>
+                        {isAdmin && (
+                          <button onClick={() => eliminar(h.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
+                        )}
+                      </div>
+                      <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{h.titulo}</div>
+                      {h.descripcion && (
+                        <p style={{ color: "#2c5f5e" }} className="text-sm leading-relaxed whitespace-pre-wrap">{h.descripcion}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
