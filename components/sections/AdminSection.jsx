@@ -52,17 +52,27 @@ export default function AdminSection() {
   const [error, setError] = useState("");
   const [seleccionado, setSeleccionado] = useState(null);
 
-  useEffect(() => {
+  const cargarUsuarios = () => {
     fetch("/api/admin/users")
       .then((r) => r.json())
       .then((d) => {
         if (d.error) setError(d.error);
         else setUsuarios(d.usuarios);
       });
-  }, []);
+  };
+
+  useEffect(() => { cargarUsuarios(); }, []);
 
   if (seleccionado) {
-    return <AdminUserDetail userId={seleccionado} onBack={() => setSeleccionado(null)} />;
+    return (
+      <AdminUserDetail
+        userId={seleccionado}
+        onBack={(huboCambios) => {
+          setSeleccionado(null);
+          if (huboCambios) cargarUsuarios();
+        }}
+      />
+    );
   }
 
   const activos = usuarios?.filter((u) => u.subscriptionStatus === "active").length ?? 0;

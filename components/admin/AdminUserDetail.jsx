@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { money } from "@/lib/helpers";
+import PasswordInput from "@/components/PasswordInput";
 
 const ESTADO_LABEL = { trial: "Prueba", active: "Activa", past_due: "Vencida", canceled: "Cancelada" };
 
@@ -25,6 +26,11 @@ export default function AdminUserDetail({ userId, onBack }) {
   const [error, setError] = useState("");
   const [cambiando, setCambiando] = useState(false);
   const [mensaje, setMensaje] = useState("");
+
+  const [pasoBorrado, setPasoBorrado] = useState(0); // 0 = nada, 1 = primera confirmación, 2 = pidiendo contraseña
+  const [passwordBorrado, setPasswordBorrado] = useState("");
+  const [borrando, setBorrando] = useState(false);
+  const [errorBorrado, setErrorBorrado] = useState("");
 
   const cargar = () => {
     fetch(`/api/admin/users/${userId}`)
@@ -53,6 +59,24 @@ export default function AdminUserDetail({ userId, onBack }) {
     }
     setMensaje(`Estado actualizado a "${ESTADO_LABEL[status] || status}" ✓`);
     cargar();
+  };
+
+  const eliminarUsuario = async () => {
+    if (!passwordBorrado) return;
+    setBorrando(true);
+    setErrorBorrado("");
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: passwordBorrado }),
+    });
+    const resData = await res.json();
+    setBorrando(false);
+    if (resData.error) {
+      setErrorBorrado(resData.error);
+      return;
+    }
+    onBack(true);
   };
 
   if (error) return <p style={{ color: "#b3453f" }} className="text-sm">{error}</p>;
@@ -218,6 +242,69 @@ export default function AdminUserDetail({ userId, onBack }) {
           {calendario.length} publicaciones planificadas · {recursos.length} recursos en su biblioteca.
         </p>
       </Bloque>
+
+      <div className="rounded-xl p-4" style={{ background: "#fbeceb", border: "1px solid #f3d5d3" }}>
+        <div className="flex items-center gap-1.5 mb-2">
+          <AlertTriangle size={14} color="#b3453f" />
+          <span style={{ color: "#b3453f" }} className="text-sm font-semibold">Zona de peligro</span>
+        </div>
+
+        {pasoBorrado === 0 && (
+          <>
+            <p style={{ color: "#8a5450" }} className="text-xs mb-3">
+              Elimina la cuenta de {profile.email} y todos sus datos (ventas, gastos, tareas, recursos, etc.) para siempre. No se puede deshacer.
+            </p>
+            <button onClick={() => setPasoBorrado(1)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold"
+              style={{ background: "#b3453f", color: "#ffffff" }}>
+              <Trash2 size={12} /> Eliminar usuario
+            </button>
+          </>
+        )}
+
+        {pasoBorrado === 1 && (
+          <>
+            <p style={{ color: "#8a5450" }} className="text-xs font-semibold mb-3">
+              ¿Estás segura? Se van a borrar todos los datos de {profile.email} para siempre. Esto no se puede deshacer.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setPasoBorrado(2)}
+                className="rounded-lg px-3 py-2 text-xs font-semibold" style={{ background: "#b3453f", color: "#ffffff" }}>
+                Sí, quiero eliminarlo
+              </button>
+              <button onClick={() => setPasoBorrado(0)}
+                className="rounded-lg px-3 py-2 text-xs font-medium" style={{ color: "#8a5450" }}>
+                Cancelar
+              </button>
+            </div>
+          </>
+        )}
+
+        {pasoBorrado === 2 && (
+          <>
+            <p style={{ color: "#8a5450" }} className="text-xs mb-2">
+              Para confirmar, ingresá tu contraseña de administradora:
+            </p>
+            <div className="mb-2 max-w-xs">
+              <PasswordInput dark={false} value={passwordBorrado} onChange={(e) => setPasswordBorrado(e.target.value)}
+                className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #e4dfd3", background: "#ffffff" }} />
+            </div>
+            {errorBorrado && <p className="text-xs mb-2" style={{ color: "#b3453f" }}>{errorBorrado}</p>}
+            <div className="flex gap-2">
+              <button onClick={eliminarUsuario} disabled={borrando || !passwordBorrado}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-50"
+                style={{ background: "#b3453f", color: "#ffffff" }}>
+                {borrando && <Loader2 size={12} className="animate-spin" />}
+                {borrando ? "Eliminando..." : "Eliminar definitivamente"}
+              </button>
+              <button onClick={() => { setPasoBorrado(0); setPasswordBorrado(""); setErrorBorrado(""); }}
+                className="rounded-lg px-3 py-2 text-xs font-medium" style={{ color: "#8a5450" }}>
+                Cancelar
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
