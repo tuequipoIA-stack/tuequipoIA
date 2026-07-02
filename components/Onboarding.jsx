@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BRAND, ETAPAS, TIEMPOS, FACTURACIONES, CANALES, DESAFIOS } from "@/lib/constants";
+import { BRAND, ETAPAS, TIEMPOS, FACTURACIONES, CANALES, DESAFIOS, TIPOS_NEGOCIO } from "@/lib/constants";
 import Chip from "./Chip";
 import BrandHeader from "./BrandHeader";
 
 export default function Onboarding({ onStart }) {
   const [step, setStep] = useState(0);
   const [perfil, setPerfil] = useState({
-    nombre: "", rubro: "", etapa: "", tiempoFuncionando: "", facturacionMensual: "",
+    nombre: "", rubro: "", tipoNegocio: "", etapa: "", tiempoFuncionando: "", facturacionMensual: "",
     canalVenta: "", desafios: [], objetivo3Meses: "",
   });
 
@@ -29,6 +29,23 @@ export default function Onboarding({ onStart }) {
             className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={{ background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }} />
           <input value={perfil.rubro} onChange={(e) => update("rubro", e.target.value)} placeholder="¿A qué se dedica?"
             className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={{ background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }} />
+        </div>
+      ),
+    },
+    {
+      title: "¿Qué vendés?",
+      body: (
+        <div className="space-y-2">
+          {TIPOS_NEGOCIO.map((t) => (
+            <button key={t.id} onClick={() => update("tipoNegocio", t.id)}
+              className="w-full text-left rounded-lg px-4 py-3"
+              style={perfil.tipoNegocio === t.id
+                ? { background: BRAND.teal, color: BRAND.navy }
+                : { background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }}>
+              <div className="font-semibold text-sm">{t.label}</div>
+              <div className="text-xs mt-0.5" style={{ opacity: 0.85 }}>{t.desc}</div>
+            </button>
+          ))}
         </div>
       ),
     },
@@ -90,7 +107,7 @@ export default function Onboarding({ onStart }) {
   ];
 
   const isLast = step === steps.length - 1;
-  const canAdvance = step === 0 ? perfil.nombre.trim().length > 0 : true;
+  const canAdvance = step === 0 ? perfil.nombre.trim().length > 0 : step === 1 ? !!perfil.tipoNegocio : true;
 
   return (
     <div style={{ background: BRAND.navy }} className="min-h-full flex items-center justify-center p-6">

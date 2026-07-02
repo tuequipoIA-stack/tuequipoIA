@@ -139,8 +139,8 @@ export default function TuEquipoIA() {
             {section === "equipo" && EQUIPO_HABILITADO && <EquipoSection business={business} />}
             {section === "recursos" && <RecursosSection isAdmin={isAdmin} />}
             {section === "marketing" && <MarketingSection />}
-            {section === "ventas" && <VentasSection />}
-            {section === "finanzas" && <FinanzasSection />}
+            {section === "ventas" && <VentasSection business={business} />}
+            {section === "finanzas" && <FinanzasSection business={business} />}
             {section === "estrategia" && <EstrategiaSection business={business} />}
             {section === "dashboard" && <DashboardSection business={business} />}
             {section === "tablero" && <TableroSection />}

@@ -7,7 +7,7 @@ import { loadData, saveData } from "@/lib/storage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
 import CostosSection from "@/components/finanzas/CostosSection";
 
-export default function FinanzasSection() {
+export default function FinanzasSection({ business }) {
   const [vista, setVista] = useState("movimientos");
   const [gastos, setGastos] = useState([]);
   const [ventas, setVentas] = useState([]);
@@ -54,7 +54,7 @@ export default function FinanzasSection() {
       </div>
 
       {vista === "costos" ? (
-        <CostosSection />
+        <CostosSection business={business} />
       ) : (
         <>
           <div className="grid grid-cols-3 gap-3 mb-5">

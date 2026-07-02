@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
-import { BRAND } from "@/lib/constants";
+import { BRAND, TIPOS_NEGOCIO } from "@/lib/constants";
 import { loadData, saveData } from "@/lib/storage";
 import { money } from "@/lib/helpers";
 import { logoUrl } from "@/lib/logo";
@@ -104,6 +104,7 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
   const [userId, setUserId] = useState(null);
   const [nombre, setNombre] = useState(business?.nombre || "");
   const [rubro, setRubro] = useState(business?.rubro || "");
+  const [tipoNegocio, setTipoNegocio] = useState(business?.tipoNegocio || "productos");
   const [guardandoDatos, setGuardandoDatos] = useState(false);
   const [guardadoDatos, setGuardadoDatos] = useState(false);
 
@@ -131,7 +132,7 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
 
   const guardarDatos = async () => {
     setGuardandoDatos(true);
-    const actualizado = { ...business, nombre, rubro };
+    const actualizado = { ...business, nombre, rubro, tipoNegocio };
     await saveData("negocio-perfil", actualizado);
     onBusinessUpdate?.(actualizado);
     setGuardandoDatos(false);
@@ -238,6 +239,21 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Rubro</span>
         <input value={rubro} onChange={(e) => setRubro(e.target.value)}
           className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+        <span style={{ color: "#8a8578" }} className="text-xs block mb-1">¿Qué vendés?</span>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          {TIPOS_NEGOCIO.map((t) => (
+            <button key={t.id} type="button" onClick={() => setTipoNegocio(t.id)}
+              className="rounded-lg px-3 py-2 text-sm font-medium"
+              style={tipoNegocio === t.id
+                ? { background: BRAND.teal, color: BRAND.navy }
+                : { background: "#f0ece2", color: "#6b6759" }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <p style={{ color: "#a89f88" }} className="text-xs mb-3">
+          Esto define cómo se arma la sección de Finanzas: {tipoNegocio === "servicios" ? "solo vas a ver costos fijos." : "vas a poder armar el costo de cada producto con sus ingredientes."}
+        </p>
         <button onClick={guardarDatos} disabled={guardandoDatos}
           className="rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50"
           style={{ background: BRAND.teal, color: BRAND.navy }}>
