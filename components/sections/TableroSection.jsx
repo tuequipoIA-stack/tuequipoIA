@@ -6,6 +6,15 @@ import { BRAND, COLUMNAS_BASE, MAX_COLUMNAS_EXTRA } from "@/lib/constants";
 import { loadData, saveData } from "@/lib/storage";
 import { uid, migrarColumna } from "@/lib/helpers";
 
+// Colores pastel por columna: semana (naranja clarito), hoy (celeste), hecho (verde clarito).
+// Las columnas extra que arme el usuario quedan con el tono neutro de siempre.
+const COLUMNA_COLOR = {
+  semana: { bg: "#fdf1e2", header: "#c98a3d", border: "#f5e2c4" },
+  hoy: { bg: "#e8f1fb", header: "#3b74ad", border: "#d3e5f7" },
+  hecho: { bg: "#e9f6ec", header: "#3f9457", border: "#d3ecd9" },
+};
+const COLUMNA_COLOR_DEFAULT = { bg: "#f0ece2", header: "#6b6759", border: "#e4dfd3" };
+
 export default function TableroSection() {
   const [columnas, setColumnas] = useState(COLUMNAS_BASE);
   const [tareas, setTareas] = useState([]);
@@ -82,17 +91,19 @@ export default function TableroSection() {
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-2">
-        {columnas.map((col) => (
+        {columnas.map((col) => {
+          const color = COLUMNA_COLOR[col.id] || COLUMNA_COLOR_DEFAULT;
+          return (
           <div key={col.id} draggable={false}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => arrastrando && moverTarea(arrastrando, col.id)}
-            className="rounded-xl p-3 shrink-0" style={{ background: "#f0ece2", width: "260px" }}>
+            className="rounded-xl p-3 shrink-0" style={{ background: color.bg, border: `1px solid ${color.border}`, width: "260px" }}>
             <div className="flex items-center justify-between mb-3 px-1">
-              <span style={{ color: "#6b6759" }} className="text-xs font-semibold uppercase tracking-wide">
+              <span style={{ color: color.header }} className="text-xs font-semibold uppercase tracking-wide">
                 {col.nombre} ({tareas.filter((t) => t.columna === col.id).length})
               </span>
               {!col.fija && (
-                <button onClick={() => eliminarColumna(col.id)} style={{ color: "#8a8578" }}><X size={13} /></button>
+                <button onClick={() => eliminarColumna(col.id)} style={{ color: color.header, opacity: 0.7 }}><X size={13} /></button>
               )}
             </div>
             <div className="space-y-2 min-h-[40px]">
@@ -118,7 +129,8 @@ export default function TableroSection() {
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {/* columna para agregar una nueva */}
         {columnasExtra < MAX_COLUMNAS_EXTRA && (

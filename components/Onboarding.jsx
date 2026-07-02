@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
 import { BRAND, ETAPAS, TIEMPOS, FACTURACIONES, CANALES, DESAFIOS } from "@/lib/constants";
 import Chip from "./Chip";
+import BrandHeader from "./BrandHeader";
 
 export default function Onboarding({ onStart }) {
   const [step, setStep] = useState(0);
@@ -95,10 +95,7 @@ export default function Onboarding({ onStart }) {
   return (
     <div style={{ background: BRAND.navy }} className="min-h-full flex items-center justify-center p-6">
       <div className="max-w-md w-full">
-        <div className="flex items-center gap-2 mb-6 justify-center">
-          <Sparkles size={20} color={BRAND.teal} />
-          <span style={{ color: BRAND.cream }} className="text-sm tracking-widest uppercase font-medium">Tu Equipo IA</span>
-        </div>
+        <BrandHeader className="mb-6" />
 
         <div className="flex items-center gap-1.5 justify-center mb-6">
           {steps.map((_, i) => (

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
+import BrandHeader from "@/components/BrandHeader";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -38,10 +38,7 @@ export default function SignupPage() {
   return (
     <div style={{ background: BRAND.navy }} className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-sm w-full">
-        <div className="flex items-center gap-2 mb-8 justify-center">
-          <Sparkles size={20} color={BRAND.teal} />
-          <span style={{ color: BRAND.cream }} className="text-sm tracking-widest uppercase font-medium">Tu Equipo IA</span>
-        </div>
+        <BrandHeader />
 
         <h1 style={{ color: BRAND.cream }} className="text-xl font-semibold text-center mb-6">Creá tu cuenta</h1>
 

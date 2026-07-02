@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
 import { BRAND, EQUIPO_HABILITADO } from "@/lib/constants";
+import LogoMark from "@/components/LogoMark";
 import { loadData, saveData } from "@/lib/storage";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
@@ -69,7 +69,9 @@ export default function TuEquipoIA() {
   if (stage === "loading") {
     return (
       <div className="w-full h-screen flex items-center justify-center" style={{ background: BRAND.navy, fontFamily: "system-ui, -apple-system, sans-serif" }}>
-        <Sparkles size={22} color={BRAND.teal} />
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center animate-pulse" style={{ background: BRAND.teal }}>
+          <LogoMark size={24} color="#ffffff" />
+        </div>
       </div>
     );
   }
@@ -86,6 +88,7 @@ export default function TuEquipoIA() {
     <div className="w-full h-screen flex" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
       <Sidebar business={business} active={section} onChange={setSection} isAdmin={isAdmin} />
       <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-6">
+       <div key={section} className="seccion-animada">
         {section === "equipo" && EQUIPO_HABILITADO && <EquipoSection business={business} />}
         {section === "recursos" && <RecursosSection isAdmin={isAdmin} />}
         {section === "marketing" && <MarketingSection />}
@@ -96,6 +99,7 @@ export default function TuEquipoIA() {
         {section === "tablero" && <TableroSection />}
         {section === "perfil" && <PerfilSection business={business} onBusinessUpdate={setBusiness} />}
         {section === "admin" && isAdmin && <AdminSection />}
+       </div>
       </div>
     </div>
   );

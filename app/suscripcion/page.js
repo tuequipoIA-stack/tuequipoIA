@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { money } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
+import BrandHeader from "@/components/BrandHeader";
 
 const PRECIO_ARS = 60500;
 
@@ -38,10 +38,7 @@ export default function SuscripcionPage() {
   return (
     <div style={{ background: BRAND.navy }} className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-sm w-full text-center">
-        <div className="flex items-center gap-2 mb-8 justify-center">
-          <Sparkles size={20} color={BRAND.teal} />
-          <span style={{ color: BRAND.cream }} className="text-sm tracking-widest uppercase font-medium">Tu Equipo IA</span>
-        </div>
+        <BrandHeader />
 
         <h1 style={{ color: BRAND.cream }} className="text-xl font-semibold mb-2">Activá tu membresía</h1>
         <p style={{ color: "#8b8b9a" }} className="text-sm mb-6">

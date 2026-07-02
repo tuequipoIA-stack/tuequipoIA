@@ -10,3 +10,29 @@ body {
   background: #ffffff;
   color: #171717;
 }
+
+/* Efecto "botón físico": se hunde al tocarlo, en toda la app.
+   Los componentes que ya definen su propio active:translate-y (ej. Sidebar)
+   tienen prioridad por especificidad de clase. */
+button:not(:disabled) {
+  transition: transform 110ms ease, filter 110ms ease, box-shadow 110ms ease;
+}
+button:not(:disabled):active {
+  transform: translateY(1.5px);
+  filter: brightness(0.94);
+}
+
+/* Transición suave al cambiar de sección en el panel principal. */
+@keyframes seccion-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.seccion-animada {
+  animation: seccion-entrada 220ms ease-out;
+}
