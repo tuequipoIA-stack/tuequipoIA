@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, ExternalLink, FileText, Lightbulb, Link2, Loader2, Plus, Trash2, Upload } from "lucide-react";
+import { BookOpen, Clock, ExternalLink, FileText, Lightbulb, Link2, Loader2, Plus, Trash2, Upload } from "lucide-react";
 import { BRAND, RECURSO_CATEGORIAS } from "@/lib/constants";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
@@ -14,7 +14,13 @@ const TIPOS = [
 ];
 
 const hoyISO = () => new Date().toISOString().slice(0, 10);
-const FORM_VACIO = { categoria: "marketing", titulo: "", descripcion: "", tipo: "nota", url: "", fechaSemana: hoyISO() };
+// Fecha+hora actual en el formato que espera <input type="datetime-local"> (hora local, sin timezone).
+function ahoraLocalInput() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+const FORM_VACIO = { categoria: "marketing", titulo: "", descripcion: "", tipo: "nota", url: "", fechaSemana: hoyISO(), publicarEn: ahoraLocalInput() };
 
 // Lunes de la semana a la que pertenece una fecha (para agrupar los hacks).
 function inicioSemana(fechaStr) {
@@ -83,6 +89,7 @@ export default function RecursosSection({ isAdmin }) {
         url,
         nombre_archivo: nombreArchivo,
         fecha_semana: form.tipo === "hack" ? form.fechaSemana : null,
+        publicar_en: form.publicarEn ? new Date(form.publicarEn).toISOString() : new Date().toISOString(),
       });
       if (insertError) throw insertError;
 
@@ -151,6 +158,15 @@ export default function RecursosSection({ isAdmin }) {
 
           <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título"
             className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" style={{ border: "1px solid #e4dfd3" }} />
+
+          <div className="mb-2">
+            <span style={{ color: "#8a8578" }} className="text-xs flex items-center gap-1 mb-1">
+              <Clock size={11} /> Publicar el
+            </span>
+            <input type="datetime-local" value={form.publicarEn} onChange={(e) => setForm({ ...form, publicarEn: e.target.value })}
+              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            <p style={{ color: "#a89f88" }} className="text-[11px] mt-1">Dejalo en el momento actual para publicarlo ya, o elegí una fecha futura para programarlo.</p>
+          </div>
 
           {form.tipo === "hack" && (
             <div className="mb-2">
@@ -231,6 +247,11 @@ export default function RecursosSection({ isAdmin }) {
                       )}
                     </div>
                   </div>
+                  {isAdmin && new Date(r.publicar_en) > new Date() && (
+                    <div className="flex items-center gap-1 text-[10px] font-semibold mb-1.5" style={{ color: "#b3703f" }}>
+                      <Clock size={10} /> Programado para {new Date(r.publicar_en).toLocaleString("es-AR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                  )}
                   <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{r.titulo}</div>
 
                   {r.tipo === "link" && r.url && (
@@ -284,6 +305,11 @@ export default function RecursosSection({ isAdmin }) {
                           <button onClick={() => eliminar(h.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
                         )}
                       </div>
+                      {isAdmin && new Date(h.publicar_en) > new Date() && (
+                        <div className="flex items-center gap-1 text-[10px] font-semibold mb-1.5" style={{ color: "#b3703f" }}>
+                          <Clock size={10} /> Programado para {new Date(h.publicar_en).toLocaleString("es-AR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </div>
+                      )}
                       <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{h.titulo}</div>
                       {h.descripcion && (
                         <p style={{ color: "#2c5f5e" }} className="text-sm leading-relaxed whitespace-pre-wrap">{h.descripcion}</p>
