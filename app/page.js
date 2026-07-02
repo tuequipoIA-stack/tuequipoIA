@@ -15,6 +15,7 @@ import VentasSection from "@/components/sections/VentasSection";
 import FinanzasSection from "@/components/sections/FinanzasSection";
 import EstrategiaSection from "@/components/sections/EstrategiaSection";
 import TableroSection from "@/components/sections/TableroSection";
+import PerfilSection from "@/components/sections/PerfilSection";
 
 export default function TuEquipoIA() {
   const [stage, setStage] = useState("loading");
@@ -77,6 +78,7 @@ export default function TuEquipoIA() {
         {section === "estrategia" && <EstrategiaSection business={business} />}
         {section === "dashboard" && <DashboardSection business={business} />}
         {section === "tablero" && <TableroSection />}
+        {section === "perfil" && <PerfilSection business={business} onBusinessUpdate={setBusiness} />}
       </div>
     </div>
   );
