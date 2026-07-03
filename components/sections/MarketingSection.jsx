@@ -2,17 +2,15 @@
 
 import { useState } from "react";
 import { BRAND } from "@/lib/constants";
-import ClienteIdealTab from "@/components/marketing/ClienteIdealTab";
-import PropuestaValorTab from "@/components/marketing/PropuestaValorTab";
 import CalendarioContenidoTab from "@/components/marketing/CalendarioContenidoTab";
+import PilaresContenidoTab from "@/components/marketing/PilaresContenidoTab";
 import MarketingSidebar from "@/components/marketing/MarketingSidebar";
 
 export default function MarketingSection() {
   const [vista, setVista] = useState("calendario");
   const tabs = [
     { id: "calendario", label: "Calendario de contenido" },
-    { id: "cliente", label: "Cliente ideal" },
-    { id: "valor", label: "Propuesta de valor" },
+    { id: "pilares", label: "Pilares de contenido" },
   ];
 
   return (
@@ -31,9 +29,8 @@ export default function MarketingSection() {
             ))}
           </div>
 
-          {vista === "cliente" && <ClienteIdealTab />}
-          {vista === "valor" && <PropuestaValorTab />}
           {vista === "calendario" && <CalendarioContenidoTab />}
+          {vista === "pilares" && <PilaresContenidoTab />}
         </div>
 
         <MarketingSidebar />
