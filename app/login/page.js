@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import BrandHeader from "@/components/BrandHeader";
+import LoginPitch from "@/components/LoginPitch";
 import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
@@ -31,34 +32,49 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ background: BRAND.navy }} className="min-h-screen flex items-center justify-center p-6">
-      <div className="max-w-sm w-full">
-        <BrandHeader variant="stacked" className="mb-9" />
+    <div style={{ background: BRAND.navy }} className="min-h-screen">
+      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        {/* Presentación: quiénes somos y qué incluye */}
+        <div className="hidden lg:flex items-center justify-center p-12 xl:p-16" style={{ borderRight: "1px solid #242440" }}>
+          <LoginPitch />
+        </div>
 
-        <h1 style={{ color: BRAND.cream }} className="text-xl font-semibold text-center mb-6">Iniciá sesión</h1>
+        {/* Formulario de login */}
+        <div className="flex items-center justify-center p-6">
+          <div className="max-w-sm w-full">
+            <BrandHeader variant="stacked" className="mb-8 lg:hidden" />
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
-            className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={{ background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }} />
-          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" required />
+            <h1 style={{ color: BRAND.cream }} className="text-xl font-semibold text-center mb-6">Iniciá sesión</h1>
 
-          <div className="text-right -mt-1">
-            <Link href="/reset-password" className="text-xs" style={{ color: "#8b8b9a" }}>¿Olvidaste tu contraseña?</Link>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
+                className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={{ background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }} />
+              <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" required />
+
+              <div className="text-right -mt-1">
+                <Link href="/reset-password" className="text-xs" style={{ color: "#8b8b9a" }}>¿Olvidaste tu contraseña?</Link>
+              </div>
+
+              {error && <p className="text-xs" style={{ color: "#e08a86" }}>{error}</p>}
+
+              <button type="submit" disabled={loading}
+                className="w-full rounded-lg py-3 text-sm font-semibold hover:opacity-90 disabled:opacity-40"
+                style={{ background: BRAND.teal, color: BRAND.navy }}>
+                {loading ? "Ingresando..." : "Ingresar"}
+              </button>
+            </form>
+
+            <p style={{ color: "#8b8b9a" }} className="text-xs text-center mt-5">
+              ¿Todavía no tenés cuenta?{" "}
+              <Link href="/signup" style={{ color: BRAND.teal }}>Creá una</Link>
+            </p>
+
+            {/* En mobile, la presentación va debajo del formulario */}
+            <div className="lg:hidden mt-10 pt-8" style={{ borderTop: "1px solid #242440" }}>
+              <LoginPitch />
+            </div>
           </div>
-
-          {error && <p className="text-xs" style={{ color: "#e08a86" }}>{error}</p>}
-
-          <button type="submit" disabled={loading}
-            className="w-full rounded-lg py-3 text-sm font-semibold hover:opacity-90 disabled:opacity-40"
-            style={{ background: BRAND.teal, color: BRAND.navy }}>
-            {loading ? "Ingresando..." : "Ingresar"}
-          </button>
-        </form>
-
-        <p style={{ color: "#8b8b9a" }} className="text-xs text-center mt-5">
-          ¿Todavía no tenés cuenta?{" "}
-          <Link href="/signup" style={{ color: BRAND.teal }}>Creá una</Link>
-        </p>
+        </div>
       </div>
     </div>
   );
