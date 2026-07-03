@@ -57,8 +57,17 @@ export default function RecursosSection({ isAdmin }) {
   const agregarLinkVacio = () => setLinks((prev) => [...prev, ""]);
   const quitarLink = (i) => setLinks((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
 
-  const agregarArchivos = (files) => setArchivos((prev) => [...prev, ...Array.from(files || [])]);
+  const agregarArchivos = (nuevos) => setArchivos((prev) => [...prev, ...nuevos]);
   const quitarArchivo = (i) => setArchivos((prev) => prev.filter((_, idx) => idx !== i));
+
+  const onElegirArchivos = (e) => {
+    const input = e.currentTarget;
+    const seleccionados = Array.from(input.files || []);
+    if (seleccionados.length > 0) agregarArchivos(seleccionados);
+    // Limpiar en el siguiente tick (no en el mismo evento) para no arriesgarnos
+    // a que el navegador invalide la FileList antes de que React la procese.
+    requestAnimationFrame(() => { if (input) input.value = ""; });
+  };
 
   const cargar = async () => {
     const supabase = createClient();
@@ -215,13 +224,13 @@ export default function RecursosSection({ isAdmin }) {
 
           {form.tipo === "archivo" && (
             <div className="mb-2">
-              <input ref={fileInputRef} type="file" multiple onChange={(e) => { agregarArchivos(e.target.files); e.target.value = ""; }}
-                className="hidden" id="recurso-archivo-input" />
-              <label htmlFor="recurso-archivo-input"
+              <input ref={fileInputRef} type="file" multiple onChange={onElegirArchivos}
+                style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} tabIndex={-1} />
+              <button type="button" onClick={() => fileInputRef.current?.click()}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer mb-2"
                 style={{ background: "#eee9dd", color: BRAND.navy }}>
                 <Upload size={13} /> {archivos.length > 0 ? "Agregar otro archivo" : "Elegir archivo(s)"}
-              </label>
+              </button>
               {archivos.length > 0 && (
                 <div className="space-y-1">
                   {archivos.map((f, i) => (
