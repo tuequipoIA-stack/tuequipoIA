@@ -6,6 +6,7 @@ import { BRAND, PLAZOS } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid } from "@/lib/helpers";
 import PlanNegocio from "@/components/estrategia/PlanNegocio";
+import DefinirOfertaTab from "@/components/estrategia/DefinirOfertaTab";
 
 export default function EstrategiaSection({ business }) {
   const { loadData, saveData, unidadId } = useUnidadStorage();
@@ -66,10 +67,16 @@ export default function EstrategiaSection({ business }) {
           style={vista === "plan" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
           Plan de negocio
         </button>
+        <button onClick={() => setVista("oferta")} className="px-3 py-1.5 rounded-md text-xs font-medium"
+          style={vista === "oferta" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          Definir oferta de negocio
+        </button>
       </div>
 
       {vista === "plan" ? (
         <PlanNegocio business={business} />
+      ) : vista === "oferta" ? (
+        <DefinirOfertaTab />
       ) : (
         <>
           <div className="rounded-xl p-4 mb-6" style={{ background: BRAND.navy }}>
