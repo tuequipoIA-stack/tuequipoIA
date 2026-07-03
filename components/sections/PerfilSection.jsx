@@ -10,6 +10,7 @@ import { logoUrl } from "@/lib/logo";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import CambiarTarjetaForm from "@/components/perfil/CambiarTarjetaForm";
+import TransferenciaBancaria from "@/components/perfil/TransferenciaBancaria";
 import PasswordInput from "@/components/PasswordInput";
 
 const ESTADO_LABEL = { trial: "Prueba gratis", active: "Activa", past_due: "Pago vencido", canceled: "Cancelada" };
@@ -24,6 +25,7 @@ function SuscripcionBlock() {
   const [sub, setSub] = useState(null);
   const [error, setError] = useState("");
   const [mostrarForm, setMostrarForm] = useState(false);
+  const [mostrarTransferencia, setMostrarTransferencia] = useState(false);
   const [mensaje, setMensaje] = useState("");
 
   const [pasoCancelar, setPasoCancelar] = useState(0); // 0 = nada, 1 = confirmando
@@ -141,6 +143,26 @@ function SuscripcionBlock() {
           "Cargar tarjeta acá" cambia la tarjeta sin salir de la app. "Pagar con MercadoPago" te lleva a MercadoPago,
           donde podés elegir tarjeta, dinero en cuenta u otros medios.
         </p>
+      )}
+
+      {!mostrarForm && sub.subscriptionStatus !== "active" && (
+        <div className="mt-4 pt-4" style={{ borderTop: "1px solid #f0ece2" }}>
+          {!mostrarTransferencia ? (
+            <button onClick={() => setMostrarTransferencia(true)} className="text-xs font-medium" style={{ color: "#127a79" }}>
+              ¿Preferís pagar por transferencia?
+            </button>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span style={{ color: BRAND.navy }} className="text-xs font-semibold">Pagar por transferencia</span>
+                <button onClick={() => setMostrarTransferencia(false)} className="text-xs font-medium" style={{ color: "#6b6759" }}>
+                  Cerrar
+                </button>
+              </div>
+              <TransferenciaBancaria />
+            </div>
+          )}
+        </div>
       )}
 
       {(sub.subscriptionStatus === "active" || sub.subscriptionStatus === "past_due") && !mostrarForm && (

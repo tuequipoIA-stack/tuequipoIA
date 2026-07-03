@@ -6,11 +6,13 @@ import { BRAND } from "@/lib/constants";
 import { money } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
 import BrandHeader from "@/components/BrandHeader";
+import TransferenciaBancaria from "@/components/perfil/TransferenciaBancaria";
 
 export default function SuscripcionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [precio, setPrecio] = useState(null);
+  const [mostrarTransferencia, setMostrarTransferencia] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -63,6 +65,23 @@ export default function SuscripcionPage() {
           style={{ background: BRAND.teal, color: BRAND.navy }}>
           {loading ? "Redirigiendo a MercadoPago..." : "Suscribirme con MercadoPago"}
         </button>
+
+        {!mostrarTransferencia ? (
+          <button onClick={() => setMostrarTransferencia(true)}
+            className="text-xs font-medium mb-4" style={{ color: BRAND.teal }}>
+            ¿Preferís pagar por transferencia?
+          </button>
+        ) : (
+          <div className="rounded-xl p-4 mb-4 text-left" style={{ background: "#242440", border: "1px solid #35354f" }}>
+            <div className="flex items-center justify-between mb-2">
+              <span style={{ color: BRAND.cream }} className="text-xs font-semibold">Pagar por transferencia</span>
+              <button onClick={() => setMostrarTransferencia(false)} className="text-xs font-medium" style={{ color: "#8b8b9a" }}>
+                Cerrar
+              </button>
+            </div>
+            <TransferenciaBancaria dark />
+          </div>
+        )}
 
         <button onClick={cerrarSesion} className="text-xs opacity-60 hover:opacity-100" style={{ color: BRAND.cream }}>
           Cerrar sesión
