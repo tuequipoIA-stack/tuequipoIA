@@ -94,6 +94,22 @@ function SuscripcionBlock() {
           style={{ background: BRAND.teal, color: BRAND.navy }}>
           Activar suscripción
         </Link>
+      ) : sub.mercadopago.status === "pending" ? (
+        // Suscripción creada pero todavía no confirmada: MercadoPago exige que
+        // sea la propia persona pagadora quien la autorice desde su checkout
+        // — no se puede completar cargando la tarjeta acá directamente.
+        <div>
+          <p style={{ color: "#8a5a2a" }} className="text-xs mb-2">
+            Todavía no confirmaste el pago. Completalo en MercadoPago para activar tu suscripción.
+          </p>
+          {sub.mercadopago.initPoint && (
+            <a href={sub.mercadopago.initPoint} target="_blank" rel="noopener noreferrer"
+              className="inline-block rounded-lg px-4 py-2 text-sm font-semibold"
+              style={{ background: BRAND.teal, color: BRAND.navy }}>
+              Completar pago en MercadoPago
+            </a>
+          )}
+        </div>
       ) : !mostrarForm ? (
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setMostrarForm(true)}
@@ -120,9 +136,9 @@ function SuscripcionBlock() {
           }}
         />
       )}
-      {sub.mercadopago && !mostrarForm && (
+      {sub.mercadopago && sub.mercadopago.status !== "pending" && !mostrarForm && (
         <p style={{ color: "#a89f88" }} className="text-[11px] mt-2">
-          "Cargar tarjeta acá" carga una tarjeta sin salir de la app. "Pagar con MercadoPago" te lleva a MercadoPago,
+          "Cargar tarjeta acá" cambia la tarjeta sin salir de la app. "Pagar con MercadoPago" te lleva a MercadoPago,
           donde podés elegir tarjeta, dinero en cuenta u otros medios.
         </p>
       )}
