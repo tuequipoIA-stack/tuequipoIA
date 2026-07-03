@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { money } from "@/lib/helpers";
+import { money, estadoSuscripcion, tiempoSuscripto } from "@/lib/helpers";
 import PasswordInput from "@/components/PasswordInput";
-
-const ESTADO_LABEL = { trial: "Prueba", active: "Activa", past_due: "Vencida", canceled: "Cancelada" };
 
 function Bloque({ titulo, children }) {
   return (
@@ -83,6 +81,12 @@ export default function AdminUserDetail({ userId, onBack }) {
   if (!data) return <p style={{ color: "#8a8578" }} className="text-sm">Cargando...</p>;
 
   const { profile, datos } = data;
+  const estado = estadoSuscripcion({
+    subscriptionStatus: profile.subscription_status,
+    trialEndsAt: profile.trial_ends_at,
+    mercadopagoSubscriptionId: profile.mercadopago_subscription_id,
+  });
+  const antiguedad = profile.subscription_started_at ? tiempoSuscripto(profile.subscription_started_at) : null;
   const perfil = datos["negocio-perfil"] || {};
   const ventas = datos["ventas-registro"] || [];
   const gastos = datos["gastos-registro"] || [];
@@ -105,16 +109,21 @@ export default function AdminUserDetail({ userId, onBack }) {
           <div style={{ color: BRAND.navy }} className="text-lg font-semibold">{perfil.nombre || "(sin nombre de negocio)"}</div>
           <div style={{ color: "#8a8578" }} className="text-xs">{profile.email}</div>
         </div>
-        <span className="text-xs px-2 py-1 rounded-full font-semibold"
-          style={{
-            background: profile.subscription_status === "active" ? "#eef7f6" : "#f0ece2",
-            color: profile.subscription_status === "active" ? "#127a79" : "#6b6759",
-          }}>
-          {ESTADO_LABEL[profile.subscription_status] || profile.subscription_status}
+        <span className="text-xs px-2 py-1 rounded-full font-semibold" style={{ background: estado.bg, color: estado.text }}>
+          {estado.label}
         </span>
       </div>
 
       <Bloque titulo="Suscripción">
+        <div className="text-xs space-y-1 mb-3" style={{ color: "#4a4740" }}>
+          {profile.subscription_status === "trial" && profile.trial_ends_at && (
+            <p><b>Prueba:</b> vence el {new Date(profile.trial_ends_at).toLocaleDateString("es-AR")}</p>
+          )}
+          {antiguedad && <p><b>Suscripto/a hace:</b> {antiguedad}</p>}
+          {profile.subscription_started_at && (
+            <p><b>Suscripto/a desde:</b> {new Date(profile.subscription_started_at).toLocaleDateString("es-AR")}</p>
+          )}
+        </div>
         <p style={{ color: "#8a8578" }} className="text-xs mb-3">
           Cambiá el estado a mano si el pago se hizo en efectivo, transferencia, o para destrabar a alguien puntualmente.
           {profile.mercadopago_subscription_id && " Esto no cancela ni modifica la suscripción en MercadoPago, solo el acceso en la app."}

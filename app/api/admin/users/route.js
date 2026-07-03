@@ -15,7 +15,7 @@ export async function GET() {
   const admin = createAdminClient();
 
   const [{ data: profiles, error: profilesError }, { data: rows, error: rowsError }] = await Promise.all([
-    admin.from("profiles").select("id, email, subscription_status, plan, trial_ends_at, is_admin, created_at").order("created_at", { ascending: false }),
+    admin.from("profiles").select("id, email, subscription_status, plan, trial_ends_at, mercadopago_subscription_id, subscription_started_at, is_admin, created_at").order("created_at", { ascending: false }),
     admin.from("app_data").select("user_id, key, value").in("key", ["negocio-perfil", "ventas-registro", "gastos-registro"]),
   ]);
 
@@ -44,6 +44,8 @@ export async function GET() {
       subscriptionStatus: p.subscription_status,
       plan: p.plan,
       trialEndsAt: p.trial_ends_at,
+      mercadopagoSubscriptionId: p.mercadopago_subscription_id,
+      subscriptionStartedAt: p.subscription_started_at,
       createdAt: p.created_at,
       nombreNegocio: perfil.nombre || null,
       rubro: perfil.rubro || null,

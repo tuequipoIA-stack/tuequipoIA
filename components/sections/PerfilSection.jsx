@@ -80,11 +80,20 @@ function SuscripcionBlock() {
           Activar suscripción
         </Link>
       ) : !mostrarForm ? (
-        <button onClick={() => setMostrarForm(true)}
-          className="rounded-lg px-4 py-2 text-sm font-semibold"
-          style={{ background: BRAND.navy, color: BRAND.cream }}>
-          Cambiar medio de pago
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setMostrarForm(true)}
+            className="rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{ background: BRAND.navy, color: BRAND.cream }}>
+            Cargar tarjeta acá
+          </button>
+          {sub.mercadopago.initPoint && (
+            <a href={sub.mercadopago.initPoint} target="_blank" rel="noopener noreferrer"
+              className="rounded-lg px-4 py-2 text-sm font-semibold"
+              style={{ background: BRAND.teal, color: BRAND.navy }}>
+              Pagar con MercadoPago
+            </a>
+          )}
+        </div>
       ) : (
         <CambiarTarjetaForm
           onCancel={() => setMostrarForm(false)}
@@ -95,6 +104,12 @@ function SuscripcionBlock() {
             setTimeout(() => setMensaje(""), 3000);
           }}
         />
+      )}
+      {sub.mercadopago && !mostrarForm && (
+        <p style={{ color: "#a89f88" }} className="text-[11px] mt-2">
+          "Cargar tarjeta acá" carga una tarjeta sin salir de la app. "Pagar con MercadoPago" te lleva a MercadoPago,
+          donde podés elegir tarjeta, dinero en cuenta u otros medios.
+        </p>
       )}
     </div>
   );

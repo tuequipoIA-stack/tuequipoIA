@@ -62,12 +62,14 @@ function AppShell({ isAdmin, bloqueado }) {
           <div className="flex items-center gap-2">
             <AlertTriangle size={16} color="#ffffff" />
             <span className="text-sm text-white">
-              No pudimos procesar tu pago. Regularizá tu suscripción para volver a usar la plataforma.
+              {bloqueado === "prueba"
+                ? "Tu prueba gratuita terminó. Suscribite para seguir usando la plataforma."
+                : "No pudimos procesar tu pago. Regularizá tu suscripción para volver a usar la plataforma."}
             </span>
           </div>
           <button onClick={() => setSection("perfil")}
             className="rounded-lg px-3 py-1.5 text-xs font-semibold shrink-0" style={{ background: "#ffffff", color: "#b3453f" }}>
-            Actualizar pago
+            {bloqueado === "prueba" ? "Suscribirme" : "Actualizar pago"}
           </button>
         </div>
       )}
@@ -97,7 +99,7 @@ function AppShell({ isAdmin, bloqueado }) {
 export default function TuEquipoIA() {
   const [stage, setStage] = useState("loading");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [bloqueado, setBloqueado] = useState(false);
+  const [bloqueado, setBloqueado] = useState(null); // null | "prueba" | "pago"
   const [unidades, setUnidades] = useState([]);
 
   useEffect(() => {
@@ -119,11 +121,11 @@ export default function TuEquipoIA() {
         const enTrial = profile?.subscription_status === "trial" && profile?.trial_ends_at && new Date(profile.trial_ends_at) > new Date();
         const activa = profile?.subscription_status === "active";
         if (!activa && !enTrial) {
-          if (!profile?.mercadopago_subscription_id) {
-            window.location.href = "/suscripcion";
-            return;
-          }
-          setBloqueado(true);
+          // Sin suscripción activa ni prueba vigente: mostramos la app en
+          // gris con un cartel, en vez de redirigir. Si nunca se suscribió,
+          // el cartel invita a suscribirse; si ya se suscribió alguna vez
+          // (y el pago falló), invita a regularizar el pago.
+          setBloqueado(profile?.mercadopago_subscription_id ? "pago" : "prueba");
         }
       }
 

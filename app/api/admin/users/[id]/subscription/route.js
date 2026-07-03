@@ -21,7 +21,16 @@ export async function POST(request, { params }) {
   }
 
   const admin = createAdminClient();
-  const { error } = await admin.from("profiles").update({ subscription_status: status }).eq("id", id);
+
+  const cambios = { subscription_status: status };
+  if (status === "active") {
+    const { data: actual } = await admin.from("profiles").select("subscription_started_at").eq("id", id).maybeSingle();
+    if (!actual?.subscription_started_at) {
+      cambios.subscription_started_at = new Date().toISOString();
+    }
+  }
+
+  const { error } = await admin.from("profiles").update(cambios).eq("id", id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

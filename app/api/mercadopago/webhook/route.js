@@ -44,13 +44,29 @@ async function procesarNotificacion(request) {
   const subscription_status = mapEstadoMercadoPago(preapproval.status);
 
   const supabase = createAdminClient();
+
+  const cambios = {
+    subscription_status,
+    mercadopago_subscription_id: preapproval.id,
+    plan: "membresia",
+  };
+
+  // Primera vez que pasa a "active": guardamos desde cuándo está suscripto
+  // (no se vuelve a tocar en renovaciones ni reactivaciones posteriores).
+  if (subscription_status === "active") {
+    const { data: actual } = await supabase
+      .from("profiles")
+      .select("subscription_started_at")
+      .eq("id", userId)
+      .maybeSingle();
+    if (!actual?.subscription_started_at) {
+      cambios.subscription_started_at = new Date().toISOString();
+    }
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({
-      subscription_status,
-      mercadopago_subscription_id: preapproval.id,
-      plan: "membresia",
-    })
+    .update(cambios)
     .eq("id", userId);
 
   if (error) {

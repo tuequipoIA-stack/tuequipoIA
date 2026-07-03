@@ -37,6 +37,7 @@ export async function GET() {
           paymentMethodId: mp.payment_method_id || null,
           nextPaymentDate: mp?.auto_recurring?.next_payment_date || null,
           lastChargedDate: mp?.summarized?.last_charged_date || null,
+          initPoint: mp.init_point || null,
         }
       : null,
   });

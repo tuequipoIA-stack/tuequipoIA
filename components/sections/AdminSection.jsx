@@ -3,16 +3,8 @@
 import { useEffect, useState } from "react";
 import { MessageSquare, Shield } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { money } from "@/lib/helpers";
+import { money, estadoSuscripcion, tiempoSuscripto } from "@/lib/helpers";
 import AdminUserDetail from "@/components/admin/AdminUserDetail";
-
-const ESTADO_LABEL = { trial: "Prueba", active: "Activo", past_due: "Vencido", canceled: "Cancelado" };
-const ESTADO_COLOR = {
-  trial: { bg: "#f0ece2", text: "#6b6759" },
-  active: { bg: "#eef7f6", text: "#127a79" },
-  past_due: { bg: "#fdf0e6", text: "#b3703f" },
-  canceled: { bg: "#fbeceb", text: "#b3453f" },
-};
 
 function SugerenciasTab() {
   const [sugerencias, setSugerencias] = useState(null);
@@ -127,29 +119,42 @@ export default function AdminSection() {
           )}
 
           <div className="space-y-2">
-            {usuarios?.map((u) => (
-              <button key={u.id} onClick={() => setSeleccionado(u.id)}
-                className="w-full text-left rounded-xl p-4 flex items-center justify-between hover:opacity-90"
-                style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-                <div>
-                  <div style={{ color: BRAND.navy }} className="text-sm font-semibold">
-                    {u.nombreNegocio || "(sin nombre de negocio)"}
-                    {u.isAdmin && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: BRAND.navy, color: BRAND.cream }}>admin</span>}
+            {usuarios?.map((u) => {
+              const estado = estadoSuscripcion({
+                subscriptionStatus: u.subscriptionStatus,
+                trialEndsAt: u.trialEndsAt,
+                mercadopagoSubscriptionId: u.mercadopagoSubscriptionId,
+              });
+              const antiguedad = u.subscriptionStartedAt ? tiempoSuscripto(u.subscriptionStartedAt) : null;
+              return (
+                <button key={u.id} onClick={() => setSeleccionado(u.id)}
+                  className="w-full text-left rounded-xl p-4 flex items-center justify-between hover:opacity-90"
+                  style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                  <div>
+                    <div style={{ color: BRAND.navy }} className="text-sm font-semibold">
+                      {u.nombreNegocio || "(sin nombre de negocio)"}
+                      {u.isAdmin && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: BRAND.navy, color: BRAND.cream }}>admin</span>}
+                    </div>
+                    <div style={{ color: "#8a8578" }} className="text-xs">{u.email} {u.rubro ? `· ${u.rubro}` : ""}</div>
                   </div>
-                  <div style={{ color: "#8a8578" }} className="text-xs">{u.email} {u.rubro ? `· ${u.rubro}` : ""}</div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div style={{ color: BRAND.navy }} className="text-xs font-medium">{money(u.ventasMes)}</div>
-                    <div style={{ color: "#a89f88" }} className="text-[10px]">ventas del mes</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div style={{ color: BRAND.navy }} className="text-xs font-medium">{money(u.ventasMes)}</div>
+                      <div style={{ color: "#a89f88" }} className="text-[10px]">ventas del mes</div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs px-2 py-1 rounded-full font-semibold inline-block"
+                        style={{ background: estado.bg, color: estado.text }}>
+                        {estado.label}
+                      </span>
+                      {antiguedad && (
+                        <div style={{ color: "#a89f88" }} className="text-[10px] mt-1">suscripto hace {antiguedad}</div>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded-full font-semibold"
-                    style={{ background: ESTADO_COLOR[u.subscriptionStatus]?.bg, color: ESTADO_COLOR[u.subscriptionStatus]?.text }}>
-                    {ESTADO_LABEL[u.subscriptionStatus] || u.subscriptionStatus}
-                  </span>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </>
       )}
