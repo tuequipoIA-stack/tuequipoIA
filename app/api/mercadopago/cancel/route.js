@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { cancelarPreapproval } from "@/lib/mercadopago";
 
 // Permite a cualquier usuario logueado dar de baja su propia membresía.
@@ -27,7 +28,11 @@ export async function POST() {
     }
   }
 
-  const { error } = await supabase
+  // Usamos el cliente admin: los usuarios ya no tienen permiso de RLS para
+  // escribir directo en su propia fila de profiles (para que nadie pueda
+  // marcarse "active" a mano sin pagar).
+  const admin = createAdminClient();
+  const { error } = await admin
     .from("profiles")
     .update({ subscription_status: "canceled" })
     .eq("id", user.id);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { actualizarTarjetaPreapproval } from "@/lib/mercadopago";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { actualizarTarjetaPreapproval, obtenerPreapproval, mapEstadoMercadoPago } from "@/lib/mercadopago";
 
 // Recibe el card_token_id generado en el browser por MercadoPago.js
 // (nunca vemos el número de tarjeta acá, solo el token ya seguro) y lo
@@ -28,8 +29,25 @@ export async function POST(request) {
   }
 
   try {
-    const actualizado = await actualizarTarjetaPreapproval(profile.mercadopago_subscription_id, token);
-    return NextResponse.json({ ok: true, paymentMethodId: actualizado.payment_method_id });
+    // Si la suscripción todavía está "pending" (nunca se autorizó desde el
+    // checkout de MercadoPago), hay que activarla en el mismo request en el
+    // que mandamos la tarjeta — si no, la tarjeta queda guardada pero nunca
+    // se ejecuta ningún cobro.
+    const actual = await obtenerPreapproval(profile.mercadopago_subscription_id);
+    const activar = actual.status === "pending";
+
+    const actualizado = await actualizarTarjetaPreapproval(profile.mercadopago_subscription_id, token, { activar });
+    const nuevoEstado = mapEstadoMercadoPago(actualizado.status);
+
+    const admin = createAdminClient();
+    const cambios = { subscription_status: nuevoEstado };
+    if (nuevoEstado === "active") {
+      const { data: actualProfile } = await admin.from("profiles").select("subscription_started_at").eq("id", user.id).maybeSingle();
+      if (!actualProfile?.subscription_started_at) cambios.subscription_started_at = new Date().toISOString();
+    }
+    await admin.from("profiles").update(cambios).eq("id", user.id);
+
+    return NextResponse.json({ ok: true, paymentMethodId: actualizado.payment_method_id, status: actualizado.status });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 502 });
   }
