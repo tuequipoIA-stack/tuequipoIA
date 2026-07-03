@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Upload } from "lucide-react";
+import { AlertTriangle, Loader2, Upload } from "lucide-react";
 import { BRAND, TIPOS_NEGOCIO } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { useUnidad } from "@/components/UnidadProvider";
@@ -25,6 +25,21 @@ function SuscripcionBlock() {
   const [error, setError] = useState("");
   const [mostrarForm, setMostrarForm] = useState(false);
   const [mensaje, setMensaje] = useState("");
+
+  const [pasoCancelar, setPasoCancelar] = useState(0); // 0 = nada, 1 = confirmando
+  const [cancelando, setCancelando] = useState(false);
+  const [errorCancelar, setErrorCancelar] = useState("");
+
+  const cancelarSuscripcion = async () => {
+    setCancelando(true);
+    setErrorCancelar("");
+    const res = await fetch("/api/mercadopago/cancel", { method: "POST" });
+    const data = await res.json();
+    setCancelando(false);
+    if (data.error) { setErrorCancelar(data.error); return; }
+    setPasoCancelar(0);
+    cargar();
+  };
 
   const cargar = () => {
     fetch("/api/mercadopago/subscription")
@@ -110,6 +125,39 @@ function SuscripcionBlock() {
           "Cargar tarjeta acá" carga una tarjeta sin salir de la app. "Pagar con MercadoPago" te lleva a MercadoPago,
           donde podés elegir tarjeta, dinero en cuenta u otros medios.
         </p>
+      )}
+
+      {(sub.subscriptionStatus === "active" || sub.subscriptionStatus === "past_due") && !mostrarForm && (
+        <div className="mt-4 pt-4" style={{ borderTop: "1px solid #f0ece2" }}>
+          {pasoCancelar === 0 ? (
+            <button onClick={() => setPasoCancelar(1)} className="text-xs font-medium" style={{ color: "#b3453f" }}>
+              Cancelar mi suscripción
+            </button>
+          ) : (
+            <div className="rounded-lg p-3" style={{ background: "#fbeceb" }}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <AlertTriangle size={13} color="#b3453f" />
+                <span style={{ color: "#b3453f" }} className="text-xs font-semibold">¿Seguro que querés cancelar?</span>
+              </div>
+              <p style={{ color: "#8a5450" }} className="text-xs mb-2">
+                Vas a perder el acceso a la app y no se te va a volver a cobrar. Podés volver a suscribirte cuando quieras.
+              </p>
+              {errorCancelar && <p className="text-xs mb-2" style={{ color: "#b3453f" }}>{errorCancelar}</p>}
+              <div className="flex gap-2">
+                <button onClick={cancelarSuscripcion} disabled={cancelando}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
+                  style={{ background: "#b3453f", color: "#ffffff" }}>
+                  {cancelando && <Loader2 size={12} className="animate-spin" />}
+                  {cancelando ? "Cancelando..." : "Sí, cancelar"}
+                </button>
+                <button onClick={() => { setPasoCancelar(0); setErrorCancelar(""); }}
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium" style={{ color: "#8a5450" }}>
+                  Volver
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
