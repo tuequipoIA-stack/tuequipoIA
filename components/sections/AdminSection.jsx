@@ -5,6 +5,7 @@ import { MessageSquare, Shield } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { money, estadoSuscripcion, tiempoSuscripto } from "@/lib/helpers";
 import AdminUserDetail from "@/components/admin/AdminUserDetail";
+import PrecioMembresiaCard from "@/components/admin/PrecioMembresiaCard";
 
 function SugerenciasTab() {
   const [sugerencias, setSugerencias] = useState(null);
@@ -94,6 +95,8 @@ export default function AdminSection() {
       ) : (
         <>
           {error && <p style={{ color: "#b3453f" }} className="text-sm mb-4">{error}</p>}
+
+          <PrecioMembresiaCard />
 
           {usuarios && (
             <div className="grid grid-cols-3 gap-3 mb-5">

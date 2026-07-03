@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { crearPreapproval } from "@/lib/mercadopago";
+import { obtenerPrecioMembresia } from "@/lib/appConfig";
 
 // Crea la suscripción del usuario logueado y devuelve la URL de checkout
 // de MercadoPago (init_point) para redirigirlo ahí.
@@ -14,11 +15,13 @@ export async function POST(request) {
   const origin = request.nextUrl.origin;
 
   try {
+    const precio = await obtenerPrecioMembresia();
     const preapproval = await crearPreapproval({
       email: user.email,
       userId: user.id,
       backUrl: `${origin}/suscripcion/resultado`,
       notificationUrl: `${origin}/api/mercadopago/webhook`,
+      precio,
     });
 
     // Guardamos el id de la suscripción ni bien se crea (todavía "pending",

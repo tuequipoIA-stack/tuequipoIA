@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { MEMBRESIA_PRECIO_ARS } from "@/lib/mercadopago";
 
 const MP_SDK_SRC = "https://sdk.mercadopago.com/js/v2";
 
@@ -47,14 +46,17 @@ export default function CambiarTarjetaForm({ onSuccess, onCancel }) {
 
     let cancelado = false;
 
-    cargarScriptMercadoPago()
-      .then(() => {
+    Promise.all([
+      cargarScriptMercadoPago(),
+      fetch("/api/config/precio").then((r) => r.json()).catch(() => ({ precio: 10000 })),
+    ])
+      .then(([, precioData]) => {
         if (cancelado) return;
         const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY;
         const mp = new window.MercadoPago(publicKey, { locale: "es-AR" });
 
         cardFormRef.current = mp.cardForm({
-          amount: String(MEMBRESIA_PRECIO_ARS),
+          amount: String(precioData.precio || 10000),
           iframe: true,
           form: {
             id: "form-cambiar-tarjeta",

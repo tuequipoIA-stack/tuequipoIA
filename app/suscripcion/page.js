@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BRAND, MEMBRESIA_PRECIO_ARS } from "@/lib/constants";
+import { BRAND } from "@/lib/constants";
 import { money } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
 import BrandHeader from "@/components/BrandHeader";
@@ -10,7 +10,15 @@ import BrandHeader from "@/components/BrandHeader";
 export default function SuscripcionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [precio, setPrecio] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    fetch("/api/config/precio")
+      .then((r) => r.json())
+      .then((d) => setPrecio(d.precio))
+      .catch(() => {});
+  }, []);
 
   const suscribirse = async () => {
     setError("");
@@ -44,7 +52,7 @@ export default function SuscripcionPage() {
         </p>
 
         <div className="rounded-xl p-5 mb-6" style={{ background: "#242440", border: "1px solid #35354f" }}>
-          <div style={{ color: BRAND.teal }} className="text-3xl font-semibold">{money(MEMBRESIA_PRECIO_ARS)}</div>
+          <div style={{ color: BRAND.teal }} className="text-3xl font-semibold">{precio !== null ? money(precio) : "..."}</div>
           <div style={{ color: "#8b8b9a" }} className="text-xs mt-1">por mes</div>
         </div>
 

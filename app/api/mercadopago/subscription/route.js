@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { obtenerPreapproval, MEMBRESIA_PRECIO_ARS } from "@/lib/mercadopago";
+import { obtenerPreapproval } from "@/lib/mercadopago";
+import { obtenerPrecioMembresia } from "@/lib/appConfig";
 
 // Devuelve el estado de la suscripción del usuario logueado, combinando
 // lo que tenemos guardado en profiles con el estado en vivo de MercadoPago
@@ -27,10 +28,15 @@ export async function GET() {
     }
   }
 
+  // Si ya tiene una suscripción en MercadoPago, mostramos el monto que
+  // quedó fijado ahí (puede diferir del precio actual si se cambió
+  // después). Si todavía no se suscribió, mostramos el precio vigente.
+  const precio = mp?.auto_recurring?.transaction_amount || (await obtenerPrecioMembresia());
+
   return NextResponse.json({
     subscriptionStatus: profile?.subscription_status || "trial",
     trialEndsAt: profile?.trial_ends_at || null,
-    precio: MEMBRESIA_PRECIO_ARS,
+    precio,
     mercadopago: mp
       ? {
           status: mp.status,
