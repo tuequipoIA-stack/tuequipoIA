@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Calculator, Check, Loader2, Sparkles } from "lucide-react";
 import { BRAND, CADENCIAS } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
-import { uid, money } from "@/lib/helpers";
+import { uid, money, calcularPlanNumeros } from "@/lib/helpers";
 import { planSystemPrompt } from "@/lib/businessContext";
 import { askClaude } from "@/lib/chat";
 
@@ -58,20 +58,10 @@ export default function PlanNegocio({ business, onIrAOferta }) {
     await saveData("plan-negocio", { form, plan, horizonte: h });
   };
 
-  const costo = Number(form.costoUnitario) || 0;
-  const margen = Number(form.margenDeseado) || 0;
-  const sueldoObjetivo = Number(form.sueldoObjetivo) || 0;
-  const diasHabiles = Number(form.diasHabiles) || 24;
-
-  const precioVenta = margen < 100 && costo > 0 ? costo / (1 - margen / 100) : 0;
-  const gananciaUnidad = precioVenta - costo;
-  const unidadesPorMes = gananciaUnidad > 0 ? Math.ceil(sueldoObjetivo / gananciaUnidad) : 0;
-  const unidadesPorDia = diasHabiles > 0 ? Math.ceil(unidadesPorMes / diasHabiles) : 0;
-  const unidadesPorSemana = Math.ceil(unidadesPorMes / 4.33);
-  const unidadesPorTrimestre = unidadesPorMes * 3;
-  const unidadesPorSemestre = unidadesPorMes * 6;
-  const unidadesPorAnio = unidadesPorMes * 12;
-  const facturacionMensual = unidadesPorMes * precioVenta;
+  const {
+    sueldoObjetivo, precioVenta, gananciaUnidad, unidadesPorDia, unidadesPorSemana, unidadesPorMes,
+    unidadesPorTrimestre, unidadesPorSemestre, unidadesPorAnio, facturacionMensual, puedeCalcular,
+  } = calcularPlanNumeros(form);
 
   const cascada = {
     dia: { label: "Por día", unidades: unidadesPorDia },
@@ -81,8 +71,6 @@ export default function PlanNegocio({ business, onIrAOferta }) {
     semestre: { label: "Por 6 meses", unidades: unidadesPorSemestre },
     anio: { label: "Por año", unidades: unidadesPorAnio },
   };
-
-  const puedeCalcular = costo > 0 && margen > 0 && margen < 100 && sueldoObjetivo > 0;
 
   const objetivoElegido = objetivos[horizonte] || "";
   const horizonteLabel = HORIZONTES_REFERENCIA.find((h) => h.key === horizonte)?.label || "";
