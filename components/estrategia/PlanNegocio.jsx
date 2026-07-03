@@ -7,6 +7,7 @@ import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money } from "@/lib/helpers";
 import { planSystemPrompt } from "@/lib/businessContext";
 import { askClaude } from "@/lib/chat";
+import AgenteOfertaCard from "./AgenteOfertaCard";
 
 export default function PlanNegocio({ business }) {
   const { loadData, saveData, unidadId } = useUnidadStorage();
@@ -81,6 +82,8 @@ export default function PlanNegocio({ business }) {
 
   return (
     <div>
+      <AgenteOfertaCard />
+
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">
         Bajá tu visión a números: cuánto tenés que vender y a qué precio para vivir de esto. Después armamos el plan de tareas para lograrlo.
       </p>
