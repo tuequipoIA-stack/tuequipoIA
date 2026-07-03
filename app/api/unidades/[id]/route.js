@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { tieneAccesoActivo, SIN_ACCESO_ERROR } from "@/lib/subscriptionGate";
 
 // Editar o borrar una unidad de negocio puntual. RLS restringe todo a las
 // unidades del propio usuario. Al borrar una unidad, sus datos (app_data)
 // se borran en cascada — se avisa esto claramente en la UI antes de llamar acá.
+
+async function verificarAcceso(supabase, userId) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin, subscription_status, trial_ends_at")
+    .eq("id", userId)
+    .maybeSingle();
+  return tieneAccesoActivo(profile);
+}
 
 export async function PATCH(request, { params }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+  if (!(await verificarAcceso(supabase, user.id))) {
+    return NextResponse.json({ error: SIN_ACCESO_ERROR }, { status: 403 });
   }
 
   const { id } = await params;
@@ -39,6 +52,9 @@ export async function DELETE(request, { params }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+  if (!(await verificarAcceso(supabase, user.id))) {
+    return NextResponse.json({ error: SIN_ACCESO_ERROR }, { status: 403 });
   }
 
   const { id } = await params;
