@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Clock, ExternalLink, FileText, Lightbulb, Link2, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
+import { BookOpen, Clock, ExternalLink, FileText, Lightbulb, Link2, Loader2, Music, Plus, Trash2, Upload, Video, X } from "lucide-react";
 import { BRAND, RECURSO_CATEGORIAS } from "@/lib/constants";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
+
+const EXT_AUDIO = ["mp3", "wav", "m4a", "ogg", "aac"];
+const EXT_VIDEO = ["mp4", "mov", "webm", "avi", "m4v"];
+function extension(nombre) {
+  return (nombre || "").split(".").pop()?.toLowerCase() || "";
+}
 
 const TIPOS = [
   { id: "nota", label: "Nota de texto" },
@@ -292,15 +298,32 @@ export default function RecursosSection({ isAdmin }) {
                   <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{r.titulo}</div>
 
                   {adjuntos.length > 0 && (
-                    <div className="mb-1 space-y-1">
-                      {adjuntos.map((a, i) => (
-                        <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-sm" style={{ color: "#127a79" }}>
-                          {r.tipo === "archivo"
-                            ? <><FileText size={13} /> {a.nombre || `Descargar archivo ${adjuntos.length > 1 ? i + 1 : ""}`} <ExternalLink size={11} /></>
-                            : <><Link2 size={13} /> {a.url}</>}
-                        </a>
-                      ))}
+                    <div className="mb-1 space-y-2">
+                      {adjuntos.map((a, i) => {
+                        if (r.tipo !== "archivo") {
+                          return (
+                            <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 text-sm" style={{ color: "#127a79" }}>
+                              <Link2 size={13} /> {a.url}
+                            </a>
+                          );
+                        }
+                        const ext = extension(a.nombre);
+                        const esAudio = EXT_AUDIO.includes(ext);
+                        const esVideo = EXT_VIDEO.includes(ext);
+                        return (
+                          <div key={i}>
+                            <a href={a.url} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 text-sm mb-1" style={{ color: "#127a79" }}>
+                              {esAudio ? <Music size={13} /> : esVideo ? <Video size={13} /> : <FileText size={13} />}
+                              {a.nombre || `Descargar archivo ${adjuntos.length > 1 ? i + 1 : ""}`}
+                              {!esAudio && !esVideo && <ExternalLink size={11} />}
+                            </a>
+                            {esAudio && <audio controls src={a.url} className="w-full" style={{ height: "32px" }} />}
+                            {esVideo && <video controls src={a.url} className="w-full rounded-lg" style={{ maxHeight: "220px" }} />}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
