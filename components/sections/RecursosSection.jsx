@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Clock, ExternalLink, FileText, Lightbulb, Link2, Loader2, Plus, Trash2, Upload } from "lucide-react";
+import { BookOpen, Clock, ExternalLink, FileText, Lightbulb, Link2, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { BRAND, RECURSO_CATEGORIAS } from "@/lib/constants";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
@@ -41,10 +41,18 @@ export default function RecursosSection({ isAdmin }) {
   const [filtro, setFiltro] = useState("todos");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(FORM_VACIO);
-  const [archivo, setArchivo] = useState(null);
+  const [links, setLinks] = useState([""]);
+  const [archivos, setArchivos] = useState([]);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
+
+  const actualizarLink = (i, valor) => setLinks((prev) => prev.map((l, idx) => (idx === i ? valor : l)));
+  const agregarLinkVacio = () => setLinks((prev) => [...prev, ""]);
+  const quitarLink = (i) => setLinks((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
+
+  const agregarArchivos = (files) => setArchivos((prev) => [...prev, ...Array.from(files || [])]);
+  const quitarArchivo = (i) => setArchivos((prev) => prev.filter((_, idx) => idx !== i));
 
   const cargar = async () => {
     const supabase = createClient();
@@ -57,9 +65,10 @@ export default function RecursosSection({ isAdmin }) {
   useEffect(() => { cargar(); }, []);
 
   const agregar = async () => {
+    const linksValidos = links.map((l) => l.trim()).filter(Boolean);
     if (!form.titulo.trim()) return;
-    if (form.tipo === "link" && !form.url.trim()) return;
-    if (form.tipo === "archivo" && !archivo) return;
+    if (form.tipo === "link" && linksValidos.length === 0) return;
+    if (form.tipo === "archivo" && archivos.length === 0) return;
     if (form.tipo === "hack" && !form.descripcion.trim()) return;
 
     setError("");
@@ -67,18 +76,22 @@ export default function RecursosSection({ isAdmin }) {
     const supabase = createClient();
 
     try {
-      let url = form.url.trim() || null;
-      let nombreArchivo = null;
+      let adjuntos = [];
 
-      if (form.tipo === "archivo" && archivo) {
-        const path = `${uid()}-${archivo.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("recursos-archivos")
-          .upload(path, archivo, { contentType: archivo.type });
-        if (uploadError) throw uploadError;
-        const { data: pub } = supabase.storage.from("recursos-archivos").getPublicUrl(path);
-        url = pub.publicUrl;
-        nombreArchivo = archivo.name;
+      if (form.tipo === "link") {
+        adjuntos = linksValidos.map((url) => ({ url }));
+      }
+
+      if (form.tipo === "archivo" && archivos.length > 0) {
+        for (const file of archivos) {
+          const path = `${uid()}-${file.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from("recursos-archivos")
+            .upload(path, file, { contentType: file.type });
+          if (uploadError) throw uploadError;
+          const { data: pub } = supabase.storage.from("recursos-archivos").getPublicUrl(path);
+          adjuntos.push({ url: pub.publicUrl, nombre: file.name });
+        }
       }
 
       const { error: insertError } = await supabase.from("recursos").insert({
@@ -86,15 +99,15 @@ export default function RecursosSection({ isAdmin }) {
         titulo: form.titulo.trim(),
         descripcion: form.descripcion.trim() || null,
         tipo: form.tipo,
-        url,
-        nombre_archivo: nombreArchivo,
+        adjuntos,
         fecha_semana: form.tipo === "hack" ? form.fechaSemana : null,
         publicar_en: form.publicarEn ? new Date(form.publicarEn).toISOString() : new Date().toISOString(),
       });
       if (insertError) throw insertError;
 
       setForm(FORM_VACIO);
-      setArchivo(null);
+      setLinks([""]);
+      setArchivos([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
       setShowForm(false);
       cargar();
@@ -177,20 +190,42 @@ export default function RecursosSection({ isAdmin }) {
           )}
 
           {form.tipo === "link" && (
-            <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })}
-              placeholder="https://..."
-              className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            <div className="mb-2">
+              {links.map((l, i) => (
+                <div key={i} className="flex items-center gap-1.5 mb-1.5">
+                  <input value={l} onChange={(e) => actualizarLink(i, e.target.value)}
+                    placeholder="https://..."
+                    className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+                  {links.length > 1 && (
+                    <button onClick={() => quitarLink(i)} style={{ color: "#b3453f" }}><X size={14} /></button>
+                  )}
+                </div>
+              ))}
+              <button onClick={agregarLinkVacio} className="flex items-center gap-1 text-xs font-medium" style={{ color: "#127a79" }}>
+                <Plus size={12} /> Agregar otro link
+              </button>
+            </div>
           )}
 
           {form.tipo === "archivo" && (
             <div className="mb-2">
-              <input ref={fileInputRef} type="file" onChange={(e) => setArchivo(e.target.files?.[0] || null)}
+              <input ref={fileInputRef} type="file" multiple onChange={(e) => { agregarArchivos(e.target.files); e.target.value = ""; }}
                 className="hidden" id="recurso-archivo-input" />
               <label htmlFor="recurso-archivo-input"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer mb-2"
                 style={{ background: "#eee9dd", color: BRAND.navy }}>
-                <Upload size={13} /> {archivo ? archivo.name : "Elegir archivo"}
+                <Upload size={13} /> {archivos.length > 0 ? "Agregar otro archivo" : "Elegir archivo(s)"}
               </label>
+              {archivos.length > 0 && (
+                <div className="space-y-1">
+                  {archivos.map((f, i) => (
+                    <div key={i} className="flex items-center justify-between rounded-md px-2 py-1.5" style={{ background: "#faf8f4" }}>
+                      <span style={{ color: "#4a4740" }} className="text-xs truncate">{f.name}</span>
+                      <button onClick={() => quitarArchivo(i)} style={{ color: "#b3453f" }}><X size={13} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -234,6 +269,8 @@ export default function RecursosSection({ isAdmin }) {
           <div className="space-y-3">
             {documentos.map((r) => {
               const cat = RECURSO_CATEGORIAS.find((c) => c.id === r.categoria);
+              // Compatibilidad: recursos viejos guardaban un solo link/archivo en "url".
+              const adjuntos = r.adjuntos?.length ? r.adjuntos : (r.url ? [{ url: r.url, nombre: r.nombre_archivo }] : []);
               return (
                 <div key={r.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
                   <div className="flex items-center justify-between mb-1.5">
@@ -254,17 +291,17 @@ export default function RecursosSection({ isAdmin }) {
                   )}
                   <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{r.titulo}</div>
 
-                  {r.tipo === "link" && r.url && (
-                    <a href={r.url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-sm mb-1" style={{ color: "#127a79" }}>
-                      <Link2 size={13} /> {r.url}
-                    </a>
-                  )}
-                  {r.tipo === "archivo" && r.url && (
-                    <a href={r.url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-sm mb-1" style={{ color: "#127a79" }}>
-                      <FileText size={13} /> {r.nombre_archivo || "Descargar archivo"} <ExternalLink size={11} />
-                    </a>
+                  {adjuntos.length > 0 && (
+                    <div className="mb-1 space-y-1">
+                      {adjuntos.map((a, i) => (
+                        <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-sm" style={{ color: "#127a79" }}>
+                          {r.tipo === "archivo"
+                            ? <><FileText size={13} /> {a.nombre || `Descargar archivo ${adjuntos.length > 1 ? i + 1 : ""}`} <ExternalLink size={11} /></>
+                            : <><Link2 size={13} /> {a.url}</>}
+                        </a>
+                      ))}
+                    </div>
                   )}
 
                   {r.descripcion && (
