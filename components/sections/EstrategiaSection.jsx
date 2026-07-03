@@ -74,7 +74,7 @@ export default function EstrategiaSection({ business }) {
       </div>
 
       {vista === "plan" ? (
-        <PlanNegocio business={business} />
+        <PlanNegocio business={business} onIrAOferta={() => setVista("oferta")} />
       ) : vista === "oferta" ? (
         <DefinirOfertaTab />
       ) : (
