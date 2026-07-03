@@ -33,7 +33,7 @@ export default function LoginPage() {
   return (
     <div style={{ background: BRAND.navy }} className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-sm w-full">
-        <BrandHeader />
+        <BrandHeader variant="stacked" className="mb-9" />
 
         <h1 style={{ color: BRAND.cream }} className="text-xl font-semibold text-center mb-6">Iniciá sesión</h1>
 
