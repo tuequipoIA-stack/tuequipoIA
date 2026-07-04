@@ -1,12 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
 
 const OTRO = "__otro__";
+const MESES_LABEL = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
+// "2026-07-15" -> "2026-07"
+const mesKey = (fechaStr) => (fechaStr || "").slice(0, 7);
+
+function labelMes(clave) {
+  const [anio, mes] = clave.split("-").map(Number);
+  const anioActual = new Date().getFullYear();
+  const nombre = MESES_LABEL[mes - 1] || clave;
+  return anio === anioActual ? nombre : `${nombre} ${anio}`;
+}
 
 export default function VentasSection({ business }) {
   const { loadData, saveData, unidadId } = useUnidadStorage();
@@ -15,6 +29,7 @@ export default function VentasSection({ business }) {
   const [fechaActiva, setFechaActiva] = useState(new Date().toISOString().slice(0, 10));
   const [fila, setFila] = useState({ productoId: "", productoLibre: "", cantidad: "1", precio: "" });
   const [catalogo, setCatalogo] = useState([]);
+  const [mesesAbiertos, setMesesAbiertos] = useState({});
 
   const usaCatalogo = business?.tipoNegocio !== "servicios";
 
@@ -63,15 +78,41 @@ export default function VentasSection({ business }) {
   const ventasConCosto = ventas.filter((v) => isThisMonth(v.fecha) && v.costoUnitario != null);
   const margenMes = ventasConCosto.reduce((s, v) => s + (Number(v.precio || 0) - Number(v.costoUnitario || 0)) * Number(v.cantidad || 1), 0);
 
-  // agrupar por fecha, más reciente primero
+  const mesActualKey = mesKey(new Date().toISOString().slice(0, 10));
+
+  // Mes en curso: se sigue mostrando día por día, como siempre.
+  const ventasMesActual = ventas.filter((v) => mesKey(v.fecha) === mesActualKey);
   const porFecha = {};
-  ventas.forEach((v) => {
+  ventasMesActual.forEach((v) => {
     if (!porFecha[v.fecha]) porFecha[v.fecha] = [];
     porFecha[v.fecha].push(v);
   });
   const fechasOrdenadas = Object.keys(porFecha).sort((a, b) => (a < b ? 1 : -1));
 
   const fechaLabel = (f) => new Date(f + "T00:00:00").toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short" });
+
+  // Meses anteriores: se agrupan en un botón colapsable por mes.
+  const porMesAnterior = {};
+  ventas.forEach((v) => {
+    const clave = mesKey(v.fecha);
+    if (clave === mesActualKey) return;
+    if (!porMesAnterior[clave]) porMesAnterior[clave] = [];
+    porMesAnterior[clave].push(v);
+  });
+  const mesesAnterioresOrdenados = Object.keys(porMesAnterior).sort((a, b) => (a < b ? 1 : -1));
+
+  const toggleMes = (clave) => setMesesAbiertos((prev) => ({ ...prev, [clave]: !prev[clave] }));
+
+  // Agrupa las ventas de un mes por producto: cantidad y valor total por línea.
+  const agruparPorProducto = (items) => {
+    const porProducto = {};
+    items.forEach((v) => {
+      if (!porProducto[v.producto]) porProducto[v.producto] = { producto: v.producto, cantidad: 0, total: 0 };
+      porProducto[v.producto].cantidad += Number(v.cantidad || 1);
+      porProducto[v.producto].total += subtotalFila(v);
+    });
+    return Object.values(porProducto).sort((a, b) => b.total - a.total);
+  };
 
   return (
     <div>
@@ -129,14 +170,18 @@ export default function VentasSection({ business }) {
         )}
       </div>
 
-      {loaded && fechasOrdenadas.length === 0 && (
-        <div className="rounded-xl p-6 text-center" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+      {loaded && ventas.length === 0 && (
+        <div className="rounded-xl p-6 text-center mb-4" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
           <ShoppingCart size={20} color="#b3ab98" className="mx-auto mb-2" />
           <p style={{ color: "#8a8578" }} className="text-sm">Todavía no cargaste ventas.</p>
         </div>
       )}
 
-      <div className="space-y-4">
+      {loaded && ventas.length > 0 && fechasOrdenadas.length === 0 && (
+        <p style={{ color: "#a89f88" }} className="text-sm mb-4">Todavía no cargaste ventas este mes.</p>
+      )}
+
+      <div className="space-y-4 mb-4">
         {fechasOrdenadas.map((fecha) => {
           const items = porFecha[fecha];
           const totalUnidades = items.reduce((s, v) => s + Number(v.cantidad || 1), 0);
@@ -175,6 +220,56 @@ export default function VentasSection({ business }) {
           );
         })}
       </div>
+
+      {mesesAnterioresOrdenados.length > 0 && (
+        <div>
+          <div style={{ color: "#8a8578" }} className="text-xs font-semibold uppercase tracking-wide mb-2">Meses anteriores</div>
+          <div className="space-y-2">
+            {mesesAnterioresOrdenados.map((clave) => {
+              const items = porMesAnterior[clave];
+              const abierto = !!mesesAbiertos[clave];
+              const totalUnidadesMes = items.reduce((s, v) => s + Number(v.cantidad || 1), 0);
+              const totalMesAnterior = items.reduce((s, v) => s + subtotalFila(v), 0);
+              const lineas = agruparPorProducto(items);
+              return (
+                <div key={clave} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                  <button onClick={() => toggleMes(clave)}
+                    className="w-full flex items-center justify-between px-4 py-3" style={{ background: "#f0ece2" }}>
+                    <div className="flex items-center gap-2">
+                      {abierto ? <ChevronUp size={15} color={BRAND.navy} /> : <ChevronDown size={15} color={BRAND.navy} />}
+                      <span style={{ color: BRAND.navy }} className="text-sm font-semibold capitalize">{labelMes(clave)}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span style={{ color: "#6b6759" }} className="text-xs">{totalUnidadesMes} {totalUnidadesMes === 1 ? "unidad" : "unidades"}</span>
+                      <span style={{ color: BRAND.navy }} className="text-sm font-semibold">{money(totalMesAnterior)}</span>
+                    </div>
+                  </button>
+                  {abierto && (
+                    <div>
+                      <div className="grid grid-cols-3 gap-2 px-4 py-2" style={{ background: "#faf8f4" }}>
+                        <span style={{ color: "#a89f88" }} className="text-[10px] uppercase font-semibold">Producto</span>
+                        <span style={{ color: "#a89f88" }} className="text-[10px] uppercase font-semibold text-right">Cantidad</span>
+                        <span style={{ color: "#a89f88" }} className="text-[10px] uppercase font-semibold text-right">Valor total</span>
+                      </div>
+                      {lineas.map((l) => (
+                        <div key={l.producto} className="grid grid-cols-3 gap-2 px-4 py-2" style={{ borderTop: "1px solid #f0ece2" }}>
+                          <span style={{ color: BRAND.navy }} className="text-sm truncate">{l.producto}</span>
+                          <span style={{ color: "#4a4740" }} className="text-sm text-right">{l.cantidad}</span>
+                          <span style={{ color: "#4a4740" }} className="text-sm text-right">{money(l.total)}</span>
+                        </div>
+                      ))}
+                      <div className="flex items-center justify-between px-4 py-2.5" style={{ background: BRAND.navy }}>
+                        <span style={{ color: "#8b8b9a" }} className="text-xs">Total del mes ({totalUnidadesMes} {totalUnidadesMes === 1 ? "unidad" : "unidades"})</span>
+                        <span style={{ color: BRAND.teal }} className="text-sm font-semibold">{money(totalMesAnterior)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

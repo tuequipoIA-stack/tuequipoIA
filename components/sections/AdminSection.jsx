@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MessageSquare, Shield } from "lucide-react";
+import { BarChart3, MessageSquare, Shield } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { money, estadoSuscripcion, tiempoSuscripto } from "@/lib/helpers";
 import AdminUserDetail from "@/components/admin/AdminUserDetail";
 import PrecioMembresiaCard from "@/components/admin/PrecioMembresiaCard";
+import MetricasAdmin from "@/components/admin/MetricasAdmin";
 
 function SugerenciasTab() {
   const [sugerencias, setSugerencias] = useState(null);
@@ -84,6 +85,10 @@ export default function AdminSection() {
           style={tab === "usuarios" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
           Usuarios
         </button>
+        <button onClick={() => setTab("metricas")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium"
+          style={tab === "metricas" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          <BarChart3 size={12} /> Métricas
+        </button>
         <button onClick={() => setTab("sugerencias")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium"
           style={tab === "sugerencias" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
           <MessageSquare size={12} /> Sugerencias
@@ -92,6 +97,8 @@ export default function AdminSection() {
 
       {tab === "sugerencias" ? (
         <SugerenciasTab />
+      ) : tab === "metricas" ? (
+        <MetricasAdmin />
       ) : (
         <>
           {error && <p style={{ color: "#b3453f" }} className="text-sm mb-4">{error}</p>}
