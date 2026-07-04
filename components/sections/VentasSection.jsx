@@ -230,7 +230,16 @@ export default function VentasSection({ business }) {
               const abierto = !!mesesAbiertos[clave];
               const totalUnidadesMes = items.reduce((s, v) => s + Number(v.cantidad || 1), 0);
               const totalMesAnterior = items.reduce((s, v) => s + subtotalFila(v), 0);
-              const lineas = agruparPorProducto(items);
+
+              // Dentro del mes, agrupado por día (más reciente primero) y,
+              // dentro de cada día, por producto.
+              const porDiaDelMes = {};
+              items.forEach((v) => {
+                if (!porDiaDelMes[v.fecha]) porDiaDelMes[v.fecha] = [];
+                porDiaDelMes[v.fecha].push(v);
+              });
+              const diasDelMes = Object.keys(porDiaDelMes).sort((a, b) => (a < b ? 1 : -1));
+
               return (
                 <div key={clave} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
                   <button onClick={() => toggleMes(clave)}
@@ -245,20 +254,35 @@ export default function VentasSection({ business }) {
                     </div>
                   </button>
                   {abierto && (
-                    <div>
-                      <div className="grid grid-cols-3 gap-2 px-4 py-2" style={{ background: "#faf8f4" }}>
-                        <span style={{ color: "#a89f88" }} className="text-[10px] uppercase font-semibold">Producto</span>
-                        <span style={{ color: "#a89f88" }} className="text-[10px] uppercase font-semibold text-right">Cantidad</span>
-                        <span style={{ color: "#a89f88" }} className="text-[10px] uppercase font-semibold text-right">Valor total</span>
-                      </div>
-                      {lineas.map((l) => (
-                        <div key={l.producto} className="grid grid-cols-3 gap-2 px-4 py-2" style={{ borderTop: "1px solid #f0ece2" }}>
-                          <span style={{ color: BRAND.navy }} className="text-sm truncate">{l.producto}</span>
-                          <span style={{ color: "#4a4740" }} className="text-sm text-right">{l.cantidad}</span>
-                          <span style={{ color: "#4a4740" }} className="text-sm text-right">{money(l.total)}</span>
-                        </div>
-                      ))}
-                      <div className="flex items-center justify-between px-4 py-2.5" style={{ background: BRAND.navy }}>
+                    <div className="p-3 space-y-3" style={{ background: "#faf8f4" }}>
+                      {diasDelMes.map((fecha) => {
+                        const itemsDia = porDiaDelMes[fecha];
+                        const lineasDia = agruparPorProducto(itemsDia);
+                        const totalUnidadesDia = itemsDia.reduce((s, v) => s + Number(v.cantidad || 1), 0);
+                        const totalDia = itemsDia.reduce((s, v) => s + subtotalFila(v), 0);
+                        return (
+                          <div key={fecha} className="rounded-lg overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                            <div className="px-3 py-2 flex items-center justify-between" style={{ background: "#f0ece2" }}>
+                              <span style={{ color: BRAND.navy }} className="text-xs font-semibold capitalize">{fechaLabel(fecha)}</span>
+                              <span style={{ color: "#6b6759" }} className="text-xs">{fecha}</span>
+                            </div>
+                            {lineasDia.map((l) => (
+                              <div key={l.producto} className="flex items-center justify-between px-3 py-1.5" style={{ borderTop: "1px solid #f0ece2" }}>
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span style={{ color: BRAND.navy }} className="text-xs truncate">{l.producto}</span>
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0" style={{ background: "#f0ece2", color: "#6b6759" }}>×{l.cantidad}</span>
+                                </div>
+                                <span style={{ color: "#4a4740" }} className="text-xs shrink-0">{money(l.total)}</span>
+                              </div>
+                            ))}
+                            <div className="flex items-center justify-between px-3 py-1.5" style={{ borderTop: "1px solid #f0ece2" }}>
+                              <span style={{ color: "#8a8578" }} className="text-[11px]">{totalUnidadesDia} {totalUnidadesDia === 1 ? "unidad" : "unidades"}</span>
+                              <span style={{ color: BRAND.navy }} className="text-xs font-semibold">{money(totalDia)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="flex items-center justify-between rounded-lg px-3 py-2.5" style={{ background: BRAND.navy }}>
                         <span style={{ color: "#8b8b9a" }} className="text-xs">Total del mes ({totalUnidadesMes} {totalUnidadesMes === 1 ? "unidad" : "unidades"})</span>
                         <span style={{ color: BRAND.teal }} className="text-sm font-semibold">{money(totalMesAnterior)}</span>
                       </div>
