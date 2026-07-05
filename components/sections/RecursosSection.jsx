@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Clock, ExternalLink, FileText, Lightbulb, Link2, Loader2, Music, Plus, Trash2, Upload, Video, X } from "lucide-react";
+import { BookOpen, Clock, ExternalLink, FileText, Image as ImageIcon, Lightbulb, Link2, Loader2, Music, Plus, Trash2, Upload, Video, X } from "lucide-react";
 import { BRAND, RECURSO_CATEGORIAS } from "@/lib/constants";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
@@ -49,9 +49,11 @@ export default function RecursosSection({ isAdmin }) {
   const [form, setForm] = useState(FORM_VACIO);
   const [links, setLinks] = useState([""]);
   const [archivos, setArchivos] = useState([]);
+  const [imagen, setImagen] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
+  const imagenInputRef = useRef(null);
 
   const actualizarLink = (i, valor) => setLinks((prev) => prev.map((l, idx) => (idx === i ? valor : l)));
   const agregarLinkVacio = () => setLinks((prev) => [...prev, ""]);
@@ -109,12 +111,24 @@ export default function RecursosSection({ isAdmin }) {
         }
       }
 
+      let imagenUrl = null;
+      if (imagen) {
+        const path = `imagenes/${uid()}-${imagen.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("recursos-archivos")
+          .upload(path, imagen, { contentType: imagen.type });
+        if (uploadError) throw uploadError;
+        const { data: pub } = supabase.storage.from("recursos-archivos").getPublicUrl(path);
+        imagenUrl = pub.publicUrl;
+      }
+
       const { error: insertError } = await supabase.from("recursos").insert({
         categoria: form.categoria,
         titulo: form.titulo.trim(),
         descripcion: form.descripcion.trim() || null,
         tipo: form.tipo,
         adjuntos,
+        imagen_url: imagenUrl,
         fecha_semana: form.tipo === "hack" ? form.fechaSemana : null,
         publicar_en: form.publicarEn ? new Date(form.publicarEn).toISOString() : new Date().toISOString(),
       });
@@ -123,7 +137,9 @@ export default function RecursosSection({ isAdmin }) {
       setForm(FORM_VACIO);
       setLinks([""]);
       setArchivos([]);
+      setImagen(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (imagenInputRef.current) imagenInputRef.current.value = "";
       setShowForm(false);
       cargar();
     } catch (e) {
@@ -249,6 +265,26 @@ export default function RecursosSection({ isAdmin }) {
             rows={form.tipo === "nota" || form.tipo === "hack" ? 5 : 3}
             className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" style={{ border: "1px solid #e4dfd3" }} />
 
+          <div className="mb-3">
+            <span style={{ color: "#8a8578" }} className="text-xs flex items-center gap-1 mb-1">
+              <ImageIcon size={11} /> Imagen (opcional, se ve en la tarjeta)
+            </span>
+            <input ref={imagenInputRef} type="file" accept="image/*"
+              onChange={(e) => setImagen(e.target.files?.[0] || null)}
+              style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} tabIndex={-1} />
+            <button type="button" onClick={() => imagenInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer"
+              style={{ background: "#eee9dd", color: BRAND.navy }}>
+              <Upload size={13} /> {imagen ? imagen.name : "Elegir imagen"}
+            </button>
+            {imagen && (
+              <button onClick={() => { setImagen(null); if (imagenInputRef.current) imagenInputRef.current.value = ""; }}
+                className="ml-2 text-xs font-medium" style={{ color: "#b3453f" }}>
+                Quitar
+              </button>
+            )}
+          </div>
+
           <button onClick={agregar} disabled={subiendo}
             className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50"
             style={{ background: BRAND.navy, color: BRAND.cream }}>
@@ -305,6 +341,10 @@ export default function RecursosSection({ isAdmin }) {
                     </div>
                   )}
                   <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{r.titulo}</div>
+
+                  {r.imagen_url && (
+                    <img src={r.imagen_url} alt={r.titulo} className="w-full rounded-lg mb-2 object-cover" style={{ maxHeight: "220px" }} />
+                  )}
 
                   {adjuntos.length > 0 && (
                     <div className="mb-1 space-y-2">
@@ -380,6 +420,9 @@ export default function RecursosSection({ isAdmin }) {
                         </div>
                       )}
                       <div style={{ color: BRAND.navy }} className="font-medium text-sm mb-1">{h.titulo}</div>
+                      {h.imagen_url && (
+                        <img src={h.imagen_url} alt={h.titulo} className="w-full rounded-lg mb-2 object-cover" style={{ maxHeight: "220px" }} />
+                      )}
                       {h.descripcion && (
                         <p style={{ color: "#2c5f5e" }} className="text-sm leading-relaxed whitespace-pre-wrap">{h.descripcion}</p>
                       )}
