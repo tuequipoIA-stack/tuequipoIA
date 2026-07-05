@@ -190,14 +190,20 @@ export default function RecursosSection({ isAdmin }) {
       {isAdmin && showForm && (
         <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
           <div className="grid grid-cols-2 gap-2 mb-2">
-            <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
-              {RECURSO_CATEGORIAS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-            </select>
-            <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
-              {TIPOS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-            </select>
+            <div>
+              <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Categoría</span>
+              <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
+                {RECURSO_CATEGORIAS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Tipo de recurso</span>
+              <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
+                {TIPOS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+              </select>
+            </div>
           </div>
 
           <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título"
