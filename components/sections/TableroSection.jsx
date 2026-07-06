@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2, X, Target, Check } from "lucide-react";
-import { BRAND, COLUMNAS_BASE, MAX_COLUMNAS_EXTRA } from "@/lib/constants";
+import { BRAND, COLUMNAS_BASE, MAX_COLUMNAS_EXTRA, MESES } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, migrarColumna } from "@/lib/helpers";
 
@@ -37,6 +37,7 @@ export default function TableroSection() {
   const [objetivos, setObjetivos] = useState([]);
   const [objetivoAbiertoId, setObjetivoAbiertoId] = useState(null);
   const [nuevoObjetivoTitulo, setNuevoObjetivoTitulo] = useState("");
+  const [nuevoObjetivoMes, setNuevoObjetivoMes] = useState("");
   const [mostrarFormObjetivo, setMostrarFormObjetivo] = useState(false);
   const [nuevaTareaObjTexto, setNuevaTareaObjTexto] = useState("");
   const [nuevaTareaObjFecha, setNuevaTareaObjFecha] = useState("");
@@ -100,11 +101,12 @@ export default function TableroSection() {
   // --- Grandes objetivos: acciones ---
   const agregarObjetivo = async () => {
     if (!nuevoObjetivoTitulo.trim()) return;
-    const o = { id: uid(), titulo: nuevoObjetivoTitulo.trim(), tareas: [] };
+    const o = { id: uid(), titulo: nuevoObjetivoTitulo.trim(), mes: nuevoObjetivoMes || null, tareas: [] };
     const actualizado = [...objetivos, o];
     setObjetivos(actualizado);
     await saveData("grandes-objetivos", actualizado);
     setNuevoObjetivoTitulo("");
+    setNuevoObjetivoMes("");
     setMostrarFormObjetivo(false);
     setObjetivoAbiertoId(o.id);
   };
@@ -114,6 +116,12 @@ export default function TableroSection() {
     setObjetivos(actualizado);
     await saveData("grandes-objetivos", actualizado);
     if (objetivoAbiertoId === id) setObjetivoAbiertoId(null);
+  };
+
+  const actualizarMesObjetivo = async (id, mes) => {
+    const actualizado = objetivos.map((o) => (o.id === id ? { ...o, mes: mes || null } : o));
+    setObjetivos(actualizado);
+    await saveData("grandes-objetivos", actualizado);
   };
 
   const agregarTareaObjetivo = async (objetivoId) => {
@@ -252,28 +260,43 @@ export default function TableroSection() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {objetivos.map((o) => (
-              <button key={o.id} onClick={() => setObjetivoAbiertoId(o.id)}
-                className="text-left rounded-xl p-4 relative hover:opacity-90"
+              <div key={o.id} role="button" tabIndex={0} onClick={() => setObjetivoAbiertoId(o.id)}
+                onKeyDown={(e) => e.key === "Enter" && setObjetivoAbiertoId(o.id)}
+                className="text-left rounded-xl p-4 relative hover:opacity-90 cursor-pointer"
                 style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
                 <button onClick={(e) => { e.stopPropagation(); eliminarObjetivo(o.id); }}
                   className="absolute top-2 right-2" style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
+
+                <select value={o.mes || ""} onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => actualizarMesObjetivo(o.id, e.target.value)}
+                  className="text-[10px] px-1.5 py-1 rounded-md font-semibold outline-none mb-2 inline-block"
+                  style={{ background: "#eef7f6", color: BRAND.teal, border: "none" }}>
+                  <option value="">Sin mes</option>
+                  {MESES.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+
                 <div className="flex items-center gap-2 mb-1">
                   <Target size={15} color={BRAND.teal} />
                   <span style={{ color: BRAND.navy }} className="text-sm font-semibold pr-4">{o.titulo}</span>
                 </div>
                 <span style={{ color: "#a89f88" }} className="text-xs">{o.tareas.length} {o.tareas.length === 1 ? "tarea" : "tareas"}</span>
-              </button>
+              </div>
             ))}
 
             {mostrarFormObjetivo ? (
               <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+                <select value={nuevoObjetivoMes} onChange={(e) => setNuevoObjetivoMes(e.target.value)}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-2" style={{ border: "1px solid #e4dfd3", color: "#6b6759" }}>
+                  <option value="">Sin mes</option>
+                  {MESES.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
                 <input value={nuevoObjetivoTitulo} onChange={(e) => setNuevoObjetivoTitulo(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && agregarObjetivo()} placeholder="Título del objetivo"
                   autoFocus className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-2" style={{ border: "1px solid #e4dfd3" }} />
                 <div className="flex gap-2">
                   <button onClick={agregarObjetivo} className="rounded-lg px-3 py-1.5 text-xs font-semibold"
                     style={{ background: BRAND.teal, color: BRAND.navy }}>Crear</button>
-                  <button onClick={() => { setMostrarFormObjetivo(false); setNuevoObjetivoTitulo(""); }} className="rounded-lg px-3 py-1.5 text-xs font-medium"
+                  <button onClick={() => { setMostrarFormObjetivo(false); setNuevoObjetivoTitulo(""); setNuevoObjetivoMes(""); }} className="rounded-lg px-3 py-1.5 text-xs font-medium"
                     style={{ color: "#6b6759" }}>Cancelar</button>
                 </div>
               </div>
@@ -300,9 +323,17 @@ export default function TableroSection() {
             className="w-full max-w-lg rounded-2xl p-5 max-h-[85vh] overflow-y-auto"
             style={{ background: BRAND.cream }}>
             <div className="flex items-start justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <Target size={17} color={BRAND.teal} />
-                <h3 style={{ color: BRAND.navy }} className="text-lg font-semibold">{objetivoAbierto.titulo}</h3>
+              <div>
+                <select value={objetivoAbierto.mes || ""} onChange={(e) => actualizarMesObjetivo(objetivoAbierto.id, e.target.value)}
+                  className="text-[10px] px-1.5 py-1 rounded-md font-semibold outline-none mb-1.5 inline-block"
+                  style={{ background: "#eef7f6", color: BRAND.teal, border: "none" }}>
+                  <option value="">Sin mes</option>
+                  {MESES.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+                <div className="flex items-center gap-2">
+                  <Target size={17} color={BRAND.teal} />
+                  <h3 style={{ color: BRAND.navy }} className="text-lg font-semibold">{objetivoAbierto.titulo}</h3>
+                </div>
               </div>
               <button onClick={() => setObjetivoAbiertoId(null)} style={{ color: "#8a8578" }}><X size={18} /></button>
             </div>

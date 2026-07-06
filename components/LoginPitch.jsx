@@ -1,16 +1,22 @@
-import { Calendar, Compass, Megaphone, Palette, TrendingUp } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import LogoMark from "@/components/LogoMark";
+import AppDemo from "@/components/AppDemo";
 
-const INCLUYE = [
-  { icon: Compass, titulo: "Arrancá", texto: "De la idea al primer paso concreto." },
-  { icon: Palette, titulo: "Tu identidad", texto: "Colores, logo, voz de marca." },
-  { icon: Megaphone, titulo: "Qué comunicar", texto: "Qué subir, qué decir, cómo mostrarte." },
-  { icon: Calendar, titulo: "Tu calendario", texto: "Contenido planificado semana a semana." },
-  { icon: TrendingUp, titulo: "Más ventas", texto: "Estrategias prácticas para crecer." },
-];
+const INSTAGRAM_URL = "https://www.instagram.com/tu_equipo.ia/";
 
-// Presentación de marca para el login: quiénes somos y qué incluye la suscripción.
+// lucide-react no incluye íconos de marcas (Instagram) por lineamientos de
+// licencia de los logos — se dibuja acá como SVG simple.
+function InstagramIcon({ size = 14, color = "currentColor" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+// Presentación de marca para el login: quiénes somos + demo animada de la app.
 export default function LoginPitch() {
   return (
     <div className="max-w-md">
@@ -24,23 +30,21 @@ export default function LoginPitch() {
       <p style={{ color: BRAND.cream }} className="text-lg font-medium leading-snug mb-3">
         Suscripción mensual para emprendedores que recién arrancan.
       </p>
-      <p style={{ color: "#a8a8bc" }} className="text-sm leading-relaxed mb-8">
+      <p style={{ color: "#a8a8bc" }} className="text-sm leading-relaxed mb-6">
         Cada semana recibís herramientas, información actualizada y guía práctica para construir tu identidad, comunicarte
         mejor y hacer crecer tu negocio — sin marearte, sin gastar en 50 cursos, sin necesitar un equipo propio.
       </p>
 
-      <div className="space-y-4">
-        {INCLUYE.map((item) => (
-          <div key={item.titulo} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "#242440" }}>
-              <item.icon size={15} color={BRAND.teal} />
-            </div>
-            <div>
-              <div style={{ color: BRAND.cream }} className="text-sm font-semibold">{item.titulo}</div>
-              <div style={{ color: "#8b8b9a" }} className="text-xs">{item.texto}</div>
-            </div>
-          </div>
-        ))}
+      <AppDemo />
+
+      <div className="mt-7 pt-6" style={{ borderTop: "1px solid #242440" }}>
+        <p style={{ color: BRAND.cream }} className="text-sm font-medium mb-1">
+          ¿Le das el primer paso a tu negocio? Suscribite y empezá esta semana.
+        </p>
+        <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mt-2 text-xs font-medium hover:opacity-80" style={{ color: BRAND.teal }}>
+          <InstagramIcon size={14} /> Seguinos en Instagram @tu_equipo.ia
+        </a>
       </div>
     </div>
   );
