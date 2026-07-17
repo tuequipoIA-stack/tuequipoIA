@@ -119,7 +119,7 @@ export default function VentasSection({ business }) {
       <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Ventas diarias</h2>
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">Cargá cada producto vendido, día por día.</p>
 
-      <div className={`grid ${usaCatalogo && ventasConCosto.length > 0 ? "grid-cols-2" : "grid-cols-1"} gap-3 mb-5`}>
+      <div className={`grid ${usaCatalogo && ventasConCosto.length > 0 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"} gap-3 mb-5`}>
         <div className="rounded-xl p-4" style={{ background: BRAND.navy }}>
           <span style={{ color: "#8b8b9a" }} className="text-xs">Total vendido este mes</span>
           <div style={{ color: BRAND.teal }} className="text-2xl font-semibold">{money(totalMes)}</div>

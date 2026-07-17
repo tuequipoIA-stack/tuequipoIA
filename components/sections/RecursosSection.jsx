@@ -189,7 +189,7 @@ export default function RecursosSection({ isAdmin }) {
 
       {isAdmin && showForm && (
         <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-          <div className="grid grid-cols-2 gap-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
               <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Categoría</span>
               <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
