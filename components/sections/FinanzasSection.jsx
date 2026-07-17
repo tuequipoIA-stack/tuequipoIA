@@ -109,7 +109,7 @@ export default function FinanzasSection({ business }) {
         <CostosSection business={business} />
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
             <div className="rounded-xl p-3" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
               <span style={{ color: "#8a8578" }} className="text-xs">Ventas</span>
               <div style={{ color: BRAND.navy }} className="text-lg font-semibold">{money(ventasMes)}</div>
@@ -124,7 +124,7 @@ export default function FinanzasSection({ business }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
             <div className="rounded-xl p-3" style={{ background: "#faf8f4", border: "1px solid #f0ece2" }}>
               <span style={{ color: "#8a8578" }} className="text-xs">Gastos fijos del mes</span>
               <div style={{ color: "#6b6759" }} className="text-base font-semibold">{money(gastosFijosMes)}</div>
