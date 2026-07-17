@@ -18,8 +18,8 @@ function NavButton({ active, collapsed, onClick, icon: Icon, label }) {
       onClick={onClick}
       title={collapsed ? label : undefined}
       className={`group flex items-center rounded-xl text-sm font-semibold text-left transition-all duration-150 ease-out
-        active:translate-y-[2px] active:shadow-none
-        ${collapsed ? "justify-center px-0 py-3" : "gap-3 px-3.5 py-3"}`}
+      active:translate-y-[2px] active:shadow-none
+      ${collapsed ? "justify-center px-0 py-3" : "gap-3 px-3.5 py-3"}`}
       style={
         active
           ? { background: BRAND.teal, color: BRAND.navy, boxShadow: "0 2px 0 0 #12807f, 0 4px 10px -2px rgba(0,0,0,0.35)" }
@@ -32,15 +32,26 @@ function NavButton({ active, collapsed, onClick, icon: Icon, label }) {
   );
 }
 
-export default function Sidebar({ active, onChange, isAdmin }) {
+export default function Sidebar({ active, onChange, isAdmin, mobileOpen = false, onCloseMobile }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [hidratado, setHidratado] = useState(false);
+  // En mobile el drawer siempre se muestra expandido (con etiquetas legibles),
+  // sin importar la preferencia de "colapsado" que es un concepto solo de escritorio.
+  const [isDesktop, setIsDesktop] = useState(true);
 
   useEffect(() => {
     const guardado = typeof window !== "undefined" && window.localStorage.getItem(COLLAPSE_KEY);
     if (guardado === "1") setCollapsed(true);
     setHidratado(true);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const actualizar = () => setIsDesktop(mq.matches);
+    actualizar();
+    mq.addEventListener("change", actualizar);
+    return () => mq.removeEventListener("change", actualizar);
   }, []);
 
   const toggleCollapsed = () => {
@@ -58,63 +69,80 @@ export default function Sidebar({ active, onChange, isAdmin }) {
     router.refresh();
   };
 
-  const ancho = collapsed ? ANCHO_COLAPSADO : ANCHO_EXPANDIDO;
+  const seleccionar = (id) => {
+    onChange(id);
+    onCloseMobile?.();
+  };
+
+  const ancho = !isDesktop ? ANCHO_EXPANDIDO : collapsed ? ANCHO_COLAPSADO : ANCHO_EXPANDIDO;
 
   return (
-    <div
-      style={{
-        background: BRAND.navy,
-        width: ancho,
-        minWidth: ancho,
-        transition: hidratado ? "width 180ms ease-out, min-width 180ms ease-out" : "none",
-      }}
-      className="h-full flex flex-col p-3 relative"
-    >
-      {/* Botón de colapsar */}
-      <button
-        onClick={toggleCollapsed}
-        title={collapsed ? "Expandir menú" : "Contraer menú"}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full flex items-center justify-center z-10 transition-transform active:translate-y-[1px]"
-        style={{ background: BRAND.teal, color: BRAND.navy, boxShadow: "0 2px 6px rgba(0,0,0,0.35)" }}
+    <>
+      {/* Fondo oscuro detrás del drawer, solo en mobile y solo si está abierto */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          style={{ background: "rgba(0,0,0,0.45)" }}
+          onClick={onCloseMobile}
+        />
+      )}
+      <div
+        style={{
+          background: BRAND.navy,
+          width: ancho,
+          minWidth: ancho,
+          transition: hidratado ? "width 180ms ease-out, min-width 180ms ease-out" : "none",
+        }}
+        className={`h-full flex flex-col p-3 fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-out
+        md:static md:translate-x-0 md:z-auto
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
-      </button>
+        {/* Botón de colapsar (solo escritorio: en mobile el drawer siempre va expandido) */}
+        <button
+          onClick={toggleCollapsed}
+          title={collapsed ? "Expandir menú" : "Contraer menú"}
+          className="hidden md:flex absolute -right-3 top-6 w-6 h-6 rounded-full items-center justify-center z-10 transition-transform active:translate-y-[1px]"
+          style={{ background: BRAND.teal, color: BRAND.navy, boxShadow: "0 2px 6px rgba(0,0,0,0.35)" }}
+        >
+          {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
+        </button>
 
-      {/* Marca */}
-      <div className={`flex items-center mb-1 px-1 ${collapsed ? "justify-center" : "gap-2"}`}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: BRAND.teal }}>
-          <LogoMark size={19} color="#ffffff" />
-        </div>
-        {!collapsed && (
-          <span style={{ color: BRAND.cream }} className="text-xs tracking-widest uppercase font-semibold truncate">
-            Tu Equipo IA
-          </span>
-        )}
-      </div>
-
-      <UnidadSwitcher collapsed={collapsed} />
-
-      <div className="flex flex-col gap-1.5 mt-1 flex-1 overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
-          <NavButton key={item.id} active={active === item.id} collapsed={collapsed}
-            onClick={() => onChange(item.id)} icon={item.icon} label={item.label} />
-        ))}
-        {isAdmin && (
-          <div className={collapsed ? "mt-1" : "mt-2 pt-2"} style={!collapsed ? { borderTop: "1px solid #2a2a45" } : undefined}>
-            <NavButton active={active === "admin"} collapsed={collapsed}
-              onClick={() => onChange("admin")} icon={Shield} label="Admin" />
+        {/* Marca */}
+        <div className={`flex items-center mb-1 px-1 ${collapsed ? "justify-center" : "gap-2"}`}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: BRAND.teal }}>
+            <LogoMark size={19} color="#ffffff" />
           </div>
-        )}
-      </div>
+          {!collapsed && (
+            <span style={{ color: BRAND.cream }} className="text-xs tracking-widest uppercase font-semibold truncate">
+              Tu Equipo IA
+            </span>
+          )}
+        </div>
 
-      <button onClick={cerrarSesion}
-        title={collapsed ? "Cerrar sesión" : undefined}
-        className={`flex items-center rounded-xl text-sm font-medium text-left transition-all duration-150 active:translate-y-[2px]
-          ${collapsed ? "justify-center px-0 py-2.5" : "gap-2.5 px-3.5 py-2.5"}`}
-        style={{ background: "transparent", color: "#6f6f82" }}>
-        <LogOut size={16} className="shrink-0" />
-        {!collapsed && "Cerrar sesión"}
-      </button>
-    </div>
+        <UnidadSwitcher collapsed={collapsed && isDesktop} />
+
+        <div className="flex flex-col gap-1.5 mt-1 flex-1 overflow-y-auto">
+          {NAV_ITEMS.map((item) => (
+            <NavButton key={item.id} active={active === item.id} collapsed={collapsed && isDesktop}
+              onClick={() => seleccionar(item.id)} icon={item.icon} label={item.label} />
+          ))}
+          {isAdmin && (
+            <div className={collapsed && isDesktop ? "mt-1" : "mt-2 pt-2"} style={!(collapsed && isDesktop) ? { borderTop: "1px solid #2a2a45" } : undefined}>
+              <NavButton active={active === "admin"} collapsed={collapsed && isDesktop}
+                onClick={() => seleccionar("admin")} icon={Shield} label="Admin" />
+            </div>
+          )}
+        </div>
+
+        <button onClick={cerrarSesion}
+          title={collapsed && isDesktop ? "Cerrar sesión" : undefined}
+          className={`flex items-center rounded-xl text-sm font-medium text-left transition-all duration-150 active:translate-y-[2px]
+          ${collapsed && isDesktop ? "justify-center px-0 py-2.5" : "gap-2.5 px-3.5 py-2.5"}`}
+          style={{ background: "transparent", color: "#6f6f82" }}>
+          <LogOut size={16} className="shrink-0" />
+          {!(collapsed && isDesktop) && "Cerrar sesión"}
+        </button>
+      </div>
+    </>
   );
 }
