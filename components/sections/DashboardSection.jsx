@@ -68,7 +68,7 @@ export default function DashboardSection({ business }) {
       </h2>
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">Todo lo importante de tu negocio, de un vistazo.</p>
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
         <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
           <span style={{ color: "#8a8578" }} className="text-xs">Ventas del mes</span>
           <div style={{ color: BRAND.navy }} className="text-lg font-semibold">{money(ventasMes)}</div>
