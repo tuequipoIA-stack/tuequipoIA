@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Menu } from "lucide-react";
 import { BRAND, EQUIPO_HABILITADO } from "@/lib/constants";
 import LogoMark from "@/components/LogoMark";
 import * as storage from "@/lib/storage";
@@ -40,6 +40,8 @@ function AppShell({ isAdmin, bloqueado }) {
   const { loadData, saveData } = useUnidadStorage();
   const [business, setBusiness] = useState(null);
   const [section, setSection] = useState(isAdmin ? "admin" : "dashboard");
+  // Drawer del menú lateral en pantallas chicas (celular/tablet angosta).
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     if (!unidadId) { setBusiness(null); return; }
@@ -47,6 +49,11 @@ function AppShell({ isAdmin, bloqueado }) {
       setBusiness(b || { nombre: unidadActual?.nombre, rubro: unidadActual?.rubro, tipoNegocio: unidadActual?.tipo_negocio });
     });
   }, [unidadId]);
+
+  // Cerrar el drawer mobile automáticamente si cambia la sección desde otro lado.
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [section]);
 
   const enPerfil = section === "perfil";
   const restringirContenido = bloqueado && !enPerfil;
@@ -73,9 +80,24 @@ function AppShell({ isAdmin, bloqueado }) {
           </button>
         </div>
       )}
+      {/* Barra superior solo en mobile: abre el menú lateral como drawer */}
+      <div className="md:hidden flex items-center gap-3 px-4 py-3 shrink-0" style={{ background: BRAND.navy }}>
+        <button
+          onClick={() => setMobileNavOpen(true)}
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 active:translate-y-[1px]"
+          style={{ background: "#1f1f38" }}
+          aria-label="Abrir menú"
+        >
+          <Menu size={18} color="#ffffff" />
+        </button>
+        <span style={{ color: BRAND.cream }} className="text-xs tracking-widest uppercase font-semibold truncate">
+          Tu Equipo IA
+        </span>
+      </div>
       <div className="flex-1 flex min-h-0">
-        <Sidebar active={section} onChange={setSection} isAdmin={isAdmin} />
-        <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-6 relative">
+        <Sidebar active={section} onChange={setSection} isAdmin={isAdmin}
+          mobileOpen={mobileNavOpen} onCloseMobile={() => setMobileNavOpen(false)} />
+        <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-4 md:p-6 relative">
           <HelpButton />
           <div key={`${section}-${unidadId}`} className="seccion-animada"
             style={restringirContenido ? { filter: "grayscale(1) opacity(0.5)", pointerEvents: "none", userSelect: "none" } : undefined}>
