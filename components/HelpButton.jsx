@@ -51,7 +51,7 @@ export default function HelpButton() {
     <div ref={ref} className="absolute top-0 right-0 z-20">
       <button onClick={() => setAbierto((v) => !v)}
         className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold"
-        style={{ background: "#ffffff", color: BRAND.navy, border: "1px solid #e4dfd3" }}>
+        style={{ background: BRAND.teal, color: "#ffffff", border: "none" }}>
         <HelpCircle size={14} />
         Ayuda
       </button>
