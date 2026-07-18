@@ -7,6 +7,8 @@ import { money, estadoSuscripcion, tiempoSuscripto } from "@/lib/helpers";
 import AdminUserDetail from "@/components/admin/AdminUserDetail";
 import PrecioMembresiaCard from "@/components/admin/PrecioMembresiaCard";
 import MetricasAdmin from "@/components/admin/MetricasAdmin";
+import AudioAyuda from "@/components/AudioAyuda";
+import { AUDIO_GUIONES } from "@/lib/audioGuiones";
 
 function SugerenciasTab() {
   const [sugerencias, setSugerencias] = useState(null);
@@ -77,6 +79,7 @@ export default function AdminSection() {
       <div className="flex items-center gap-2 mb-1">
         <Shield size={18} color={BRAND.navy} />
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Admin</h2>
+        <AudioAyuda texto={AUDIO_GUIONES[`admin:${tab}`]} />
       </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">Todos los suscriptores, para ayudarlos o entender cómo usan la app.</p>
 

@@ -12,6 +12,8 @@ import Link from "next/link";
 import CambiarTarjetaForm from "@/components/perfil/CambiarTarjetaForm";
 import TransferenciaBancaria from "@/components/perfil/TransferenciaBancaria";
 import PasswordInput from "@/components/PasswordInput";
+import AudioAyuda from "@/components/AudioAyuda";
+import { AUDIO_GUIONES } from "@/lib/audioGuiones";
 
 const ESTADO_LABEL = { trial: "Prueba gratis", active: "Activa", past_due: "Pago vencido", canceled: "Cancelada" };
 const ESTADO_COLOR = {
@@ -306,7 +308,10 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
 
   return (
     <div>
-      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Perfil</h2>
+      <div className="flex items-center gap-2 mb-1">
+        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Perfil</h2>
+        <AudioAyuda texto={AUDIO_GUIONES.perfil} />
+      </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-6">Tu cuenta, tu negocio y tu logo.</p>
 
       {/* Cuenta */}

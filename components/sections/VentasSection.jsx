@@ -5,6 +5,8 @@ import { ChevronDown, ChevronUp, Plus, ShoppingCart, Trash2 } from "lucide-react
 import { BRAND } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
+import AudioAyuda from "@/components/AudioAyuda";
+import { AUDIO_GUIONES } from "@/lib/audioGuiones";
 
 const OTRO = "__otro__";
 const MESES_LABEL = [
@@ -116,7 +118,10 @@ export default function VentasSection({ business }) {
 
   return (
     <div>
-      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Ventas diarias</h2>
+      <div className="flex items-center gap-2 mb-1">
+        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Ventas diarias</h2>
+        <AudioAyuda texto={AUDIO_GUIONES.ventas} />
+      </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">Cargá cada producto vendido, día por día.</p>
 
       <div className={`grid ${usaCatalogo && ventasConCosto.length > 0 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"} gap-3 mb-5`}>
