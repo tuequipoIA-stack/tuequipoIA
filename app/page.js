@@ -17,6 +17,7 @@ import EquipoSection from "@/components/sections/EquipoSection";
 import RecursosSection from "@/components/sections/RecursosSection";
 import MarketingSection from "@/components/sections/MarketingSection";
 import VentasSection from "@/components/sections/VentasSection";
+import ClientesSection from "@/components/sections/ClientesSection";
 import FinanzasSection from "@/components/sections/FinanzasSection";
 import EstrategiaSection from "@/components/sections/EstrategiaSection";
 import TableroSection from "@/components/sections/TableroSection";
@@ -105,6 +106,7 @@ function AppShell({ isAdmin, bloqueado }) {
             {section === "recursos" && <RecursosSection isAdmin={isAdmin} />}
             {section === "marketing" && <MarketingSection />}
             {section === "ventas" && <VentasSection business={business} />}
+            {section === "clientes" && <ClientesSection />}
             {section === "finanzas" && <FinanzasSection business={business} />}
             {section === "estrategia" && <EstrategiaSection business={business} />}
             {section === "dashboard" && <DashboardSection business={business} />}
