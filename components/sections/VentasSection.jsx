@@ -7,6 +7,8 @@ import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
 import AudioAyuda from "@/components/AudioAyuda";
 import { AUDIO_GUIONES } from "@/lib/audioGuiones";
+import SearchableSelect from "@/components/SearchableSelect";
+import ClienteModal from "@/components/ClienteModal";
 
 const OTRO = "__otro__";
 const MESES_LABEL = [
@@ -25,7 +27,7 @@ function labelMes(clave) {
 }
 
 const FILTROS_VACIOS = {
-  desde: "", hasta: "", producto: "", mes: "", montoMin: "", montoMax: "",
+  desde: "", hasta: "", producto: "", cliente: "", mes: "", montoMin: "", montoMax: "",
 };
 
 export default function VentasSection({ business }) {
@@ -33,8 +35,10 @@ export default function VentasSection({ business }) {
   const [ventas, setVentas] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [fechaActiva, setFechaActiva] = useState(new Date().toISOString().slice(0, 10));
-  const [fila, setFila] = useState({ productoId: "", productoLibre: "", cantidad: "1", precio: "" });
+  const [fila, setFila] = useState({ productoId: "", productoLibre: "", cantidad: "1", precio: "", clienteId: "" });
   const [catalogo, setCatalogo] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [clienteModalAbierto, setClienteModalAbierto] = useState(false);
   const [mesesAbiertos, setMesesAbiertos] = useState({});
   const [vista, setVista] = useState("carga");
   const [filtros, setFiltros] = useState(FILTROS_VACIOS);
@@ -51,6 +55,7 @@ export default function VentasSection({ business }) {
     } else {
       setCatalogo([]);
     }
+    loadData("clientes-registro", []).then((c) => setClientes(c));
   }, [usaCatalogo, unidadId]);
 
   const productoElegido = catalogo.find((p) => p.id === fila.productoId);
@@ -66,17 +71,29 @@ export default function VentasSection({ business }) {
       cantidad: Number(fila.cantidad) || 1,
       precio: Number(fila.precio),
       ...(productoElegido ? { costoUnitario: Number(productoElegido.costo) || 0 } : {}),
+      ...(fila.clienteId ? { clienteId: fila.clienteId } : {}),
     };
     const actualizado = [nuevo, ...ventas];
     setVentas(actualizado);
     await saveData("ventas-registro", actualizado);
-    setFila({ productoId: "", productoLibre: "", cantidad: "1", precio: "" });
+    setFila({ productoId: "", productoLibre: "", cantidad: "1", precio: "", clienteId: "" });
   };
 
   const eliminar = async (id) => {
     const actualizado = ventas.filter((v) => v.id !== id);
     setVentas(actualizado);
     await saveData("ventas-registro", actualizado);
+  };
+
+  const clienteNombre = (id) => clientes.find((c) => c.id === id)?.nombre;
+
+  const guardarClienteNuevo = async (datos) => {
+    const nuevo = { ...datos, id: uid() };
+    const actualizado = [nuevo, ...clientes];
+    setClientes(actualizado);
+    await saveData("clientes-registro", actualizado);
+    setFila((f) => ({ ...f, clienteId: nuevo.id }));
+    setClienteModalAbierto(false);
   };
 
   const subtotalFila = (v) => Number(v.precio || 0) * Number(v.cantidad || 1);
@@ -136,6 +153,7 @@ export default function VentasSection({ business }) {
       if (filtros.desde && v.fecha < filtros.desde) return false;
       if (filtros.hasta && v.fecha > filtros.hasta) return false;
       if (filtros.producto && v.producto !== filtros.producto) return false;
+      if (filtros.cliente && v.clienteId !== filtros.cliente) return false;
       if (filtros.mes && mesKey(v.fecha) !== filtros.mes) return false;
       const subtotal = subtotalFila(v);
       if (filtros.montoMin && subtotal < Number(filtros.montoMin)) return false;
@@ -201,18 +219,36 @@ export default function VentasSection({ business }) {
               className="rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
             <div className="flex flex-col sm:flex-row gap-2 mb-2">
               {usaCatalogo && catalogo.length > 0 ? (
-                <select value={fila.productoId} onChange={(e) => setFila({ ...fila, productoId: e.target.value })}
-                  className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }}>
-                  <option value="">Elegí un producto...</option>
-                  {catalogo.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                  <option value={OTRO}>Otro (escribir)...</option>
-                </select>
+                <SearchableSelect
+                  options={catalogo}
+                  getId={(p) => p.id}
+                  getLabel={(p) => p.nombre}
+                  value={fila.productoId === OTRO ? "" : fila.productoId}
+                  placeholder="Elegí un producto..."
+                  onSelect={(p) => setFila({ ...fila, productoId: p ? p.id : "" })}
+                  createLabel="Otro (escribir)..."
+                  onCreateNew={() => setFila({ ...fila, productoId: OTRO, productoLibre: "" })}
+                />
               ) : null}
               {mostrarLibre && (
                 <input value={fila.productoLibre} onChange={(e) => setFila({ ...fila, productoLibre: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Producto"
                   className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
               )}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mb-2">
+              <SearchableSelect
+                options={clientes}
+                getId={(c) => c.id}
+                getLabel={(c) => c.nombre}
+                getSub={(c) => c.telefono || c.correo}
+                value={fila.clienteId}
+                placeholder="Cliente (opcional)"
+                onSelect={(c) => setFila({ ...fila, clienteId: c ? c.id : "" })}
+                clearLabel="Sin cliente asignado"
+                createLabel="+ Crear cliente nuevo"
+                onCreateNew={() => setClienteModalAbierto(true)}
+              />
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <input type="number" min="1" value={fila.cantidad} onChange={(e) => setFila({ ...fila, cantidad: e.target.value })}
@@ -258,9 +294,14 @@ export default function VentasSection({ business }) {
                   <div>
                     {items.map((v) => (
                       <div key={v.id} className="flex items-center justify-between px-4 py-2.5" style={{ borderTop: "1px solid #f0ece2" }}>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span style={{ color: BRAND.navy }} className="text-sm">{v.producto}</span>
                           <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#f0ece2", color: "#6b6759" }}>×{v.cantidad || 1}</span>
+                          {v.clienteId && clienteNombre(v.clienteId) && (
+                            <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#eef2fb", color: "#3a4b8f" }}>
+                              {clienteNombre(v.clienteId)}
+                            </span>
+                          )}
                           {v.costoUnitario != null && (
                             <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#eef7f6", color: "#127a79" }}>
                               margen {money((v.precio - v.costoUnitario) * (v.cantidad || 1))}
@@ -372,7 +413,7 @@ export default function VentasSection({ business }) {
               )}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-2">
               <div>
                 <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Desde</span>
                 <input type="date" value={filtros.desde} onChange={(e) => setFiltros({ ...filtros, desde: e.target.value })}
@@ -397,6 +438,14 @@ export default function VentasSection({ business }) {
                   className={inputCls + " w-full"} style={inputStyle}>
                   <option value="">Todos</option>
                   {productosUnicos.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div>
+                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Cliente</span>
+                <select value={filtros.cliente} onChange={(e) => setFiltros({ ...filtros, cliente: e.target.value })}
+                  className={inputCls + " w-full"} style={inputStyle}>
+                  <option value="">Todos</option>
+                  {clientes.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                 </select>
               </div>
             </div>
@@ -465,10 +514,15 @@ export default function VentasSection({ business }) {
             <div className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
               {movimientosFiltrados.map((v) => (
                 <div key={v.id} className="flex items-center justify-between px-4 py-2.5" style={{ borderTop: "1px solid #f0ece2" }}>
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
                     <span style={{ color: "#8a8578" }} className="text-xs shrink-0">{v.fecha}</span>
                     <span style={{ color: BRAND.navy }} className="text-sm truncate">{v.producto}</span>
                     <span className="text-xs px-1.5 py-0.5 rounded shrink-0" style={{ background: "#f0ece2", color: "#6b6759" }}>×{v.cantidad || 1}</span>
+                    {v.clienteId && clienteNombre(v.clienteId) && (
+                      <span className="text-xs px-1.5 py-0.5 rounded shrink-0 hidden sm:inline-block" style={{ background: "#eef2fb", color: "#3a4b8f" }}>
+                        {clienteNombre(v.clienteId)}
+                      </span>
+                    )}
                     {v.costoUnitario != null && (
                       <span className="text-xs px-1.5 py-0.5 rounded shrink-0 hidden sm:inline-block" style={{ background: "#eef7f6", color: "#127a79" }}>
                         margen {money((v.precio - v.costoUnitario) * (v.cantidad || 1))}
@@ -486,6 +540,13 @@ export default function VentasSection({ business }) {
           )}
         </>
       )}
+
+      <ClienteModal
+        open={clienteModalAbierto}
+        initial={null}
+        onClose={() => setClienteModalAbierto(false)}
+        onSave={guardarClienteNuevo}
+      />
     </div>
   );
 }
