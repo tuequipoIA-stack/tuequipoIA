@@ -5,6 +5,8 @@ import { ListChecks, Megaphone, Compass } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { isThisMonth, money } from "@/lib/helpers";
+import AudioAyuda from "@/components/AudioAyuda";
+import { AUDIO_GUIONES } from "@/lib/audioGuiones";
 
 export default function DashboardSection({ business }) {
   const { loadData, unidadId } = useUnidadStorage();
@@ -63,9 +65,12 @@ export default function DashboardSection({ business }) {
 
   return (
     <div>
-      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">
-        {business?.nombre ? `Hola, ${business.nombre}` : "Dashboard"}
-      </h2>
+      <div className="flex items-center gap-2 mb-1">
+        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">
+          {business?.nombre ? `Hola, ${business.nombre}` : "Dashboard"}
+        </h2>
+        <AudioAyuda texto={AUDIO_GUIONES.dashboard} />
+      </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">Todo lo importante de tu negocio, de un vistazo.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
