@@ -6,7 +6,7 @@ import { BRAND } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid } from "@/lib/helpers";
 import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES } from "@/lib/audioGuiones";
+import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 import ClienteModal from "@/components/ClienteModal";
 
 export default function ClientesSection() {
@@ -58,7 +58,7 @@ export default function ClientesSection() {
     <div>
       <div className="flex items-center gap-2 mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Clientes</h2>
-        <AudioAyuda texto={AUDIO_GUIONES.clientes} />
+        <AudioAyuda texto={AUDIO_GUIONES.clientes} audioSrc={AUDIO_ARCHIVOS.clientes} />
       </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">Todos tus clientes, en un solo lugar.</p>
 
