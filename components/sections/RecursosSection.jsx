@@ -6,7 +6,7 @@ import { BRAND, RECURSO_CATEGORIAS } from "@/lib/constants";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
 import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES } from "@/lib/audioGuiones";
+import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
 const EXT_AUDIO = ["mp3", "wav", "m4a", "ogg", "aac"];
 const EXT_VIDEO = ["mp4", "mov", "webm", "avi", "m4v"];
@@ -175,7 +175,7 @@ export default function RecursosSection({ isAdmin }) {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
           <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Recursos</h2>
-          <AudioAyuda texto={AUDIO_GUIONES.recursos} />
+          <AudioAyuda texto={AUDIO_GUIONES.recursos} audioSrc={AUDIO_ARCHIVOS.recursos} />
         </div>
         {isAdmin && (
           <button onClick={() => setShowForm(!showForm)}
