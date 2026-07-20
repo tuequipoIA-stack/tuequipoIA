@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
-import { BRAND } from "@/lib/constants";
+import { BRAND, MONEDAS } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money } from "@/lib/helpers";
+import MoneyInput from "@/components/MoneyInput";
 import InsumosTab from "./InsumosTab";
 
 const RECETA_VACIA = { insumoId: "", cantidad: "1" };
+const inputStyle = { border: "1px solid #e4dfd3" };
+const inputCls = "rounded-lg px-3 py-2 text-sm outline-none";
+
+function simboloMoneda(id) {
+  return MONEDAS.find((m) => m.id === id)?.simbolo || "$";
+}
 
 function ArmadorDeReceta({ insumos, ingredientes, onChange }) {
   const [nuevoIngrediente, setNuevoIngrediente] = useState(RECETA_VACIA);
@@ -77,7 +84,7 @@ function ProductosTab({ business }) {
   const [costos, setCostos] = useState({ productos: [], fijos: [] });
   const [insumos, setInsumos] = useState([]);
   const [loaded, setLoaded] = useState(false);
-  const [nuevoProducto, setNuevoProducto] = useState({ nombre: "", costo: "", cantidad: "1", fecha: new Date().toISOString().slice(0, 10) });
+  const [nuevoProducto, setNuevoProducto] = useState({ nombre: "", costo: "", moneda: "ARS", cantidad: "1", fecha: new Date().toISOString().slice(0, 10) });
   const [nuevosIngredientes, setNuevosIngredientes] = useState([]);
   const [expandido, setExpandido] = useState(null);
 
@@ -100,6 +107,7 @@ function ProductosTab({ business }) {
       id: uid(),
       nombre: nuevoProducto.nombre.trim(),
       costo: costoFinal,
+      moneda: nuevoProducto.moneda || "ARS",
       cantidad: Number(nuevoProducto.cantidad) || 0,
       fecha: nuevoProducto.fecha,
       ingredientes: nuevosIngredientes,
@@ -107,7 +115,7 @@ function ProductosTab({ business }) {
     const actualizado = { ...costos, productos: [item, ...costos.productos] };
     setCostos(actualizado);
     await saveData("finanzas-costos", actualizado);
-    setNuevoProducto({ nombre: "", costo: "", cantidad: "1", fecha: nuevoProducto.fecha });
+    setNuevoProducto({ nombre: "", costo: "", moneda: nuevoProducto.moneda, cantidad: "1", fecha: nuevoProducto.fecha });
     setNuevosIngredientes([]);
   };
 
@@ -148,8 +156,11 @@ function ProductosTab({ business }) {
         <ArmadorDeReceta insumos={insumos} ingredientes={nuevosIngredientes} onChange={setNuevosIngredientes} />
 
         <div className="flex gap-2">
-          <input type="number" value={nuevoProducto.costo}
-            onChange={(e) => setNuevoProducto({ ...nuevoProducto, costo: e.target.value })}
+          <select value={nuevoProducto.moneda} onChange={(e) => setNuevoProducto({ ...nuevoProducto, moneda: e.target.value })}
+            className="rounded-lg px-2 py-2 text-sm outline-none w-24 shrink-0" style={{ border: "1px solid #e4dfd3" }}>
+            {MONEDAS.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
+          </select>
+          <MoneyInput value={nuevoProducto.costo} onChange={(n) => setNuevoProducto({ ...nuevoProducto, costo: n })}
             placeholder={totalReceta ? `Costo (sugerido: ${money(totalReceta)})` : "Costo"}
             className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
           <input type="number" min="0" value={nuevoProducto.cantidad} onChange={(e) => setNuevoProducto({ ...nuevoProducto, cantidad: e.target.value })}
@@ -178,8 +189,8 @@ function ProductosTab({ business }) {
                 <div className="flex-1 min-w-0">
                   <div style={{ color: BRAND.navy }} className="text-sm truncate">{p.nombre}</div>
                   <div className="flex items-center gap-1.5">
-                    <span style={{ color: "#8a8578" }} className="text-xs">Costo:</span>
-                    <input type="number" defaultValue={p.costo} onBlur={(e) => editarCosto(p.id, e.target.value)}
+                    <span style={{ color: "#8a8578" }} className="text-xs">Costo ({p.moneda || "ARS"}):</span>
+                    <MoneyInput value={p.costo} onChange={(n) => editarCosto(p.id, n)}
                       className="text-xs rounded px-1.5 py-0.5 w-20 outline-none" style={{ border: "1px solid #e4dfd3", color: BRAND.navy }} />
                     <span style={{ color: "#a89f88" }} className="text-xs">· {p.fecha || "sin fecha"}</span>
                   </div>
@@ -263,7 +274,7 @@ function FijosTab() {
           onKeyDown={(e) => e.key === "Enter" && agregarFijo()} placeholder="Ej: Alquiler, Luz, Internet"
           className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
         <div className="flex gap-2">
-          <input type="number" value={nuevoFijo.monto} onChange={(e) => setNuevoFijo({ ...nuevoFijo, monto: e.target.value })}
+          <MoneyInput value={nuevoFijo.monto} onChange={(n) => setNuevoFijo({ ...nuevoFijo, monto: n })}
             onKeyDown={(e) => e.key === "Enter" && agregarFijo()} placeholder="Monto mensual"
             className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
           <input type="date" value={nuevoFijo.fecha} onChange={(e) => setNuevoFijo({ ...nuevoFijo, fecha: e.target.value })}

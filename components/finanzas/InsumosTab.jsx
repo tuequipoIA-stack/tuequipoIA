@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { BRAND, UNIDADES_INSUMO } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money } from "@/lib/helpers";
+import MoneyInput from "@/components/MoneyInput";
 
 // Catálogo de insumos/materias primas reutilizables entre recetas de
 // productos (ej: "Harina" a $500/kg). Si sube el precio de un insumo, se
@@ -58,7 +59,7 @@ export default function InsumosTab() {
             className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }}>
             {UNIDADES_INSUMO.map((u) => <option key={u} value={u}>{u}</option>)}
           </select>
-          <input type="number" value={form.costoUnitario} onChange={(e) => setForm({ ...form, costoUnitario: e.target.value })}
+          <MoneyInput value={form.costoUnitario} onChange={(n) => setForm({ ...form, costoUnitario: n })}
             onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Costo por unidad"
             className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
           <button onClick={agregar} className="rounded-lg px-3 py-2 text-sm font-semibold flex items-center gap-1 shrink-0"
