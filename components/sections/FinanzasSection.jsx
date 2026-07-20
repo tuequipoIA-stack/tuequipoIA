@@ -7,7 +7,7 @@ import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
 import CostosSection from "@/components/finanzas/CostosSection";
 import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES } from "@/lib/audioGuiones";
+import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
 const MESES_LABEL = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -95,7 +95,7 @@ export default function FinanzasSection({ business }) {
     <div>
       <div className="flex items-center gap-2 mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Finanzas</h2>
-        <AudioAyuda texto={AUDIO_GUIONES[`finanzas:${vista}`]} />
+        <AudioAyuda texto={AUDIO_GUIONES[`finanzas:${vista}`]} audioSrc={AUDIO_ARCHIVOS.finanzas} />
       </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">Ventas, gastos, costos y ganancia, todo junto.</p>
 
