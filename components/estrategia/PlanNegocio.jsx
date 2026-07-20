@@ -7,6 +7,7 @@ import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money, calcularPlanNumeros } from "@/lib/helpers";
 import { planSystemPrompt } from "@/lib/businessContext";
 import { askClaude } from "@/lib/chat";
+import MoneyInput from "@/components/MoneyInput";
 
 const OBJETIVOS_VACIO = { tresMeses: "", seisMeses: "", unAnio: "", tresAnios: "", cincoAnios: "" };
 const HORIZONTES_REFERENCIA = [
@@ -184,7 +185,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Costo por unidad</span>
-            <input type="number" value={form.costoUnitario} onChange={(e) => guardarForm({ ...form, costoUnitario: e.target.value })}
+            <MoneyInput value={form.costoUnitario} onChange={(n) => guardarForm({ ...form, costoUnitario: n })}
               placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
           </div>
           <div>
@@ -197,7 +198,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Sueldo mensual que querés sacar</span>
-            <input type="number" value={form.sueldoObjetivo} onChange={(e) => guardarForm({ ...form, sueldoObjetivo: e.target.value })}
+            <MoneyInput value={form.sueldoObjetivo} onChange={(n) => guardarForm({ ...form, sueldoObjetivo: n })}
               placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
           </div>
           <div>
