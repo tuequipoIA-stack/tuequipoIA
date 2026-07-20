@@ -23,6 +23,7 @@ import EstrategiaSection from "@/components/sections/EstrategiaSection";
 import TableroSection from "@/components/sections/TableroSection";
 import PerfilSection from "@/components/sections/PerfilSection";
 import AdminSection from "@/components/sections/AdminSection";
+import PanelSection from "@/components/sections/panel/PanelSection";
 
 function PantallaCarga() {
   return (
@@ -113,6 +114,7 @@ function AppShell({ isAdmin, bloqueado }) {
             {section === "tablero" && <TableroSection />}
             {section === "perfil" && <PerfilSection business={business} onBusinessUpdate={setBusiness} />}
             {section === "admin" && isAdmin && <AdminSection />}
+            {section.startsWith("panel-") && isAdmin && <PanelSection vista={section} />}
           </div>
         </div>
       </div>
