@@ -6,7 +6,7 @@ import PlanNegocio from "@/components/estrategia/PlanNegocio";
 import DefinirOfertaTab from "@/components/estrategia/DefinirOfertaTab";
 import TuGuiaTab from "@/components/estrategia/TuGuiaTab";
 import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES } from "@/lib/audioGuiones";
+import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
 export default function EstrategiaSection({ business }) {
   const [vista, setVista] = useState("guia");
@@ -15,7 +15,7 @@ export default function EstrategiaSection({ business }) {
     <div>
       <div className="flex items-center gap-2 mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Estrategia</h2>
-        <AudioAyuda texto={AUDIO_GUIONES[`estrategia:${vista}`]} />
+        <AudioAyuda texto={AUDIO_GUIONES[`estrategia:${vista}`]} audioSrc={AUDIO_ARCHIVOS.estrategia} />
       </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">Tu visión, tus objetivos, y los números para llegar.</p>
 
