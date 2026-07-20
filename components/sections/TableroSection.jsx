@@ -6,7 +6,7 @@ import { BRAND, COLUMNAS_BASE, MAX_COLUMNAS_EXTRA, MESES } from "@/lib/constants
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, migrarColumna } from "@/lib/helpers";
 import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES } from "@/lib/audioGuiones";
+import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
 // Colores pastel por columna: semana (naranja clarito), hoy (celeste), hecho (verde clarito).
 // Las columnas extra que arme el usuario quedan con el tono neutro de siempre.
@@ -165,7 +165,7 @@ export default function TableroSection() {
     <div>
       <div className="flex items-center gap-2 mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Organización</h2>
-        <AudioAyuda texto={AUDIO_GUIONES[`tablero:${tab}`]} />
+        <AudioAyuda texto={AUDIO_GUIONES[`tablero:${tab}`]} audioSrc={AUDIO_ARCHIVOS.tablero} />
       </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">
         {tab === "bajados" ? "Arrastrá las tarjetas entre columnas, o usá los botones en mobile." : "Definí tus grandes objetivos y desglosalos en tareas concretas."}
