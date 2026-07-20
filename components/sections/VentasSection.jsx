@@ -9,6 +9,7 @@ import AudioAyuda from "@/components/AudioAyuda";
 import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 import SearchableSelect from "@/components/SearchableSelect";
 import ClienteModal from "@/components/ClienteModal";
+import MoneyInput from "@/components/MoneyInput";
 
 const OTRO = "__otro__";
 const MESES_LABEL = [
@@ -254,7 +255,7 @@ export default function VentasSection({ business }) {
               <input type="number" min="1" value={fila.cantidad} onChange={(e) => setFila({ ...fila, cantidad: e.target.value })}
                 onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Unidades"
                 className="rounded-lg px-3 py-2 text-sm outline-none sm:w-24" style={{ border: "1px solid #e4dfd3" }} />
-              <input type="number" value={fila.precio} onChange={(e) => setFila({ ...fila, precio: e.target.value })}
+              <MoneyInput value={fila.precio} onChange={(n) => setFila({ ...fila, precio: n })}
                 onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Precio unitario"
                 className="rounded-lg px-3 py-2 text-sm outline-none sm:w-32" style={{ border: "1px solid #e4dfd3" }} />
               <button onClick={agregar} className="rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-1.5 justify-center"
@@ -453,12 +454,12 @@ export default function VentasSection({ business }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
                 <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Facturación mínima</span>
-                <input type="number" placeholder="$ mín" value={filtros.montoMin} onChange={(e) => setFiltros({ ...filtros, montoMin: e.target.value })}
+                <MoneyInput placeholder="$ mín" value={filtros.montoMin} onChange={(n) => setFiltros({ ...filtros, montoMin: n })}
                   className={inputCls + " w-full"} style={inputStyle} />
               </div>
               <div>
                 <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Facturación máxima</span>
-                <input type="number" placeholder="$ máx" value={filtros.montoMax} onChange={(e) => setFiltros({ ...filtros, montoMax: e.target.value })}
+                <MoneyInput placeholder="$ máx" value={filtros.montoMax} onChange={(n) => setFiltros({ ...filtros, montoMax: n })}
                   className={inputCls + " w-full"} style={inputStyle} />
               </div>
               <div className="col-span-2 sm:col-span-2">

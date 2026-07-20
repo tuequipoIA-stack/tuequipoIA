@@ -8,6 +8,7 @@ import { uid, isThisMonth, money } from "@/lib/helpers";
 import CostosSection from "@/components/finanzas/CostosSection";
 import AudioAyuda from "@/components/AudioAyuda";
 import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
+import MoneyInput from "@/components/MoneyInput";
 
 const MESES_LABEL = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -156,7 +157,7 @@ export default function FinanzasSection({ business }) {
                 </button>
               ))}
             </div>
-            <input type="number" value={form.monto} onChange={(e) => setForm({ ...form, monto: e.target.value })} placeholder="Monto"
+            <MoneyInput value={form.monto} onChange={(n) => setForm({ ...form, monto: n })} placeholder="Monto"
               className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
             <input value={form.nota} onChange={(e) => setForm({ ...form, nota: e.target.value })} placeholder="Nota (opcional)"
               className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
