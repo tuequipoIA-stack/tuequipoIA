@@ -6,7 +6,7 @@ import { BRAND } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, isThisMonth, money } from "@/lib/helpers";
 import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES } from "@/lib/audioGuiones";
+import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 import SearchableSelect from "@/components/SearchableSelect";
 import ClienteModal from "@/components/ClienteModal";
 
@@ -181,7 +181,7 @@ export default function VentasSection({ business }) {
     <div>
       <div className="flex items-center gap-2 mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Ventas</h2>
-        <AudioAyuda texto={AUDIO_GUIONES[`ventas:${vista}`]} />
+        <AudioAyuda texto={AUDIO_GUIONES[`ventas:${vista}`]} audioSrc={AUDIO_ARCHIVOS.ventas} />
       </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">
         {vista === "carga" ? "Cargá cada producto vendido, día por día." : "Filtrá y explorá todos tus movimientos de venta."}
