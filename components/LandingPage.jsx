@@ -213,8 +213,8 @@ export default function LandingPage() {
             {FEATURES_PORTAL.map((f) => (
               <div
                 key={f.titulo}
-                className="rounded-xl p-5 transition-all duration-200 hover:-translate-y-1 shadow-[0_10px_28px_-14px_rgba(26,171,170,0.4),0_4px_14px_-8px_rgba(26,26,46,0.14)] hover:shadow-[0_18px_40px_-14px_rgba(26,171,170,0.5),0_8px_20px_-8px_rgba(26,26,46,0.18)]"
-                style={{ background: "linear-gradient(165deg, #ffffff 0%, #fbfaf7 100%)", border: "1px solid #ece7da" }}
+                className="rounded-xl p-5 transition-all duration-200 hover:-translate-y-1 shadow-[0_16px_34px_-8px_rgba(26,171,170,0.65),0_6px_16px_-6px_rgba(26,26,46,0.18)] hover:shadow-[0_22px_46px_-8px_rgba(26,171,170,0.8),0_10px_22px_-6px_rgba(26,26,46,0.22)]"
+                style={{ background: "linear-gradient(165deg, #ffffff 0%, #eaf6f5 100%)", border: "1px solid #d9ece9" }}
               >
                 <div
                   className="w-9 h-9 rounded-[9px] flex items-center justify-center font-bold text-[15px] mb-3"
