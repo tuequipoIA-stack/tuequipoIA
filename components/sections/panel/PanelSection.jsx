@@ -28,6 +28,22 @@ function Toast({ mensaje }) {
   );
 }
 
+// Indicador de "se está ejecutando algo" — aparece solo si la acción tarda
+// más de ~350ms, para no hacer parpadear la pantalla en las acciones rápidas.
+function CargandoIndicador({ visible }) {
+  if (!visible) return null;
+  return (
+    <div className="fixed bottom-5 left-5 z-50 flex items-center gap-2 rounded-full px-4 py-2 text-sm text-white shadow-lg" style={{ background: BRAND.navy }}>
+      <span className="flex gap-1">
+        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: BRAND.teal, animationDelay: "0ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: BRAND.teal, animationDelay: "150ms" }} />
+        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: BRAND.teal, animationDelay: "300ms" }} />
+      </span>
+      Procesando...
+    </div>
+  );
+}
+
 export default function PanelSection({ vista }) {
   const [leads, setLeads] = useState(null);
   const [cobros, setCobros] = useState(null);
@@ -36,10 +52,29 @@ export default function PanelSection({ vista }) {
   const [checklist, setChecklist] = useState(null);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
+  const [accionesEnCurso, setAccionesEnCurso] = useState(0);
+  const [mostrarCargando, setMostrarCargando] = useState(false);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2200);
+  };
+
+  // Envuelve cualquier acción async: si tarda más de 350ms, muestra el
+  // indicador de "Procesando..." hasta que termine (o falle).
+  const conIndicador = async (fn) => {
+    setAccionesEnCurso((n) => n + 1);
+    const timer = setTimeout(() => setMostrarCargando(true), 350);
+    try {
+      return await fn();
+    } finally {
+      clearTimeout(timer);
+      setAccionesEnCurso((n) => {
+        const siguiente = n - 1;
+        if (siguiente <= 0) setMostrarCargando(false);
+        return siguiente;
+      });
+    }
   };
 
   const cargarTodo = () => {
@@ -62,37 +97,37 @@ export default function PanelSection({ vista }) {
   useEffect(() => { cargarTodo(); }, []);
 
   // ---- Leads ----
-  const agregarLead = async (lead) => {
+  const agregarLead = (lead) => conIndicador(async () => {
     const nuevo = await leadsApi.create(lead);
     setLeads((prev) => [nuevo, ...(prev || [])]);
     showToast("Contacto agregado");
-  };
-  const actualizarLead = async (id, patch) => {
+  });
+  const actualizarLead = (id, patch) => conIndicador(async () => {
     const actualizado = await leadsApi.update(id, patch);
     setLeads((prev) => (prev || []).map((l) => (l.id === id ? actualizado : l)));
     return actualizado;
-  };
-  const eliminarLead = async (id) => {
+  });
+  const eliminarLead = (id) => conIndicador(async () => {
     await leadsApi.remove(id);
     setLeads((prev) => (prev || []).filter((l) => l.id !== id));
     setCobros((prev) => (prev || []).filter((c) => c.lead_id !== id));
     showToast("Contacto eliminado");
-  };
-  const importarLeads = async (leadsNuevos) => {
+  });
+  const importarLeads = (leadsNuevos) => conIndicador(async () => {
     const creados = [];
     for (const l of leadsNuevos) {
       try { creados.push(await leadsApi.create(l)); } catch (e) { /* seguimos con el resto */ }
     }
     setLeads((prev) => [...creados, ...(prev || [])]);
     return creados.length;
-  };
+  });
 
   // ---- Seguimiento / kanban ----
-  const enviarASeguimiento = async (leadId) => {
+  const enviarASeguimiento = (leadId) => conIndicador(async () => {
     await actualizarLead(leadId, { enSeguimiento: true, etapa: "Reunión coordinada" });
     showToast("Enviado a Seguimiento de Interesados");
-  };
-  const moverEtapa = async (leadId, nuevaEtapa) => {
+  });
+  const moverEtapa = (leadId, nuevaEtapa) => conIndicador(async () => {
     const lead = (leads || []).find((l) => l.id === leadId);
     if (!lead) return;
     if (nuevaEtapa === "Confirmado") {
@@ -109,21 +144,21 @@ export default function PanelSection({ vista }) {
     if (nuevaEtapa === "Perdido") patch.estado = "Cerrado perdido";
     else if (lead.estado === "Cerrado perdido") patch.estado = "Seguimiento";
     await actualizarLead(leadId, patch);
-  };
+  });
 
   // ---- Cobros ----
-  const actualizarCobro = async (id, patch) => {
+  const actualizarCobro = (id, patch) => conIndicador(async () => {
     const actualizado = await cobrosApi.update(id, patch);
     setCobros((prev) => (prev || []).map((c) => (c.id === id ? actualizado : c)));
-  };
-  const eliminarCobro = async (id) => {
+  });
+  const eliminarCobro = (id) => conIndicador(async () => {
     await cobrosApi.remove(id);
     setCobros((prev) => (prev || []).filter((c) => c.id !== id));
     showToast("Registro de cobro eliminado");
-  };
+  });
 
   // ---- Listas ----
-  const guardarLista = async (nombre, leadIds, editId) => {
+  const guardarLista = (nombre, leadIds, editId) => conIndicador(async () => {
     if (editId) {
       const actualizada = await listasApi.update(editId, { nombre, leadIds });
       setListas((prev) => (prev || []).map((l) => (l.id === editId ? actualizada : l)));
@@ -133,15 +168,15 @@ export default function PanelSection({ vista }) {
       setListas((prev) => [creada, ...(prev || [])]);
       showToast("Lista creada");
     }
-  };
-  const eliminarLista = async (id) => {
+  });
+  const eliminarLista = (id) => conIndicador(async () => {
     await listasApi.remove(id);
     setListas((prev) => (prev || []).filter((l) => l.id !== id));
     showToast("Lista eliminada");
-  };
+  });
 
   // ---- Enviados (tildes de "ya le escribí") ----
-  const marcarEnviado = async (leadId, canal, listaId, marcado) => {
+  const marcarEnviado = (leadId, canal, listaId, marcado) => conIndicador(async () => {
     if (marcado) {
       await enviadosApi.create(leadId, canal, listaId);
       setEnviados((prev) => [...(prev || []), { lead_id: leadId, canal, lista_id: listaId }]);
@@ -149,20 +184,20 @@ export default function PanelSection({ vista }) {
       await enviadosApi.removeByLead(leadId, canal);
       setEnviados((prev) => (prev || []).filter((e) => !(e.lead_id === leadId && e.canal === canal)));
     }
-  };
-  const reiniciarEnviados = async (leadIds, canal) => {
+  });
+  const reiniciarEnviados = (leadIds, canal) => conIndicador(async () => {
     for (const id of leadIds) {
       await enviadosApi.removeByLead(id, canal);
     }
     setEnviados((prev) => (prev || []).filter((e) => !(leadIds.includes(e.lead_id) && e.canal === canal)));
     showToast("Marcas de enviado reiniciadas");
-  };
+  });
 
   // ---- Checklist ----
-  const guardarChecklist = async (proyecto, items) => {
+  const guardarChecklist = (proyecto, items) => conIndicador(async () => {
     await checklistApi.save(proyecto, items);
     setChecklist((prev) => ({ ...prev, [proyecto]: items }));
-  };
+  });
 
   const cargando = leads === null || cobros === null || listas === null || enviados === null || checklist === null;
 
@@ -196,6 +231,7 @@ export default function PanelSection({ vista }) {
       {vista === "panel-correos" && <PanelCorreos {...props} />}
       {vista === "panel-difusion" && <PanelDifusion {...props} />}
       <Toast mensaje={toast} />
+      <CargandoIndicador visible={mostrarCargando} />
     </div>
   );
 }

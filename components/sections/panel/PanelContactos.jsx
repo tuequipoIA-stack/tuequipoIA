@@ -105,6 +105,7 @@ export default function PanelContactos({ leads, actualizarLead, eliminarLead, en
   const [filtroProyecto, setFiltroProyecto] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
   const [busqueda, setBusqueda] = useState("");
+  const [importando, setImportando] = useState(false);
 
   const filtrados = useMemo(() => leads.filter((l) =>
     (!filtroProyecto || l.proyecto === filtroProyecto) &&
@@ -115,12 +116,17 @@ export default function PanelContactos({ leads, actualizarLead, eliminarLead, en
   const onImportar = async (ev) => {
     const file = ev.target.files[0];
     if (!file) return;
-    const text = await file.text();
-    const { leads: nuevos, skipped } = parseLeadsFromCSV(text);
-    if (!nuevos.length) { showToast("El archivo está vacío o no tiene filas válidas"); ev.target.value = ""; return; }
-    const cantidad = await importarLeads(nuevos);
-    showToast(`${cantidad} contacto(s) importado(s)${skipped ? `, ${skipped} fila(s) omitida(s)` : ""}`);
-    ev.target.value = "";
+    setImportando(true);
+    try {
+      const text = await file.text();
+      const { leads: nuevos, skipped } = parseLeadsFromCSV(text);
+      if (!nuevos.length) { showToast("El archivo está vacío o no tiene filas válidas"); return; }
+      const cantidad = await importarLeads(nuevos);
+      showToast(`${cantidad} contacto(s) importado(s)${skipped ? `, ${skipped} fila(s) omitida(s)` : ""}`);
+    } finally {
+      setImportando(false);
+      ev.target.value = "";
+    }
   };
 
   return (
@@ -132,9 +138,12 @@ export default function PanelContactos({ leads, actualizarLead, eliminarLead, en
         </div>
         <div className="flex gap-2 flex-wrap">
           <button onClick={downloadTemplate} className="rounded-lg px-3 py-1.5 text-xs font-semibold" style={{ background: "#eee9dd", color: "#6b6759" }}>Descargar plantilla CSV</button>
-          <label className="rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer" style={{ background: "#eee9dd", color: "#6b6759" }}>
-            Importar CSV
-            <input type="file" accept=".csv" hidden onChange={onImportar} />
+          <label
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 ${importando ? "cursor-wait opacity-70" : "cursor-pointer"}`}
+            style={{ background: "#eee9dd", color: "#6b6759" }}
+          >
+            {importando ? "Importando..." : "Importar CSV"}
+            <input type="file" accept=".csv" hidden onChange={onImportar} disabled={importando} />
           </label>
         </div>
       </div>
