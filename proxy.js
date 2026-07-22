@@ -31,7 +31,11 @@ export async function proxy(request) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
+  // "/" es pública para poder mostrar la landing de marketing a quien no
+  // tiene sesión (ver app/page.js: sin user, se renderiza LandingPage en
+  // vez del dashboard). Uso match exacto, no startsWith, para no abrir
+  // sin querer todo lo que empieza con "/".
+  const isPublic = path === "/" || PUBLIC_PATHS.some((p) => path.startsWith(p));
   const isApi = path.startsWith("/api/");
 
   if (!user && !isPublic && !isApi) {

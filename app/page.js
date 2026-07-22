@@ -9,6 +9,7 @@ import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/client";
 import { UnidadProvider, useUnidad } from "@/components/UnidadProvider";
+import LandingPage from "@/components/LandingPage";
 import Sidebar from "@/components/Sidebar";
 import Onboarding from "@/components/Onboarding";
 import HelpButton from "@/components/HelpButton";
@@ -132,7 +133,7 @@ export default function TuEquipoIA() {
     (async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setStage("app"); return; }
+      if (!user) { setStage("landing"); return; }
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -190,6 +191,8 @@ export default function TuEquipoIA() {
   };
 
   if (stage === "loading") return <PantallaCarga />;
+
+  if (stage === "landing") return <LandingPage />;
 
   if (stage === "onboarding") {
     return (
