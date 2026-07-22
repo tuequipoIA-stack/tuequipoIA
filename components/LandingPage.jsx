@@ -111,7 +111,7 @@ export default function LandingPage() {
 
       {/* HERO */}
       <header className="relative overflow-hidden" style={{ background: BRAND.navy }}>
-        <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-12 items-center pt-8 md:pt-10 pb-20 md:pb-24 relative z-[2]">
+        <div className="max-w-[1180px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-12 items-center pt-8 md:pt-10 pb-10 md:pb-14 relative z-[2]">
           <div>
             <div className="mb-7">
               {/* eslint-disable-next-line @next/next/no-img-element */}
