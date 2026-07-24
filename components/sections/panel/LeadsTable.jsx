@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { PROJECTS, ESTADOS, waLink, mailLink, todayStr, gmailAuthUserKey } from "@/lib/panel/constants";
 
@@ -31,10 +32,67 @@ function Contacto({ lead }) {
   return <div className="flex flex-col gap-1 items-start">{botones}</div>;
 }
 
+// Valor de texto que representa a cada contacto, para poder ordenar la
+// columna "Contacto" alfabéticamente (usa lo primero que haya cargado).
+function valorContacto(lead) {
+  return (lead.mail || lead.telefono || (lead.canal === "instagram" ? "instagram" : "") || "").toLowerCase();
+}
+
+const COLUMNAS = [
+  { key: "nombre", label: "Nombre / Proyecto" },
+  { key: "empresa", label: "Empresa / Rubro" },
+  { key: "contacto", label: "Contacto" },
+  { key: "estado", label: "Estado" },
+  { key: "proxima_accion", label: "Próxima acción" },
+];
+
+function SortIcon({ activo, dir }) {
+  if (!activo) return <span style={{ color: "#c9c2b0" }} className="ml-1">↕</span>;
+  return <span style={{ color: BRAND.navy }} className="ml-1">{dir === "asc" ? "↑" : "↓"}</span>;
+}
+
 // Tabla de contactos compartida entre las vistas por proyecto y "Todos los
-// Contactos": muestra WhatsApp/correo/Instagram juntos por contacto, el
-// botón "+ Seguimiento" para Apps a Medida, y borrar.
-export default function LeadsTable({ leads, onEstadoChange, onDelete, onEnviarSeguimiento }) {
+// Contactos": muestra WhatsApp/correo/Instagram juntos por contacto, deja
+// cargar la próxima acción directo en la tabla, y se puede ordenar por
+// cualquier columna (por default, por próxima acción: lo más cercano
+// arriba, lo más lejano abajo, y sin fecha siempre al final).
+export default function LeadsTable({ leads, onEstadoChange, onProximaAccionChange, onDelete, onEnviarSeguimiento }) {
+  const [sortBy, setSortBy] = useState("proxima_accion");
+  const [sortDir, setSortDir] = useState("asc");
+
+  const ordenClick = (key) => {
+    if (sortBy === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setSortDir("asc");
+    }
+  };
+
+  const leadsOrdenados = useMemo(() => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    const copia = [...leads];
+    copia.sort((a, b) => {
+      if (sortBy === "proxima_accion") {
+        // Sin fecha siempre al final, sin importar la dirección elegida.
+        if (!a.proxima_accion && !b.proxima_accion) return 0;
+        if (!a.proxima_accion) return 1;
+        if (!b.proxima_accion) return -1;
+        return a.proxima_accion.localeCompare(b.proxima_accion) * dir;
+      }
+      let va, vb;
+      if (sortBy === "contacto") {
+        va = valorContacto(a);
+        vb = valorContacto(b);
+      } else {
+        va = (a[sortBy] || "").toString().toLowerCase();
+        vb = (b[sortBy] || "").toString().toLowerCase();
+      }
+      return va.localeCompare(vb, "es") * dir;
+    });
+    return copia;
+  }, [leads, sortBy, sortDir]);
+
   if (!leads.length) {
     return (
       <div className="rounded-xl p-8 text-center text-sm" style={{ background: "#ffffff", border: "1px solid #e4dfd3", color: "#8a8578" }}>
@@ -48,13 +106,20 @@ export default function LeadsTable({ leads, onEstadoChange, onDelete, onEnviarSe
       <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ background: "#f7f4ed" }}>
-            {["Nombre / Proyecto", "Empresa / Rubro", "Contacto", "Estado", "Próxima acción", "Notas", "Acciones"].map((h) => (
-              <th key={h} style={{ color: "#8a8578" }} className="text-left text-[11px] uppercase font-semibold px-3 py-2 whitespace-nowrap">{h}</th>
+            {COLUMNAS.map((col) => (
+              <th key={col.key} style={{ color: "#8a8578" }} className="text-left text-[11px] uppercase font-semibold px-3 py-2 whitespace-nowrap">
+                <button type="button" onClick={() => ordenClick(col.key)} className="flex items-center uppercase font-semibold" style={{ color: sortBy === col.key ? BRAND.navy : "#8a8578" }}>
+                  {col.label}
+                  <SortIcon activo={sortBy === col.key} dir={sortDir} />
+                </button>
+              </th>
             ))}
+            <th style={{ color: "#8a8578" }} className="text-left text-[11px] uppercase font-semibold px-3 py-2 whitespace-nowrap">Notas</th>
+            <th style={{ color: "#8a8578" }} className="text-left text-[11px] uppercase font-semibold px-3 py-2 whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {leads.map((lead) => {
+          {leadsOrdenados.map((lead) => {
             const vencida = lead.proxima_accion && lead.proxima_accion <= todayStr();
             const puedeSeguimiento = lead.proyecto === "apps" && !lead.en_seguimiento && lead.estado !== "Cerrado ganado" && lead.estado !== "Cerrado perdido";
             return (
@@ -74,8 +139,14 @@ export default function LeadsTable({ leads, onEstadoChange, onDelete, onEnviarSe
                     {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
                   </select>
                 </td>
-                <td className="px-3 py-2 align-top text-xs" style={vencida ? { color: "#b3453f", fontWeight: 700 } : { color: "#4a4740" }}>
-                  {lead.proxima_accion || "—"}
+                <td className="px-3 py-2 align-top">
+                  <input
+                    type="date"
+                    value={lead.proxima_accion || ""}
+                    onChange={(e) => onProximaAccionChange(lead.id, e.target.value || null)}
+                    className="text-xs rounded-md px-1.5 py-1"
+                    style={vencida ? { border: "1px solid #f1c6c3", color: "#b3453f", fontWeight: 700 } : { border: "1px solid #e4dfd3", color: "#4a4740" }}
+                  />
                 </td>
                 <td className="px-3 py-2 align-top text-xs max-w-[160px]" style={{ color: "#6b6759" }}>{lead.notas || ""}</td>
                 <td className="px-3 py-2 align-top">

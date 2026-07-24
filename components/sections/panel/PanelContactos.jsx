@@ -164,6 +164,7 @@ export default function PanelContactos({ leads, actualizarLead, eliminarLead, en
       <LeadsTable
         leads={filtrados}
         onEstadoChange={(id, estado) => actualizarLead(id, { estado })}
+        onProximaAccionChange={(id, proximaAccion) => actualizarLead(id, { proximaAccion })}
         onDelete={eliminarLead}
         onEnviarSeguimiento={enviarASeguimiento}
       />
