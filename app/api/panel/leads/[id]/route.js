@@ -5,8 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 const CAMPOS_EDITABLES = [
   "nombre", "empresa", "rubro", "canal", "telefono", "mail",
   "proximaAccion", "estado", "notas", "enSeguimiento", "etapa",
+  "descripcion", "reunionFecha", "reunionHora", "tarifa",
 ];
-const MAPA_COLUMNA = { proximaAccion: "proxima_accion", enSeguimiento: "en_seguimiento" };
+const MAPA_COLUMNA = {
+  proximaAccion: "proxima_accion", enSeguimiento: "en_seguimiento",
+  reunionFecha: "reunion_fecha", reunionHora: "reunion_hora",
+};
 
 export async function PATCH(request, { params }) {
   const auth = await requireAdmin();
