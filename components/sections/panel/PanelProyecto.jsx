@@ -146,6 +146,7 @@ export default function PanelProyecto({ proyectoKey, leads, checklist, agregarLe
       <LeadsTable
         leads={listaProyecto}
         onEstadoChange={(id, estado) => actualizarLead(id, { estado })}
+        onProximaAccionChange={(id, proximaAccion) => actualizarLead(id, { proximaAccion })}
         onDelete={eliminarLead}
         onEnviarSeguimiento={enviarASeguimiento}
       />
