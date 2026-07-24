@@ -1,34 +1,39 @@
 "use client";
 
 import { BRAND } from "@/lib/constants";
-import { PROJECTS, ESTADOS, labelCanal, waLink, mailLink, todayStr, gmailAuthUserKey } from "@/lib/panel/constants";
+import { PROJECTS, ESTADOS, waLink, mailLink, todayStr, gmailAuthUserKey } from "@/lib/panel/constants";
 
 function gmailAuthUser() {
   if (typeof window === "undefined") return "0";
   return window.localStorage.getItem(gmailAuthUserKey()) || "0";
 }
 
-function ChanTag({ canal }) {
-  const colores = { instagram: "#C13584", whatsapp: "#1f9e57", email: "#2563eb" };
+function ContactoBtn({ href, children, color }) {
   return (
-    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: colores[canal] || "#8b8b9a" }}>
-      {labelCanal(canal)}
-    </span>
-  );
-}
-
-function ActionBtn({ href, children, color }) {
-  return (
-    <a href={href} target="_blank" rel="noreferrer" className="text-[11px] font-bold px-2 py-1 rounded-md text-white inline-block" style={{ background: color }}>
+    <a href={href} target="_blank" rel="noreferrer" className="text-[11px] font-bold px-2 py-1 rounded-md text-white inline-block max-w-full truncate" style={{ background: color }}>
       {children}
     </a>
   );
 }
 
+// Muestra WhatsApp y correo juntos para el mismo contacto (antes solo se
+// mostraba un canal a la vez, el que estuviera cargado como "canal
+// principal"). Ahora se listan todos los datos de contacto disponibles.
+function Contacto({ lead }) {
+  const botones = [];
+  if (lead.telefono) botones.push(<ContactoBtn key="wa" href={waLink(lead)} color="#1f9e57">WhatsApp</ContactoBtn>);
+  if (lead.mail) botones.push(<ContactoBtn key="mail" href={mailLink(lead, gmailAuthUser())} color="#2563eb">{lead.mail}</ContactoBtn>);
+  if (lead.canal === "instagram") botones.push(<ContactoBtn key="ig" href="https://instagram.com/direct/inbox/" color="#C13584">Instagram DM</ContactoBtn>);
+
+  if (!botones.length) {
+    return <span style={{ color: "#a89f88" }} className="text-[11px] italic">Sin datos de contacto</span>;
+  }
+  return <div className="flex flex-col gap-1 items-start">{botones}</div>;
+}
+
 // Tabla de contactos compartida entre las vistas por proyecto y "Todos los
-// Contactos": muestra los botones de canal (WhatsApp/Gmail/Instagram) que
-// abren la sesión real de Marisa, el botón "+ Seguimiento" para Apps a
-// Medida, y borrar.
+// Contactos": muestra WhatsApp/correo/Instagram juntos por contacto, el
+// botón "+ Seguimiento" para Apps a Medida, y borrar.
 export default function LeadsTable({ leads, onEstadoChange, onDelete, onEnviarSeguimiento }) {
   if (!leads.length) {
     return (
@@ -43,7 +48,7 @@ export default function LeadsTable({ leads, onEstadoChange, onDelete, onEnviarSe
       <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ background: "#f7f4ed" }}>
-            {["Nombre / Proyecto", "Empresa / Rubro", "Canal", "Estado", "Próxima acción", "Notas", "Acciones"].map((h) => (
+            {["Nombre / Proyecto", "Empresa / Rubro", "Contacto", "Estado", "Próxima acción", "Notas", "Acciones"].map((h) => (
               <th key={h} style={{ color: "#8a8578" }} className="text-left text-[11px] uppercase font-semibold px-3 py-2 whitespace-nowrap">{h}</th>
             ))}
           </tr>
@@ -62,7 +67,7 @@ export default function LeadsTable({ leads, onEstadoChange, onDelete, onEnviarSe
                   <div style={{ color: "#4a4740" }}>{lead.empresa || "—"}</div>
                   {lead.rubro && <span className="inline-block mt-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "#eee9dd", color: "#6b6759" }}>{lead.rubro}</span>}
                 </td>
-                <td className="px-3 py-2 align-top"><ChanTag canal={lead.canal} /></td>
+                <td className="px-3 py-2 align-top max-w-[200px]"><Contacto lead={lead} /></td>
                 <td className="px-3 py-2 align-top">
                   <select value={lead.estado || ""} onChange={(e) => onEstadoChange(lead.id, e.target.value)}
                     className="text-xs rounded-md px-1.5 py-1" style={{ border: "1px solid #e4dfd3" }}>
@@ -75,15 +80,6 @@ export default function LeadsTable({ leads, onEstadoChange, onDelete, onEnviarSe
                 <td className="px-3 py-2 align-top text-xs max-w-[160px]" style={{ color: "#6b6759" }}>{lead.notas || ""}</td>
                 <td className="px-3 py-2 align-top">
                   <div className="flex flex-wrap gap-1.5">
-                    {lead.canal === "whatsapp" && lead.telefono && (
-                      <ActionBtn href={waLink(lead)} color="#1f9e57">WhatsApp</ActionBtn>
-                    )}
-                    {lead.canal === "email" && lead.mail && (
-                      <ActionBtn href={mailLink(lead, gmailAuthUser())} color="#2563eb">Gmail</ActionBtn>
-                    )}
-                    {lead.canal === "instagram" && (
-                      <ActionBtn href="https://instagram.com/direct/inbox/" color="#C13584">Instagram DM</ActionBtn>
-                    )}
                     {lead.en_seguimiento && (
                       <span className="text-[11px] font-bold px-2 py-1 rounded-md" style={{ background: "#e5e7eb", color: "#374151" }}>En seguimiento</span>
                     )}
