@@ -3,20 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { PROJECTS, todayStr } from "@/lib/panel/constants";
-import { leadsApi, cobrosApi, listasApi, enviadosApi, checklistApi } from "@/lib/panel/api";
+import { leadsApi, cobrosApi, listasApi, checklistApi } from "@/lib/panel/api";
 import PanelProyecto from "@/components/sections/panel/PanelProyecto";
 import PanelSeguimiento from "@/components/sections/panel/PanelSeguimiento";
 import PanelCobros from "@/components/sections/panel/PanelCobros";
 import PanelContactos from "@/components/sections/panel/PanelContactos";
 import PanelListas from "@/components/sections/panel/PanelListas";
-import PanelCorreos from "@/components/sections/panel/PanelCorreos";
-import PanelDifusion from "@/components/sections/panel/PanelDifusion";
 
 // Punto de entrada único del Panel de Comunicación (CRM interno de Marisa).
 // Solo se monta cuando isAdmin === true (ver app/page.js). Cada botón del
 // grupo "TuequipoIA Panel" del Sidebar corresponde a un valor de `vista`
 // ("panel-resumen", "panel-membresias", etc). Todos los datos (leads,
-// cobros, listas, enviados, checklist) se cargan acá una sola vez y se
+// cobros, listas, checklist) se cargan acá una sola vez y se
 // pasan hacia abajo, así todas las vistas ven siempre lo mismo.
 
 function Toast({ mensaje }) {
@@ -32,7 +30,6 @@ export default function PanelSection({ vista }) {
   const [leads, setLeads] = useState(null);
   const [cobros, setCobros] = useState(null);
   const [listas, setListas] = useState(null);
-  const [enviados, setEnviados] = useState(null);
   const [checklist, setChecklist] = useState(null);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
@@ -43,12 +40,11 @@ export default function PanelSection({ vista }) {
   };
 
   const cargarTodo = () => {
-    Promise.all([leadsApi.list(), cobrosApi.list(), listasApi.list(), enviadosApi.list(), checklistApi.list()])
-      .then(([ls, cs, lis, envs, chk]) => {
+    Promise.all([leadsApi.list(), cobrosApi.list(), listasApi.list(), checklistApi.list()])
+      .then(([ls, cs, lis, chk]) => {
         setLeads(ls);
         setCobros(cs);
         setListas(lis);
-        setEnviados(envs);
         const porProyecto = {};
         Object.keys(PROJECTS).forEach((k) => {
           const fila = chk.find((c) => c.proyecto === k);
@@ -140,31 +136,13 @@ export default function PanelSection({ vista }) {
     showToast("Lista eliminada");
   };
 
-  // ---- Enviados (tildes de "ya le escribí") ----
-  const marcarEnviado = async (leadId, canal, listaId, marcado) => {
-    if (marcado) {
-      await enviadosApi.create(leadId, canal, listaId);
-      setEnviados((prev) => [...(prev || []), { lead_id: leadId, canal, lista_id: listaId }]);
-    } else {
-      await enviadosApi.removeByLead(leadId, canal);
-      setEnviados((prev) => (prev || []).filter((e) => !(e.lead_id === leadId && e.canal === canal)));
-    }
-  };
-  const reiniciarEnviados = async (leadIds, canal) => {
-    for (const id of leadIds) {
-      await enviadosApi.removeByLead(id, canal);
-    }
-    setEnviados((prev) => (prev || []).filter((e) => !(leadIds.includes(e.lead_id) && e.canal === canal)));
-    showToast("Marcas de enviado reiniciadas");
-  };
-
   // ---- Checklist ----
   const guardarChecklist = async (proyecto, items) => {
     await checklistApi.save(proyecto, items);
     setChecklist((prev) => ({ ...prev, [proyecto]: items }));
   };
 
-  const cargando = leads === null || cobros === null || listas === null || enviados === null || checklist === null;
+  const cargando = leads === null || cobros === null || listas === null || checklist === null;
 
   if (error) {
     return <p style={{ color: "#b3453f" }} className="text-sm">{error}</p>;
@@ -174,12 +152,11 @@ export default function PanelSection({ vista }) {
   }
 
   const props = {
-    leads, cobros, listas, enviados, checklist,
+    leads, cobros, listas, checklist,
     agregarLead, actualizarLead, eliminarLead, importarLeads,
     enviarASeguimiento, moverEtapa,
     actualizarCobro, eliminarCobro,
     guardarLista, eliminarLista,
-    marcarEnviado, reiniciarEnviados,
     guardarChecklist,
     showToast,
   };
@@ -193,8 +170,6 @@ export default function PanelSection({ vista }) {
       {vista === "panel-cobros" && <PanelCobros {...props} />}
       {vista === "panel-contactos" && <PanelContactos {...props} />}
       {vista === "panel-listas" && <PanelListas {...props} />}
-      {vista === "panel-correos" && <PanelCorreos {...props} />}
-      {vista === "panel-difusion" && <PanelDifusion {...props} />}
       <Toast mensaje={toast} />
     </div>
   );
