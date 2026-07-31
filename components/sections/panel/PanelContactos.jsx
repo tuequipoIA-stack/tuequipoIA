@@ -116,12 +116,25 @@ function ImportarCSV({ marca, setMarca, onImportado, showToast }) {
   return (
     <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
       <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold mb-2">Cargar contactos (CSV o Excel)</h3>
-      <div className="flex items-center gap-2 flex-wrap">
-        <input type="file" accept=".csv,.xlsx,.xls,text/csv" onChange={onFile} className="text-sm" />
+      <div className="flex items-center gap-3 flex-wrap mb-2">
+        <label className="cursor-pointer text-sm font-semibold px-4 py-2 rounded-md text-white" style={{ background: BRAND.navy }}>
+          Cargar archivo
+          <input type="file" accept=".csv,.xlsx,.xls,text/csv" onChange={onFile} className="hidden" />
+        </label>
+        <a
+          href="/plantilla-contactos.csv"
+          download
+          className="text-sm font-semibold px-4 py-2 rounded-md"
+          style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy }}
+        >
+          Descargar plantilla
+        </a>
         <select value={marca} onChange={(e) => setMarca(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
           {MARCAS.map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
-        <span style={{ color: "#8a8578" }} className="text-xs">Soporta .csv, .xlsx y .xls (incluye exports de Apollo). Revisá el mapeo de columnas antes de confirmar. Duplicados por email se actualizan.</span>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span style={{ color: "#8a8578" }} className="text-xs">Soporta .csv, .xlsx y .xls (incluye exports de Apollo). Descargá la plantilla si no sabés qué columnas usar. Revisá el mapeo de columnas antes de confirmar. Duplicados por email se actualizan.</span>
       </div>
       {headers && (
         <div className="mt-3">
