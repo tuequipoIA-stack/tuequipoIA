@@ -158,12 +158,37 @@ function ImportarCSV({ marca, setMarca, onImportado, showToast }) {
   );
 }
 
+function CampoEditable({ label, value, onChange, placeholder, type = "text" }) {
+  return (
+    <label className="flex flex-col gap-0.5">
+      <span className="text-xs" style={{ color: "#8a8578" }}>{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder || "—"}
+        className="text-sm rounded-md p-1.5"
+        style={{ border: "1px solid #ddd" }}
+      />
+    </label>
+  );
+}
+
 function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToast }) {
+  const [nombre, setNombre] = useState(contacto.nombre || "");
+  const [empresa, setEmpresa] = useState(contacto.empresa || "");
+  const [puesto, setPuesto] = useState(contacto.puesto || "");
+  const [industria, setIndustria] = useState(contacto.industria || "");
+  const [pais, setPais] = useState(contacto.pais || "");
+  const [email, setEmail] = useState(contacto.email || "");
+  const [telefono, setTelefono] = useState(contacto.telefono || "");
+  const [observaciones, setObservaciones] = useState(contacto.observaciones || "");
   const [estado, setEstado] = useState(contacto.estado);
   const [canal, setCanal] = useState(contacto.canal_preferido || "");
   const [proximo, setProximo] = useState(contacto.proximo_seguimiento ? contacto.proximo_seguimiento.slice(0, 16) : "");
   const [interacciones, setInteracciones] = useState(null);
   const [nota, setNota] = useState("");
+  const [guardando, setGuardando] = useState(false);
 
   useState(() => {
     interaccionesApi.list(contacto.id).then(setInteracciones).catch(() => setInteracciones([]));
@@ -172,13 +197,27 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
   const seg = segmentos.find((s) => s.id === contacto.segmento_id);
 
   const guardar = async () => {
-    await contactosApi.update(contacto.id, {
-      estado,
-      canal_preferido: canal || null,
-      proximo_seguimiento: proximo ? new Date(proximo).toISOString() : null,
-    });
-    showToast("Guardado");
-    onActualizado();
+    setGuardando(true);
+    try {
+      await contactosApi.update(contacto.id, {
+        nombre: nombre.trim(),
+        empresa: empresa.trim() || null,
+        puesto: puesto.trim() || null,
+        industria: industria.trim() || null,
+        pais: pais.trim() || null,
+        email: email.trim() || null,
+        telefono: telefono.trim() || null,
+        observaciones: observaciones.trim() || null,
+        estado,
+        canal_preferido: canal || null,
+        proximo_seguimiento: proximo ? new Date(proximo).toISOString() : null,
+      });
+      showToast("Guardado");
+      onActualizado();
+    } catch (e) {
+      showToast("Error al guardar: " + e.message);
+    }
+    setGuardando(false);
   };
 
   const agregarNota = async () => {
@@ -190,13 +229,28 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
 
   return (
     <div className="rounded-xl p-4 mt-4" style={{ background: "#faf9f6", border: "1px solid #e4dfd3" }}>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         <h3 style={{ color: BRAND.navy }} className="text-base font-semibold">{contacto.nombre}</h3>
         <button onClick={onCerrar} className="text-xs" style={{ color: "#8a8578" }}>Cerrar</button>
       </div>
-      <p style={{ color: "#6b6759" }} className="text-sm mb-3">
-        {contacto.puesto || "—"} · {contacto.empresa || "—"} · {contacto.industria || "—"} · {contacto.pais || "—"} · {contacto.email || "sin email"} · {contacto.telefono || "sin teléfono"} · segmento: {seg ? segNombre(seg) : "sin asignar"}
-      </p>
+
+      <div className="rounded-lg p-3 mb-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+        <strong className="text-xs" style={{ color: "#8a8578" }}>Datos del contacto</strong>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+          <CampoEditable label="Nombre" value={nombre} onChange={setNombre} />
+          <CampoEditable label="Empresa" value={empresa} onChange={setEmpresa} />
+          <CampoEditable label="Puesto" value={puesto} onChange={setPuesto} />
+          <CampoEditable label="Industria" value={industria} onChange={setIndustria} />
+          <CampoEditable label="País" value={pais} onChange={setPais} />
+          <CampoEditable label="Email" value={email} onChange={setEmail} type="email" />
+          <CampoEditable label="Teléfono" value={telefono} onChange={setTelefono} />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs" style={{ color: "#8a8578" }}>Segmento</span>
+            <span className="text-sm p-1.5">{seg ? segNombre(seg) : "sin asignar"}</span>
+          </div>
+        </div>
+      </div>
+
       <div className="flex gap-2 flex-wrap items-center mb-3">
         <select value={estado} onChange={(e) => setEstado(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
           {ESTADOS.map((e) => <option key={e.id} value={e.id}>{e.label}</option>)}
@@ -207,8 +261,26 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
           <option value="whatsapp">WhatsApp</option>
         </select>
         <input type="datetime-local" value={proximo} onChange={(e) => setProximo(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }} />
-        <button onClick={guardar} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>Guardar</button>
       </div>
+
+      <div className="rounded-lg p-3 mb-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+        <label className="flex flex-col gap-0.5">
+          <span className="text-xs" style={{ color: "#8a8578" }}>Observaciones</span>
+          <textarea
+            value={observaciones}
+            onChange={(e) => setObservaciones(e.target.value)}
+            placeholder="Notas generales sobre este contacto..."
+            rows={3}
+            className="text-sm rounded-md p-1.5 resize-y"
+            style={{ border: "1px solid #ddd" }}
+          />
+        </label>
+      </div>
+
+      <button disabled={guardando} onClick={guardar} className="text-xs px-3 py-1.5 rounded-md text-white mb-3" style={{ background: BRAND.navy }}>
+        {guardando ? "Guardando..." : "Guardar cambios"}
+      </button>
+
       <div className="rounded-lg p-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
         <strong className="text-xs" style={{ color: "#8a8578" }}>Historial de interacciones</strong>
         <div className="mt-2 space-y-2">
