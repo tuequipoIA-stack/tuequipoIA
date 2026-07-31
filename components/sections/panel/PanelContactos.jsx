@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import * as XLSX from "xlsx";
 import { BRAND } from "@/lib/constants";
 import { ESTADOS, ESTADO_COLOR, MARCAS, labelEstado, segNombre } from "@/lib/panel/constants";
 import { contactosApi, interaccionesApi } from "@/lib/panel/api";
@@ -25,19 +26,34 @@ function parseCSV(text) {
   return rows.filter((r) => r.some((c) => c && c.trim().length));
 }
 
+// Lee la primera hoja de un .xlsx/.xls y la devuelve como filas de texto
+// (mismo formato que parseCSV: array de arrays, primera fila = encabezados).
+function parseXLSX(arrayBuffer) {
+  const wb = XLSX.read(arrayBuffer, { type: "array" });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: false });
+  return rows
+    .map((r) => r.map((c) => (c === null || c === undefined ? "" : String(c).trim())))
+    .filter((r) => r.some((c) => c && c.trim().length));
+}
+
+// "apellido" no es un campo propio de contactos: se junta con "nombre" al
+// armar el contacto (ver confirmar()). Se lista igual para que el usuario
+// pueda mapear la columna de apellido de exports como los de Apollo.
 const CAMPO_GUESS = {
-  nombre: ["nombre", "name", "full_name", "contacto"],
-  empresa: ["empresa", "company", "organizacion"],
+  nombre: ["nombre", "name", "first_name", "first name"],
+  apellido: ["apellido", "last_name", "last name", "surname"],
+  empresa: ["empresa", "company", "organizacion", "organización", "company name"],
   puesto: ["puesto", "cargo", "role", "title"],
   industria: ["industria", "industry", "rubro", "sector"],
-  email: ["email", "mail", "correo"],
-  telefono: ["telefono", "teléfono", "phone", "celular", "whatsapp"],
-  pais: ["pais", "país", "country"],
+  email: ["email", "mail", "correo", "e-mail"],
+  telefono: ["telefono", "teléfono", "phone", "celular", "whatsapp", "corporate phone", "mobile phone", "work direct phone"],
+  pais: ["pais", "país", "country", "company country", "person country"],
 };
-const CAMPOS_APP = [["nombre", "Nombre"], ["empresa", "Empresa"], ["puesto", "Puesto"], ["industria", "Industria"], ["email", "Email"], ["telefono", "Teléfono"], ["pais", "País"], ["", "(ignorar)"]];
+const CAMPOS_APP = [["nombre", "Nombre"], ["apellido", "Apellido"], ["empresa", "Empresa"], ["puesto", "Puesto"], ["industria", "Industria"], ["email", "Email"], ["telefono", "Teléfono"], ["pais", "País"], ["", "(ignorar)"]];
 
 function adivinar(header) {
-  const h = header.toLowerCase().trim();
+  const h = (header || "").toLowerCase().trim();
   for (const key in CAMPO_GUESS) if (CAMPO_GUESS[key].includes(h)) return key;
   return "";
 }
@@ -48,20 +64,26 @@ function ImportarCSV({ marca, setMarca, onImportado, showToast }) {
   const [mapa, setMapa] = useState({});
   const [importando, setImportando] = useState(false);
 
+  const cargarFilas = (parsed) => {
+    const hs = parsed[0];
+    setHeaders(hs);
+    setRows(parsed.slice(1));
+    const m = {};
+    hs.forEach((h) => { m[h] = adivinar(h); });
+    setMapa(m);
+  };
+
   const onFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const esExcel = /\.(xlsx|xls)$/i.test(file.name);
     const reader = new FileReader();
     reader.onload = () => {
-      const parsed = parseCSV(reader.result);
-      const hs = parsed[0];
-      setHeaders(hs);
-      setRows(parsed.slice(1));
-      const m = {};
-      hs.forEach((h) => { m[h] = adivinar(h); });
-      setMapa(m);
+      const parsed = esExcel ? parseXLSX(reader.result) : parseCSV(reader.result);
+      cargarFilas(parsed);
     };
-    reader.readAsText(file);
+    if (esExcel) reader.readAsArrayBuffer(file);
+    else reader.readAsText(file);
   };
 
   const confirmar = async () => {
@@ -70,8 +92,15 @@ function ImportarCSV({ marca, setMarca, onImportado, showToast }) {
     headers.forEach((h, i) => { if (mapa[h]) colIndex[mapa[h]] = i; });
     const contactos = rows.map((r) => {
       const get = (k) => (colIndex[k] !== undefined ? (r[colIndex[k]] || "").trim() : "");
-      return { nombre: get("nombre"), empresa: get("empresa"), puesto: get("puesto"), industria: get("industria"), email: get("email"), telefono: get("telefono"), pais: get("pais") };
+      const nombreCompleto = [get("nombre"), get("apellido")].filter(Boolean).join(" ").trim();
+      return { nombre: nombreCompleto, empresa: get("empresa"), puesto: get("puesto"), industria: get("industria"), email: get("email"), telefono: get("telefono"), pais: get("pais") };
     }).filter((c) => c.nombre);
+
+    if (!contactos.length) {
+      showToast("Ninguna fila tiene 'Nombre' asignado — revisá el mapeo de columnas arriba del archivo");
+      setImportando(false);
+      return;
+    }
 
     try {
       const { importados, omitidos } = await contactosApi.bulkImport(contactos, marca);
@@ -86,13 +115,13 @@ function ImportarCSV({ marca, setMarca, onImportado, showToast }) {
 
   return (
     <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-      <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold mb-2">Cargar contactos (CSV)</h3>
+      <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold mb-2">Cargar contactos (CSV o Excel)</h3>
       <div className="flex items-center gap-2 flex-wrap">
-        <input type="file" accept=".csv,text/csv" onChange={onFile} className="text-sm" />
+        <input type="file" accept=".csv,.xlsx,.xls,text/csv" onChange={onFile} className="text-sm" />
         <select value={marca} onChange={(e) => setMarca(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
           {MARCAS.map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
-        <span style={{ color: "#8a8578" }} className="text-xs">Columnas: nombre, empresa, puesto, industria, email, telefono, pais. Duplicados por email se actualizan.</span>
+        <span style={{ color: "#8a8578" }} className="text-xs">Soporta .csv, .xlsx y .xls (incluye exports de Apollo). Revisá el mapeo de columnas antes de confirmar. Duplicados por email se actualizan.</span>
       </div>
       {headers && (
         <div className="mt-3">
