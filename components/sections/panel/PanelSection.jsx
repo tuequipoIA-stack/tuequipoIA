@@ -116,6 +116,7 @@ export default function PanelSection({ vista }) {
         <PanelContactos
           contactos={contactosFiltrados}
           segmentos={segmentosFiltrados}
+          marcaFiltro={marcaFiltro}
           recargar={cargarTodo}
           showToast={showToast}
         />

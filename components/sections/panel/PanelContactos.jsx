@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { BRAND } from "@/lib/constants";
 import { ESTADOS, ESTADO_COLOR, MARCAS, labelEstado, segNombre } from "@/lib/panel/constants";
@@ -129,9 +129,12 @@ function ImportarCSV({ marca, setMarca, onImportado, showToast }) {
         >
           Descargar plantilla
         </a>
-        <select value={marca} onChange={(e) => setMarca(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
-          {MARCAS.map((m) => <option key={m} value={m}>{m}</option>)}
-        </select>
+        <label className="flex items-center gap-1.5 text-xs" style={{ color: "#8a8578" }}>
+          Se importan a:
+          <select value={marca} onChange={(e) => setMarca(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
+            {MARCAS.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </label>
       </div>
       <div className="flex items-center gap-2 flex-wrap">
         <span style={{ color: "#8a8578" }} className="text-xs">Soporta .csv, .xlsx y .xls (incluye exports de Apollo). Descargá la plantilla si no sabés qué columnas usar. Revisá el mapeo de columnas antes de confirmar. Duplicados por email se actualizan.</span>
@@ -320,11 +323,22 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
   );
 }
 
-export default function PanelContactos({ contactos, segmentos, recargar, showToast }) {
-  const [marcaImport, setMarcaImport] = useState(MARCAS[0]);
+export default function PanelContactos({ contactos, segmentos, marcaFiltro, recargar, showToast }) {
+  const [marcaImport, setMarcaImport] = useState(
+    marcaFiltro && marcaFiltro !== "todas" ? marcaFiltro : MARCAS[0]
+  );
   const [busqueda, setBusqueda] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("");
   const [abiertoId, setAbiertoId] = useState(null);
+
+  // La pestaña "Marca:" de arriba filtra qué contactos se ven. Si el
+  // selector de importación no sigue esa misma marca, es fácil subir un
+  // archivo pensando que va a una marca y que termine en otra (los
+  // contactos se importan igual, solo que no aparecen en la pestaña que
+  // se está mirando). Lo mantenemos sincronizado con la pestaña activa.
+  useEffect(() => {
+    if (marcaFiltro && marcaFiltro !== "todas") setMarcaImport(marcaFiltro);
+  }, [marcaFiltro]);
 
   const filtrados = useMemo(() => {
     let f = contactos;
