@@ -241,10 +241,15 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
   };
 
   return (
-    <div className="rounded-xl p-4 mt-4" style={{ background: "#faf9f6", border: "1px solid #e4dfd3" }}>
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:p-8"
+      style={{ background: "rgba(20, 20, 30, 0.45)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
+    >
+    <div className="rounded-xl p-4 w-full max-w-2xl my-4" style={{ background: "#faf9f6", border: "1px solid #e4dfd3", boxShadow: "0 10px 40px rgba(0,0,0,0.25)" }}>
       <div className="flex items-center justify-between mb-3">
         <h3 style={{ color: BRAND.navy }} className="text-base font-semibold">{contacto.nombre}</h3>
-        <button onClick={onCerrar} className="text-xs" style={{ color: "#8a8578" }}>Cerrar</button>
+        <button onClick={onCerrar} className="text-xs px-2 py-1 rounded-md" style={{ color: "#4a4740", background: "#f1efe8" }}>Cerrar ✕</button>
       </div>
 
       <div className="rounded-lg p-3 mb-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
@@ -310,6 +315,7 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
           <button onClick={agregarNota} className="text-xs px-3 py-1.5 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>Agregar</button>
         </div>
       </div>
+    </div>
     </div>
   );
 }
