@@ -6,6 +6,7 @@ import { MARCAS } from "@/lib/panel/constants";
 import { contactosApi, segmentosApi } from "@/lib/panel/api";
 import PanelHoy from "@/components/sections/panel/PanelHoy";
 import PanelSegmentos from "@/components/sections/panel/PanelSegmentos";
+import PanelEnvios from "@/components/sections/panel/PanelEnvios";
 import PanelContactos from "@/components/sections/panel/PanelContactos";
 
 // Punto de entrada único del Panel de Prospección (CRM interno de Marisa).
@@ -112,6 +113,16 @@ export default function PanelSection({ vista }) {
           showToast={showToast}
         />
       )}
+      {vista === "panel-envios" && (
+        <PanelEnvios
+          segmentos={segmentosFiltrados}
+          contactos={contactosFiltrados}
+          marcaFiltro={marcaFiltro}
+          recargar={cargarTodo}
+          showToast={showToast}
+        />
+      )}
+
       {vista === "panel-contactos" && (
         <PanelContactos
           contactos={contactosFiltrados}
