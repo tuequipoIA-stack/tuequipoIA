@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { fillTemplate, gmailLink, gmailAuthUserKey, segNombre, waLink } from "@/lib/panel/constants";
 import { segmentosApi, interaccionesApi } from "@/lib/panel/api";
@@ -98,7 +99,13 @@ export default function PanelEnvios({ segmentos, contactos, marcaFiltro, recarga
   if (!visibles.length) {
     return (
       <div>
-        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Envíos</h2>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Envíos</h2>
+          <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+            <RefreshCw size={13} />
+            Actualizar
+          </button>
+        </div>
         <p style={{ color: "#8a8578" }} className="text-sm">Todavía no hay segmentos aprobados. Generá y aprobá un mensaje en "Segmentos" para que aparezca acá, listo para mandar.</p>
       </div>
     );
@@ -106,7 +113,13 @@ export default function PanelEnvios({ segmentos, contactos, marcaFiltro, recarga
 
   return (
     <div>
-      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Envíos</h2>
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Envíos</h2>
+        <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+          <RefreshCw size={13} />
+          Actualizar
+        </button>
+      </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">Segmentos aprobados. Un click en "Enviar a todos" manda el email personalizado a cada contacto de la lista.</p>
 
       <div className="space-y-4">
