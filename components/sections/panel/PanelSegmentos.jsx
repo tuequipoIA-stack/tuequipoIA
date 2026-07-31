@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, RefreshCw, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, RefreshCw, Check, Folder, FolderPlus, Trash2 } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { MARCAS, segNombre } from "@/lib/panel/constants";
-import { segmentosApi } from "@/lib/panel/api";
+import { segmentosApi, gruposSegmentosApi } from "@/lib/panel/api";
 
 // Colores suaves por marca para poder distinguir de un vistazo, ya que
-// ahora Segmentos muestra las dos marcas juntas (sin las pestañas
+// Segmentos muestra las dos marcas juntas (sin las pestañas
 // "LiftyFive"/"Tu Equipo IA" de arriba, que quedaron reemplazadas por el
 // filtro de marca de este panel).
 const MARCA_ESTILO = {
@@ -29,29 +29,54 @@ function Chip({ children }) {
 // Barra de acciones en lote: aparece cuando hay segmentos seleccionados con
 // checkbox (después de filtrar). Deja generar con IA los que falten y/o
 // aprobar de una los que ya tienen mensaje, todo sobre el grupo elegido.
-function BarraAccionesSegmentos({ cantidad, pendientesGenerar, listosAprobar, onGenerarGrupo, onAprobarGrupo, onCancelar, procesando }) {
+// Además, esa misma selección se puede guardar con un nombre como "grupo de
+// segmentos" persistente, que después aparece en la pestaña "Grupos".
+function BarraAccionesSegmentos({
+  cantidad, pendientesGenerar, listosAprobar, onGenerarGrupo, onAprobarGrupo, onCancelar, procesando,
+  nombreGrupo, setNombreGrupo, onCrearGrupo, creandoGrupo,
+}) {
   return (
-    <div className="flex items-center gap-2 flex-wrap rounded-lg p-2.5 mb-3" style={{ background: "#eef3fb", border: "1px solid #cfe0f5" }}>
-      <span className="text-sm font-semibold" style={{ color: BRAND.navy }}>{cantidad} seleccionado{cantidad === 1 ? "" : "s"}</span>
-      <button
-        disabled={procesando || !pendientesGenerar}
-        onClick={onGenerarGrupo}
-        className="text-xs px-3 py-1.5 rounded-md text-white disabled:opacity-40"
-        style={{ background: BRAND.navy }}
-      >
-        {procesando ? "Procesando..." : `✨ Generar con IA (${pendientesGenerar} sin generar)`}
-      </button>
-      <button
-        disabled={procesando || !listosAprobar}
-        onClick={onAprobarGrupo}
-        className="text-xs px-3 py-1.5 rounded-md text-white disabled:opacity-40"
-        style={{ background: "#1f9e57" }}
-      >
-        {procesando ? "Procesando..." : `✅ Aprobar y pasar a Envíos (${listosAprobar} listos)`}
-      </button>
-      <button onClick={onCancelar} className="text-xs px-3 py-1.5 rounded-md ml-auto" style={{ background: "#f1efe8", color: "#4a4740" }}>
-        Cancelar selección
-      </button>
+    <div className="rounded-lg p-2.5 mb-3" style={{ background: "#eef3fb", border: "1px solid #cfe0f5" }}>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-sm font-semibold" style={{ color: BRAND.navy }}>{cantidad} seleccionado{cantidad === 1 ? "" : "s"}</span>
+        <button
+          disabled={procesando || !pendientesGenerar}
+          onClick={onGenerarGrupo}
+          className="text-xs px-3 py-1.5 rounded-md text-white disabled:opacity-40"
+          style={{ background: BRAND.navy }}
+        >
+          {procesando ? "Procesando..." : `✨ Generar con IA (${pendientesGenerar} sin generar)`}
+        </button>
+        <button
+          disabled={procesando || !listosAprobar}
+          onClick={onAprobarGrupo}
+          className="text-xs px-3 py-1.5 rounded-md text-white disabled:opacity-40"
+          style={{ background: "#1f9e57" }}
+        >
+          {procesando ? "Procesando..." : `✅ Aprobar y pasar a Envíos (${listosAprobar} listos)`}
+        </button>
+        <button onClick={onCancelar} className="text-xs px-3 py-1.5 rounded-md ml-auto" style={{ background: "#f1efe8", color: "#4a4740" }}>
+          Cancelar selección
+        </button>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap mt-2 pt-2" style={{ borderTop: "1px solid #cfe0f5" }}>
+        <FolderPlus size={14} style={{ color: BRAND.navy, flexShrink: 0 }} />
+        <input
+          value={nombreGrupo}
+          onChange={(e) => setNombreGrupo(e.target.value)}
+          placeholder="Nombre para guardar esta selección como grupo..."
+          className="text-sm rounded-md p-1.5 flex-1"
+          style={{ border: "1px solid #ddd", minWidth: 220 }}
+        />
+        <button
+          disabled={creandoGrupo || !nombreGrupo.trim()}
+          onClick={onCrearGrupo}
+          className="text-xs px-3 py-1.5 rounded-md text-white disabled:opacity-40"
+          style={{ background: BRAND.navy }}
+        >
+          {creandoGrupo ? "Guardando..." : "Guardar como grupo"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -155,8 +180,12 @@ function PanelFiltros({
 // lista tildable de segmentos puntuales) que se aplica con un botón y se
 // puede limpiar con "Borrar filtros". También se puede refrescar a mano
 // con "Actualizar", y seleccionar varios segmentos con checkbox para
-// generar y/o aprobar ese grupo de una sola vez.
+// generar y/o aprobar ese grupo de una sola vez — o guardarlos como un
+// "grupo de segmentos" con nombre propio, visible en la pestaña "Grupos",
+// desde donde también se puede generar con IA en bloque.
 export default function PanelSegmentos({ segmentos, contactos, recargar, showToast }) {
+  const [vista, setVista] = useState("segmentos"); // "segmentos" | "grupos"
+
   const [abierto, setAbierto] = useState(null);
   const [generando, setGenerando] = useState(null);
   const [guardando, setGuardando] = useState(null);
@@ -174,7 +203,37 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
   const [estadoPendiente, setEstadoPendiente] = useState("todos");
   const [estadoAplicado, setEstadoAplicado] = useState("todos");
 
-  const base = segmentos.filter((s) => !s.aprobado);
+  // Grupos de segmentos: colecciones con nombre, guardadas en la tabla
+  // grupos_segmentos, para agrupar segmentos ya filtrados/seleccionados y
+  // poder volver a generarlos con IA en bloque más tarde.
+  const [grupos, setGrupos] = useState([]);
+  const [cargandoGrupos, setCargandoGrupos] = useState(false);
+  const [nombreGrupo, setNombreGrupo] = useState("");
+  const [creandoGrupo, setCreandoGrupo] = useState(false);
+  const [grupoAbierto, setGrupoAbierto] = useState(null);
+  const [procesandoGrupoId, setProcesandoGrupoId] = useState(null);
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(null);
+
+  const cargarGrupos = async () => {
+    setCargandoGrupos(true);
+    try {
+      const data = await gruposSegmentosApi.list();
+      setGrupos(data);
+    } catch (e) {
+      showToast("Error al cargar grupos: " + e.message);
+    }
+    setCargandoGrupos(false);
+  };
+
+  useEffect(() => {
+    cargarGrupos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Un segmento sin contactos no sirve para nada acá (no hay a quién
+  // mandarle el mensaje), así que no tiene sentido que aparezca en la
+  // lista principal ni en los filtros.
+  const base = segmentos.filter((s) => !s.aprobado && contactos.some((c) => c.segmento_id === s.id));
 
   const nombresUnicos = Array.from(new Set(base.map((s) => segNombre(s)))).sort((a, b) => a.localeCompare(b));
 
@@ -254,6 +313,7 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
   const actualizar = () => {
     setActualizando(true);
     recargar();
+    cargarGrupos();
     setTimeout(() => setActualizando(false), 500);
   };
 
@@ -344,6 +404,154 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
     setProcesandoGrupo(false);
   };
 
+  const crearGrupo = async () => {
+    if (!nombreGrupo.trim() || !seleccionados.size) return;
+    setCreandoGrupo(true);
+    try {
+      await gruposSegmentosApi.create(nombreGrupo.trim(), Array.from(seleccionados));
+      showToast("Grupo creado");
+      setNombreGrupo("");
+      limpiarSeleccion();
+      await cargarGrupos();
+      setVista("grupos");
+    } catch (e) {
+      showToast("Error al crear grupo: " + e.message);
+    }
+    setCreandoGrupo(false);
+  };
+
+  const eliminarGrupo = async (id) => {
+    try {
+      await gruposSegmentosApi.remove(id);
+      showToast("Grupo eliminado");
+      setGrupoAbierto((prev) => (prev === id ? null : prev));
+      setConfirmandoEliminar(null);
+      await cargarGrupos();
+    } catch (e) {
+      showToast("Error al eliminar: " + e.message);
+    }
+  };
+
+  const miembrosDe = (grupo) => {
+    const ids = new Set(grupo.segmento_ids || []);
+    return segmentos.filter((s) => ids.has(s.id));
+  };
+
+  const generarMiembrosGrupo = async (grupo) => {
+    const pendientes = miembrosDe(grupo).filter((s) => !s.aprobado && !s.mensaje_base_email);
+    if (!pendientes.length) return;
+    setProcesandoGrupoId(grupo.id);
+    let ok = 0, fallidos = 0;
+    for (const seg of pendientes) {
+      try {
+        await segmentosApi.generar(seg.id);
+        ok++;
+      } catch {
+        fallidos++;
+      }
+    }
+    showToast(`${ok} mensaje${ok === 1 ? "" : "s"} generado${ok === 1 ? "" : "s"}${fallidos ? `, ${fallidos} con error` : ""}`);
+    recargar();
+    setProcesandoGrupoId(null);
+  };
+
+  const aprobarMiembrosGrupo = async (grupo) => {
+    const listos = miembrosDe(grupo).filter((s) => !s.aprobado && !!s.mensaje_base_email);
+    if (!listos.length) return;
+    setProcesandoGrupoId(grupo.id);
+    let ok = 0, fallidos = 0;
+    for (const seg of listos) {
+      try {
+        await segmentosApi.update(seg.id, { aprobado: true });
+        ok++;
+      } catch {
+        fallidos++;
+      }
+    }
+    showToast(`${ok} aprobado${ok === 1 ? "" : "s"} — pasaron a Envíos${fallidos ? `, ${fallidos} con error` : ""}`);
+    recargar();
+    setProcesandoGrupoId(null);
+  };
+
+  // Tarjeta de un segmento individual: se reutiliza tanto en la lista
+  // principal (con checkbox de selección) como dentro de un grupo abierto
+  // (sin checkbox, ya que ahí las acciones en lote son por grupo entero).
+  const renderTarjeta = (seg, { mostrarCheckbox = true } = {}) => {
+    const enSegmento = contactos.filter((c) => c.segmento_id === seg.id);
+    const abiertoEste = abierto === seg.id;
+    const marcado = seleccionados.has(seg.id);
+    const est = estiloMarca(seg.marca_origen);
+    return (
+      <div
+        key={seg.id}
+        className="rounded-xl overflow-hidden"
+        style={{ background: "#ffffff", border: marcado ? `1px solid ${BRAND.navy}` : "1px solid #e4dfd3", borderLeft: `4px solid ${est.border}` }}
+      >
+        <div className="w-full flex items-center justify-between flex-wrap gap-2 p-4" style={{ background: abiertoEste ? "#faf9f6" : marcado ? "#f5f9ff" : "transparent" }}>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {mostrarCheckbox && (
+              <input
+                type="checkbox"
+                checked={marcado}
+                onClick={(e) => e.stopPropagation()}
+                onChange={() => toggleSeleccion(seg.id)}
+              />
+            )}
+            <button onClick={() => toggleAbierto(seg)} className="flex-1 min-w-0 text-left">
+              <strong style={{ color: BRAND.navy }}>{segNombre(seg)}</strong>{" "}
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: est.bg, color: est.text }}>{seg.marca_origen}</span>{" "}
+              <span style={{ color: "#8a8578" }} className="text-xs">{enSegmento.length} contacto(s)</span>{" "}
+              {seg.aprobado && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold ml-1" style={{ background: "#eaf3de", color: "#27500a" }}>Ya en Envíos</span>
+              )}
+              {!seg.aprobado && !seg.mensaje_base_email && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold ml-1" style={{ background: "#faeeda", color: "#854f0b" }}>Sin generar</span>
+              )}
+            </button>
+          </div>
+          <button onClick={() => toggleAbierto(seg)}>
+            <ChevronDown size={16} style={{ color: "#8a8578", transform: abiertoEste ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }} />
+          </button>
+        </div>
+
+        {abiertoEste && (
+          <div className="px-4 pb-4">
+            {!seg.mensaje_base_email ? (
+              <div className="flex items-center gap-2 pt-1">
+                <p style={{ color: "#8a8578" }} className="text-sm flex-1">Sin mensaje generado todavía.</p>
+                <button disabled={generando === seg.id} onClick={() => generar(seg)} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>
+                  {generando === seg.id ? "Generando..." : "✨ Generar con IA"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2 pt-1">
+                <input value={campos.asunto_email} onChange={(e) => setCampos({ ...campos, asunto_email: e.target.value })} placeholder="Asunto email" className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
+                <textarea value={campos.mensaje_base_email} onChange={(e) => setCampos({ ...campos, mensaje_base_email: e.target.value })} placeholder="Mensaje base email" rows={4} className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
+                <textarea value={campos.mensaje_base_whatsapp} onChange={(e) => setCampos({ ...campos, mensaje_base_whatsapp: e.target.value })} placeholder="Mensaje base WhatsApp" rows={3} className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
+                <input value={campos.hooks} onChange={(e) => setCampos({ ...campos, hooks: e.target.value })} placeholder="Hooks separados por |" className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
+                <div>{campos.hooks.split("|").map((h) => h.trim()).filter(Boolean).map((h, i) => <Chip key={i}>{h}</Chip>)}</div>
+
+                {!seg.aprobado && (
+                  <div className="flex gap-2 flex-wrap items-center pt-1">
+                    <button disabled={generando === seg.id} onClick={() => generar(seg)} className="text-xs px-3 py-1.5 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>
+                      {generando === seg.id ? "Regenerando..." : "Regenerar con IA"}
+                    </button>
+                    <button disabled={guardando === seg.id} onClick={() => guardarCambios(seg)} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>
+                      {guardando === seg.id ? "Guardando..." : "Guardar cambios"}
+                    </button>
+                    <button onClick={() => aprobar(seg)} className="text-xs px-3 py-1.5 rounded-md text-white ml-auto" style={{ background: "#1f9e57" }}>
+                      Aprobar y pasar a Envíos
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between gap-2 mb-1">
@@ -358,111 +566,151 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
           Actualizar
         </button>
       </div>
-      <p style={{ color: "#6b6759" }} className="text-sm mb-4">Todas las marcas juntas, diferenciadas por color. Generá el mensaje con IA, revisalo y aprobalo — al aprobarlo pasa a "Envíos", listo para mandar.</p>
+      <p style={{ color: "#6b6759" }} className="text-sm mb-4">Todas las marcas juntas, diferenciadas por color. Generá el mensaje con IA, revisalo y aprobalo — al aprobarlo pasa a "Envíos", listo para mandar. Seleccioná varios y guardalos como grupo para volver a generarlos juntos desde "Grupos".</p>
 
-      <PanelFiltros
-        marcasPendiente={marcasPendiente}
-        toggleMarcaPendiente={toggleMarcaPendiente}
-        nombresUnicos={nombresUnicos}
-        segNombresPendiente={segNombresPendiente}
-        toggleSegNombrePendiente={toggleSegNombrePendiente}
-        buscarChecklist={buscarChecklist}
-        setBuscarChecklist={setBuscarChecklist}
-        estadoPendiente={estadoPendiente}
-        setEstadoPendiente={setEstadoPendiente}
-        onAplicar={aplicarFiltros}
-        onBorrar={borrarFiltros}
-        hayFiltrosAplicados={hayFiltrosAplicados}
-      />
+      <div className="flex items-center gap-2 mb-4">
+        <button
+          onClick={() => setVista("segmentos")}
+          className="text-sm px-3 py-1.5 rounded-md font-semibold"
+          style={vista === "segmentos" ? { background: BRAND.navy, color: "#fff" } : { background: "#f1efe8", color: "#4a4740" }}
+        >
+          Segmentos
+        </button>
+        <button
+          onClick={() => setVista("grupos")}
+          className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md font-semibold"
+          style={vista === "grupos" ? { background: BRAND.navy, color: "#fff" } : { background: "#f1efe8", color: "#4a4740" }}
+        >
+          <Folder size={14} />
+          Grupos{grupos.length > 0 ? ` (${grupos.length})` : ""}
+        </button>
+      </div>
 
-      {seleccionados.size > 0 && (
-        <BarraAccionesSegmentos
-          cantidad={seleccionados.size}
-          pendientesGenerar={pendientesGenerar.length}
-          listosAprobar={listosAprobar.length}
-          onGenerarGrupo={generarGrupo}
-          onAprobarGrupo={aprobarGrupo}
-          onCancelar={limpiarSeleccion}
-          procesando={procesandoGrupo}
-        />
+      {vista === "segmentos" && (
+        <>
+          <PanelFiltros
+            marcasPendiente={marcasPendiente}
+            toggleMarcaPendiente={toggleMarcaPendiente}
+            nombresUnicos={nombresUnicos}
+            segNombresPendiente={segNombresPendiente}
+            toggleSegNombrePendiente={toggleSegNombrePendiente}
+            buscarChecklist={buscarChecklist}
+            setBuscarChecklist={setBuscarChecklist}
+            estadoPendiente={estadoPendiente}
+            setEstadoPendiente={setEstadoPendiente}
+            onAplicar={aplicarFiltros}
+            onBorrar={borrarFiltros}
+            hayFiltrosAplicados={hayFiltrosAplicados}
+          />
+
+          {seleccionados.size > 0 && (
+            <BarraAccionesSegmentos
+              cantidad={seleccionados.size}
+              pendientesGenerar={pendientesGenerar.length}
+              listosAprobar={listosAprobar.length}
+              onGenerarGrupo={generarGrupo}
+              onAprobarGrupo={aprobarGrupo}
+              onCancelar={limpiarSeleccion}
+              procesando={procesandoGrupo}
+              nombreGrupo={nombreGrupo}
+              setNombreGrupo={setNombreGrupo}
+              onCrearGrupo={crearGrupo}
+              creandoGrupo={creandoGrupo}
+            />
+          )}
+
+          {!base.length ? (
+            <p style={{ color: "#8a8578" }} className="text-sm">
+              No hay segmentos en borrador con contactos. Se crean solos al cargar contactos por CSV o a mano en "Contactos", y los que ya aprobaste están en "Envíos".
+            </p>
+          ) : !visibles.length ? (
+            <p style={{ color: "#8a8578" }} className="text-sm">Ningún segmento coincide con esos filtros.</p>
+          ) : (
+            <div className="space-y-3">
+              {visibles.map((seg) => renderTarjeta(seg))}
+            </div>
+          )}
+        </>
       )}
 
-      {!base.length ? (
-        <p style={{ color: "#8a8578" }} className="text-sm">
-          No hay segmentos en borrador. Se crean solos al cargar contactos por CSV o a mano en "Contactos", y los que ya aprobaste están en "Envíos".
-        </p>
-      ) : !visibles.length ? (
-        <p style={{ color: "#8a8578" }} className="text-sm">Ningún segmento coincide con esos filtros.</p>
-      ) : (
-        <div className="space-y-3">
-          {visibles.map((seg) => {
-            const enSegmento = contactos.filter((c) => c.segmento_id === seg.id);
-            const abiertoEste = abierto === seg.id;
-            const marcado = seleccionados.has(seg.id);
-            const est = estiloMarca(seg.marca_origen);
-            return (
-              <div
-                key={seg.id}
-                className="rounded-xl overflow-hidden"
-                style={{ background: "#ffffff", border: marcado ? `1px solid ${BRAND.navy}` : "1px solid #e4dfd3", borderLeft: `4px solid ${est.border}` }}
-              >
-                <div className="w-full flex items-center justify-between flex-wrap gap-2 p-4" style={{ background: abiertoEste ? "#faf9f6" : marcado ? "#f5f9ff" : "transparent" }}>
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <input
-                      type="checkbox"
-                      checked={marcado}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={() => toggleSeleccion(seg.id)}
-                    />
-                    <button onClick={() => toggleAbierto(seg)} className="flex-1 min-w-0 text-left">
-                      <strong style={{ color: BRAND.navy }}>{segNombre(seg)}</strong>{" "}
-                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: est.bg, color: est.text }}>{seg.marca_origen}</span>{" "}
-                      <span style={{ color: "#8a8578" }} className="text-xs">{enSegmento.length} contacto(s)</span>{" "}
-                      {!seg.mensaje_base_email && (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-semibold ml-1" style={{ background: "#faeeda", color: "#854f0b" }}>Sin generar</span>
-                      )}
-                    </button>
-                  </div>
-                  <button onClick={() => toggleAbierto(seg)}>
-                    <ChevronDown size={16} style={{ color: "#8a8578", transform: abiertoEste ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }} />
-                  </button>
-                </div>
-
-                {abiertoEste && (
-                  <div className="px-4 pb-4">
-                    {!seg.mensaje_base_email ? (
-                      <div className="flex items-center gap-2 pt-1">
-                        <p style={{ color: "#8a8578" }} className="text-sm flex-1">Sin mensaje generado todavía.</p>
-                        <button disabled={generando === seg.id} onClick={() => generar(seg)} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>
-                          {generando === seg.id ? "Generando..." : "✨ Generar con IA"}
+      {vista === "grupos" && (
+        <div>
+          {cargandoGrupos ? (
+            <p style={{ color: "#8a8578" }} className="text-sm">Cargando grupos...</p>
+          ) : !grupos.length ? (
+            <p style={{ color: "#8a8578" }} className="text-sm">
+              Todavía no creaste ningún grupo. En la pestaña "Segmentos", seleccioná varios con el checkbox y guardalos con un nombre desde la barra que aparece abajo.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {grupos.map((grupo) => {
+                const miembros = miembrosDe(grupo);
+                const pendientes = miembros.filter((s) => !s.aprobado && !s.mensaje_base_email);
+                const listos = miembros.filter((s) => !s.aprobado && !!s.mensaje_base_email);
+                const abiertoEste = grupoAbierto === grupo.id;
+                const procesandoEste = procesandoGrupoId === grupo.id;
+                return (
+                  <div key={grupo.id} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                    <div className="w-full flex items-center justify-between flex-wrap gap-2 p-4" style={{ background: abiertoEste ? "#faf9f6" : "transparent" }}>
+                      <button onClick={() => setGrupoAbierto(abiertoEste ? null : grupo.id)} className="flex-1 min-w-0 text-left flex items-center gap-2">
+                        <Folder size={15} style={{ color: BRAND.navy, flexShrink: 0 }} />
+                        <strong style={{ color: BRAND.navy }}>{grupo.nombre}</strong>{" "}
+                        <span style={{ color: "#8a8578" }} className="text-xs">{miembros.length} segmento{miembros.length === 1 ? "" : "s"}</span>
+                      </button>
+                      <div className="flex items-center gap-2">
+                        {confirmandoEliminar === grupo.id ? (
+                          <>
+                            <span className="text-xs" style={{ color: "#8a8578" }}>¿Eliminar grupo?</span>
+                            <button onClick={() => eliminarGrupo(grupo.id)} className="text-xs px-2.5 py-1 rounded-md text-white" style={{ background: "#c2483d" }}>Sí, eliminar</button>
+                            <button onClick={() => setConfirmandoEliminar(null)} className="text-xs px-2.5 py-1 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>Cancelar</button>
+                          </>
+                        ) : (
+                          <button onClick={() => setConfirmandoEliminar(grupo.id)} title="Eliminar grupo" className="p-1.5 rounded-md" style={{ color: "#8a8578" }}>
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                        <button onClick={() => setGrupoAbierto(abiertoEste ? null : grupo.id)}>
+                          <ChevronDown size={16} style={{ color: "#8a8578", transform: abiertoEste ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }} />
                         </button>
                       </div>
-                    ) : (
-                      <div className="space-y-2 pt-1">
-                        <input value={campos.asunto_email} onChange={(e) => setCampos({ ...campos, asunto_email: e.target.value })} placeholder="Asunto email" className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
-                        <textarea value={campos.mensaje_base_email} onChange={(e) => setCampos({ ...campos, mensaje_base_email: e.target.value })} placeholder="Mensaje base email" rows={4} className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
-                        <textarea value={campos.mensaje_base_whatsapp} onChange={(e) => setCampos({ ...campos, mensaje_base_whatsapp: e.target.value })} placeholder="Mensaje base WhatsApp" rows={3} className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
-                        <input value={campos.hooks} onChange={(e) => setCampos({ ...campos, hooks: e.target.value })} placeholder="Hooks separados por |" className="w-full text-sm rounded-md p-2" style={{ border: "1px solid #ddd" }} />
-                        <div>{campos.hooks.split("|").map((h) => h.trim()).filter(Boolean).map((h, i) => <Chip key={i}>{h}</Chip>)}</div>
+                    </div>
 
-                        <div className="flex gap-2 flex-wrap items-center pt-1">
-                          <button disabled={generando === seg.id} onClick={() => generar(seg)} className="text-xs px-3 py-1.5 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>
-                            {generando === seg.id ? "Regenerando..." : "Regenerar con IA"}
-                          </button>
-                          <button disabled={guardando === seg.id} onClick={() => guardarCambios(seg)} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>
-                            {guardando === seg.id ? "Guardando..." : "Guardar cambios"}
-                          </button>
-                          <button onClick={() => aprobar(seg)} className="text-xs px-3 py-1.5 rounded-md text-white ml-auto" style={{ background: "#1f9e57" }}>
-                            Aprobar y pasar a Envíos
-                          </button>
-                        </div>
+                    {abiertoEste && (
+                      <div className="px-4 pb-4">
+                        {!miembros.length ? (
+                          <p style={{ color: "#8a8578" }} className="text-sm">Los segmentos de este grupo ya no existen.</p>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-2 flex-wrap mb-3">
+                              <button
+                                disabled={procesandoEste || !pendientes.length}
+                                onClick={() => generarMiembrosGrupo(grupo)}
+                                className="text-xs px-3 py-1.5 rounded-md text-white disabled:opacity-40"
+                                style={{ background: BRAND.navy }}
+                              >
+                                {procesandoEste ? "Procesando..." : `✨ Generar con IA (${pendientes.length} sin generar)`}
+                              </button>
+                              <button
+                                disabled={procesandoEste || !listos.length}
+                                onClick={() => aprobarMiembrosGrupo(grupo)}
+                                className="text-xs px-3 py-1.5 rounded-md text-white disabled:opacity-40"
+                                style={{ background: "#1f9e57" }}
+                              >
+                                {procesandoEste ? "Procesando..." : `✅ Aprobar y pasar a Envíos (${listos.length} listos)`}
+                              </button>
+                            </div>
+                            <div className="space-y-3">
+                              {miembros.map((seg) => renderTarjeta(seg, { mostrarCheckbox: false }))}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
