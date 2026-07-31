@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const CAMPOS_EDITABLES = [
   "nombre", "empresa", "puesto", "industria", "pais", "telefono", "email",
-  "estado", "canal_preferido", "proximo_seguimiento", "segmento_id",
+  "estado", "canal_preferido", "proximo_seguimiento", "segmento_id", "observaciones",
 ];
 
 export async function PATCH(request, { params }) {
