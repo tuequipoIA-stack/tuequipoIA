@@ -3,8 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { BRAND } from "@/lib/constants";
-import { ESTADOS, ESTADO_COLOR, MARCAS, labelEstado, segNombre } from "@/lib/panel/constants";
+import { ESTADOS, ESTADO_COLOR, MARCAS, labelEstado, segNombre, fillTemplate, gmailLink, gmailAuthUserKey } from "@/lib/panel/constants";
 import { contactosApi, interaccionesApi } from "@/lib/panel/api";
+import { inferirDolor } from "@/lib/panel/coldEmailMatrix";
+
+function gmailAuthUser() {
+  if (typeof window === "undefined") return "0";
+  return window.localStorage.getItem(gmailAuthUserKey()) || "0";
+}
 
 function parseCSV(text) {
   text = text.replace(/^﻿/, "").replace(/\r\n/g, "\n");
@@ -323,7 +329,7 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
   );
 }
 
-function BarraAcciones({ cantidad, marcaDestino, setMarcaDestino, onMigrar, onEliminar, onCancelar, procesando }) {
+function BarraAcciones({ cantidad, marcaDestino, setMarcaDestino, onMigrar, onEliminar, onGenerarIA, onCancelar, procesando }) {
   return (
     <div className="flex items-center gap-2 flex-wrap rounded-lg p-2.5 mb-3" style={{ background: "#eef3fb", border: "1px solid #cfe0f5" }}>
       <span className="text-sm font-semibold" style={{ color: BRAND.navy }}>{cantidad} seleccionado{cantidad === 1 ? "" : "s"}</span>
@@ -337,9 +343,135 @@ function BarraAcciones({ cantidad, marcaDestino, setMarcaDestino, onMigrar, onEl
       <button disabled={procesando} onClick={onEliminar} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: "#b3453f" }}>
         Eliminar
       </button>
+      <button onClick={onGenerarIA} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: "#2563eb" }}>
+        ✨ Generar email con IA
+      </button>
       <button onClick={onCancelar} className="text-xs px-3 py-1.5 rounded-md ml-auto" style={{ background: "#f1efe8", color: "#4a4740" }}>
         Cancelar selección
       </button>
+    </div>
+  );
+}
+
+// Genera, para un grupo de contactos elegidos a mano (checkboxes), una
+// sola plantilla de cold email con IA (asunto A/B + cuerpo con
+// {{nombre}}/{{empresa}} como placeholders) y arma con eso una cola de
+// envío personalizada por contacto, igual mecánica que la cola de envío
+// por segmento pero para una selección libre en vez de un segmento fijo.
+function GeneradorGrupoIA({ contactos, onCerrar, showToast }) {
+  const marca = contactos[0]?.marca_origen;
+  const marcasDistintas = new Set(contactos.map((c) => c.marca_origen)).size > 1;
+
+  const dolorPreview = useMemo(() => {
+    if (marcasDistintas || !marca) return null;
+    const conteo = {};
+    contactos.forEach((c) => {
+      const { dolor } = inferirDolor(marca, c.industria, c.puesto);
+      conteo[dolor] = (conteo[dolor] || 0) + 1;
+    });
+    const top = Object.entries(conteo).sort((a, b) => b[1] - a[1])[0];
+    return top ? top[0] : null;
+  }, [contactos, marca, marcasDistintas]);
+
+  const [triggerEvent, setTriggerEvent] = useState("");
+  const [objetivo, setObjetivo] = useState("Agendar llamada de 15 min");
+  const [generando, setGenerando] = useState(false);
+  const [resultado, setResultado] = useState(null);
+  const [enviados, setEnviados] = useState({});
+
+  const generar = async () => {
+    setGenerando(true);
+    try {
+      const r = await contactosApi.generarGrupo({ ids: contactos.map((c) => c.id), trigger_event: triggerEvent, objetivo });
+      setResultado(r);
+    } catch (e) {
+      showToast("Error al generar: " + e.message);
+    }
+    setGenerando(false);
+  };
+
+  const marcarEnviado = async (c, mensaje) => {
+    try {
+      await interaccionesApi.create({ contacto_id: c.id, canal: "email", tipo: "mensaje_enviado", contenido: mensaje });
+      setEnviados((prev) => ({ ...prev, [c.id]: true }));
+    } catch (e) {
+      showToast("No se pudo registrar el envío: " + e.message);
+    }
+  };
+
+  return (
+    <div className="rounded-xl p-4 mb-3" style={{ background: "#faf9f6", border: "1px solid #e4dfd3" }}>
+      <div className="flex items-center justify-between mb-2">
+        <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold">Generar email con IA para el grupo ({contactos.length})</h3>
+        <button onClick={onCerrar} className="text-xs px-2 py-1 rounded-md" style={{ color: "#4a4740", background: "#f1efe8" }}>Cerrar ✕</button>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {contactos.map((c) => (
+          <span key={c.id} className="text-xs px-2.5 py-1 rounded-full" style={{ background: "#f1efe8", color: "#4a4740" }}>{c.empresa || c.nombre}</span>
+        ))}
+      </div>
+
+      {marcasDistintas ? (
+        <p className="text-sm" style={{ color: "#791f1f" }}>Los contactos seleccionados son de marcas distintas. Elegí contactos de una sola marca para generar el email en grupo.</p>
+      ) : !resultado ? (
+        <div className="rounded-lg p-3" style={{ background: "#ffffff", border: "1px solid #cfe0f5" }}>
+          <p className="text-xs mb-2" style={{ color: "#8a8578" }}>Comparten marca <strong style={{ color: "#4a4740" }}>{marca}</strong>. La IA arma una sola plantilla con variables por nombre y empresa, y un preview personalizado por cada contacto.</p>
+          {dolorPreview && (
+            <div className="mb-3">
+              <span className="text-xs block mb-1" style={{ color: "#8a8578" }}>Dolor inferido (revisalo antes de generar)</span>
+              <div className="text-sm rounded-md p-2" style={{ background: "#e6f1fb", color: "#0c447c" }}>{dolorPreview}</div>
+            </div>
+          )}
+          <div className="flex gap-2 flex-wrap mb-3">
+            <input value={triggerEvent} onChange={(e) => setTriggerEvent(e.target.value)} placeholder="Trigger event (opcional)" className="flex-1 text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }} />
+            <select value={objetivo} onChange={(e) => setObjetivo(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
+              <option>Agendar llamada de 15 min</option>
+              <option>Ofrecer demo</option>
+              <option>Enviar recurso / caso</option>
+            </select>
+          </div>
+          <button disabled={generando} onClick={generar} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>
+            {generando ? "Generando..." : "✨ Generar con IA"}
+          </button>
+        </div>
+      ) : (
+        <div>
+          <div className="rounded-lg p-3 mb-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+            <strong className="text-xs" style={{ color: "#8a8578" }}>Plantilla base</strong>
+            <p className="text-sm mt-1" style={{ color: "#4a4740" }}><strong>Asunto A:</strong> {resultado.asunto_a}</p>
+            <p className="text-sm" style={{ color: "#4a4740" }}><strong>Asunto B:</strong> {resultado.asunto_b}</p>
+            <p className="text-sm whitespace-pre-wrap mt-1" style={{ color: "#4a4740" }}>{resultado.cuerpo}</p>
+            <button onClick={() => setResultado(null)} className="text-xs px-2.5 py-1 rounded-md mt-2" style={{ background: "#f1efe8", color: "#4a4740" }}>Regenerar</button>
+          </div>
+
+          <strong className="text-xs block mb-2" style={{ color: "#8a8578" }}>Cola de envío — {contactos.length} preview{contactos.length === 1 ? "" : "s"} personalizado{contactos.length === 1 ? "" : "s"}</strong>
+          <div className="space-y-2">
+            {contactos.map((c) => {
+              const asunto = fillTemplate(resultado.asunto_a, c);
+              const mensaje = fillTemplate(resultado.cuerpo, c);
+              const href = gmailLink(c.email, asunto, mensaje, gmailAuthUser());
+              const ya = !!enviados[c.id];
+              return (
+                <div key={c.id} className="flex items-start justify-between gap-3 rounded-lg p-2.5" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+                  <div className="text-sm flex-1">
+                    <strong style={{ color: BRAND.navy }}>{c.nombre}</strong> <span style={{ color: "#8a8578" }}>{c.empresa}</span>
+                    <p className="text-xs mt-1" style={{ color: "#6b6759" }}>{asunto}</p>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    {c.email ? (
+                      <a href={href} target="_blank" rel="noreferrer" onClick={() => marcarEnviado(c, mensaje)} className="text-[11px] font-bold px-2.5 py-1 rounded-md text-white" style={{ background: "#2563eb" }}>Abrir Gmail</a>
+                    ) : (
+                      <span className="text-[11px]" style={{ color: "#8a8578" }}>Sin email</span>
+                    )}
+                    {ya && <span className="text-[11px] px-2.5 py-1 rounded-md" style={{ background: "#eaf3de", color: "#27500a" }}>Registrado</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -354,6 +486,7 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
   const [seleccionados, setSeleccionados] = useState(() => new Set());
   const [marcaDestino, setMarcaDestino] = useState(MARCAS[0]);
   const [procesando, setProcesando] = useState(false);
+  const [grupoIAAbierto, setGrupoIAAbierto] = useState(false);
 
   // La pestaña "Marca:" de arriba filtra qué contactos se ven. Si el
   // selector de importación no sigue esa misma marca, es fácil subir un
@@ -411,7 +544,7 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
     });
   };
 
-  const cancelarSeleccion = () => setSeleccionados(new Set());
+  const cancelarSeleccion = () => { setSeleccionados(new Set()); setGrupoIAAbierto(false); };
 
   const migrarSeleccionados = async () => {
     const ids = [...seleccionados];
@@ -466,8 +599,17 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
           setMarcaDestino={setMarcaDestino}
           onMigrar={migrarSeleccionados}
           onEliminar={eliminarSeleccionados}
+          onGenerarIA={() => setGrupoIAAbierto(true)}
           onCancelar={cancelarSeleccion}
           procesando={procesando}
+        />
+      )}
+
+      {grupoIAAbierto && seleccionados.size > 0 && (
+        <GeneradorGrupoIA
+          contactos={contactos.filter((c) => seleccionados.has(c.id))}
+          onCerrar={() => setGrupoIAAbierto(false)}
+          showToast={showToast}
         />
       )}
 
