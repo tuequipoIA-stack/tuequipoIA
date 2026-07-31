@@ -76,26 +76,32 @@ export default function PanelSection({ vista }) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
-        <span style={{ color: "#8a8578" }} className="text-xs">Marca:</span>
-        <button
-          onClick={() => setMarcaFiltro("todas")}
-          className="text-xs px-3 py-1 rounded-full font-semibold"
-          style={marcaFiltro === "todas" ? { background: BRAND.navy, color: "#fff" } : { background: "#f1efe8", color: "#4a4740" }}
-        >
-          Todas
-        </button>
-        {MARCAS.map((m) => (
+      {/* Segmentos ya no usa este filtro de marca de arriba: tiene su
+          propio panel de filtros (marca + estado + segmentos puntuales,
+          con "Aplicar filtros"/"Borrar filtros") y muestra las dos marcas
+          juntas, diferenciadas por color. Por eso se oculta acá. */}
+      {vista !== "panel-segmentos" && (
+        <div className="flex items-center gap-2 mb-4">
+          <span style={{ color: "#8a8578" }} className="text-xs">Marca:</span>
           <button
-            key={m}
-            onClick={() => setMarcaFiltro(m)}
+            onClick={() => setMarcaFiltro("todas")}
             className="text-xs px-3 py-1 rounded-full font-semibold"
-            style={marcaFiltro === m ? { background: BRAND.navy, color: "#fff" } : { background: "#f1efe8", color: "#4a4740" }}
+            style={marcaFiltro === "todas" ? { background: BRAND.navy, color: "#fff" } : { background: "#f1efe8", color: "#4a4740" }}
           >
-            {m}
+            Todas
           </button>
-        ))}
-      </div>
+          {MARCAS.map((m) => (
+            <button
+              key={m}
+              onClick={() => setMarcaFiltro(m)}
+              className="text-xs px-3 py-1 rounded-full font-semibold"
+              style={marcaFiltro === m ? { background: BRAND.navy, color: "#fff" } : { background: "#f1efe8", color: "#4a4740" }}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      )}
 
       {vista === "panel-hoy" && (
         <PanelHoy
@@ -106,9 +112,8 @@ export default function PanelSection({ vista }) {
       )}
       {vista === "panel-segmentos" && (
         <PanelSegmentos
-          segmentos={segmentosFiltrados}
-          contactos={contactosFiltrados}
-          marcaFiltro={marcaFiltro}
+          segmentos={segmentos}
+          contactos={contactos}
           recargar={cargarTodo}
           showToast={showToast}
         />

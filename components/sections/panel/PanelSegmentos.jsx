@@ -1,10 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronDown, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, RefreshCw, Check } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import { segNombre } from "@/lib/panel/constants";
+import { MARCAS, segNombre } from "@/lib/panel/constants";
 import { segmentosApi } from "@/lib/panel/api";
+
+// Colores suaves por marca para poder distinguir de un vistazo, ya que
+// ahora Segmentos muestra las dos marcas juntas (sin las pestañas
+// "LiftyFive"/"Tu Equipo IA" de arriba, que quedaron reemplazadas por el
+// filtro de marca de este panel).
+const MARCA_ESTILO = {
+  "LiftyFive": { bg: "#eaf2fd", border: "#a9cdf5", text: "#1c5fa8" },
+  "Tu Equipo IA": { bg: "#eafbf1", border: "#a3e3c1", text: "#1f7a45" },
+};
+function estiloMarca(marca) {
+  return MARCA_ESTILO[marca] || { bg: "#f3f1ea", border: "#e4dfd3", text: "#4a4740" };
+}
 
 function Chip({ children }) {
   return (
@@ -44,6 +56,91 @@ function BarraAccionesSegmentos({ cantidad, pendientesGenerar, listosAprobar, on
   );
 }
 
+// Panel de filtros: todo lo que se toca acá queda "pendiente" hasta que se
+// aprieta "Aplicar filtros" — recién ahí se actualiza la lista de abajo.
+// Reemplaza a las viejas pestañas "Todas / LiftyFive / Tu Equipo IA": la
+// marca ahora es un filtro más (podés tildar una sola o las dos), y se le
+// suma poder filtrar tildando varios segmentos puntuales (puesto ×
+// industria) para ver solo esos.
+function PanelFiltros({
+  marcasPendiente, toggleMarcaPendiente,
+  nombresUnicos, segNombresPendiente, toggleSegNombrePendiente,
+  buscarChecklist, setBuscarChecklist,
+  estadoPendiente, setEstadoPendiente,
+  onAplicar, onBorrar, hayFiltrosAplicados,
+}) {
+  const nombresVisiblesChecklist = nombresUnicos.filter((n) => n.toLowerCase().includes(buscarChecklist.trim().toLowerCase()));
+
+  return (
+    <div className="rounded-xl p-4 mb-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+        <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold">Filtros</h3>
+        <div className="flex items-center gap-2">
+          <button onClick={onAplicar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md text-white" style={{ background: "#1f9e57" }}>
+            <Check size={13} />
+            Aplicar filtros
+          </button>
+          {hayFiltrosAplicados && (
+            <button onClick={onBorrar} className="text-xs px-3 py-1.5 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>
+              Borrar filtros
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4">
+        <div>
+          <span style={{ color: "#8a8578" }} className="text-xs font-semibold">Marca</span>
+          <div className="flex flex-col gap-1.5 mt-1.5">
+            {MARCAS.map((m) => {
+              const est = estiloMarca(m);
+              return (
+                <label key={m} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={marcasPendiente.has(m)} onChange={() => toggleMarcaPendiente(m)} />
+                  <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: est.border }} />
+                  {m}
+                </label>
+              );
+            })}
+          </div>
+
+          <span style={{ color: "#8a8578" }} className="text-xs font-semibold mt-4 block">Estado</span>
+          <select value={estadoPendiente} onChange={(e) => setEstadoPendiente(e.target.value)} className="text-sm rounded-md p-1.5 mt-1.5" style={{ border: "1px solid #ddd" }}>
+            <option value="todos">Todos</option>
+            <option value="sin_generar">Sin generar</option>
+            <option value="generado">Generado</option>
+          </select>
+        </div>
+
+        <div className="min-w-0">
+          <span style={{ color: "#8a8578" }} className="text-xs font-semibold">
+            Segmentos {segNombresPendiente.size > 0 && `(${segNombresPendiente.size} tildado${segNombresPendiente.size === 1 ? "" : "s"} — se muestran solo esos)`}
+          </span>
+          <input
+            value={buscarChecklist}
+            onChange={(e) => setBuscarChecklist(e.target.value)}
+            placeholder="Buscar segmento para tildar..."
+            className="w-full text-sm rounded-md p-1.5 mt-1.5 mb-1.5"
+            style={{ border: "1px solid #ddd" }}
+          />
+          <div className="max-h-48 overflow-y-auto rounded-md p-2" style={{ border: "1px solid #eee" }}>
+            {nombresVisiblesChecklist.length === 0 ? (
+              <p style={{ color: "#8a8578" }} className="text-xs">Sin coincidencias.</p>
+            ) : (
+              nombresVisiblesChecklist.map((n) => (
+                <label key={n} className="flex items-center gap-2 text-sm py-0.5 cursor-pointer">
+                  <input type="checkbox" checked={segNombresPendiente.has(n)} onChange={() => toggleSegNombrePendiente(n)} />
+                  <span className="truncate">{n}</span>
+                </label>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Cada segmento es un acordeón: colapsado por default, se despliega hacia
 // abajo al tocar su encabezado o cualquiera de sus botones (generar,
 // regenerar, aprobar). Ya no hay un modo "Editar" separado: si hay mensaje
@@ -51,38 +148,80 @@ function BarraAccionesSegmentos({ cantidad, pendientesGenerar, listosAprobar, on
 // escribe ahí se guarda con "Guardar cambios". Al aprobar, el segmento
 // desaparece de esta lista y pasa a la sección "Envíos" para mandarlo.
 //
-// Además de la lista, se puede: buscar por puesto/industria, filtrar por
-// estado (sin generar / generado), refrescar a mano con "Actualizar", y
-// seleccionar varios segmentos con checkbox para generar y/o aprobar ese
-// grupo de una sola vez.
-export default function PanelSegmentos({ segmentos, contactos, marcaFiltro, recargar, showToast }) {
+// Segmentos ya no usa las pestañas de marca de arriba (esas se ocultan
+// para esta sección): todo queda centralizado acá, con los segmentos de
+// las dos marcas mezclados y diferenciados por color (LiftyFive en azul,
+// Tu Equipo IA en verde), más un panel de filtros (marca, estado y una
+// lista tildable de segmentos puntuales) que se aplica con un botón y se
+// puede limpiar con "Borrar filtros". También se puede refrescar a mano
+// con "Actualizar", y seleccionar varios segmentos con checkbox para
+// generar y/o aprobar ese grupo de una sola vez.
+export default function PanelSegmentos({ segmentos, contactos, recargar, showToast }) {
   const [abierto, setAbierto] = useState(null);
   const [generando, setGenerando] = useState(null);
   const [guardando, setGuardando] = useState(null);
   const [campos, setCampos] = useState({ asunto_email: "", mensaje_base_email: "", mensaje_base_whatsapp: "", hooks: "" });
-  const [busqueda, setBusqueda] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("todos"); // todos | sin_generar | generado
   const [seleccionados, setSeleccionados] = useState(new Set());
   const [procesandoGrupo, setProcesandoGrupo] = useState(false);
   const [actualizando, setActualizando] = useState(false);
 
-  // Al cambiar de marca se limpia la selección: evita aprobar/generar por
-  // error algo que ya no está a la vista.
-  useEffect(() => { setSeleccionados(new Set()); }, [marcaFiltro]);
+  const [buscarChecklist, setBuscarChecklist] = useState("");
 
-  const base = (marcaFiltro === "todas" ? segmentos : segmentos.filter((s) => s.marca_origen === marcaFiltro)).filter((s) => !s.aprobado);
+  const [marcasPendiente, setMarcasPendiente] = useState(new Set(MARCAS));
+  const [marcasAplicado, setMarcasAplicado] = useState(new Set(MARCAS));
+  const [segNombresPendiente, setSegNombresPendiente] = useState(new Set());
+  const [segNombresAplicado, setSegNombresAplicado] = useState(new Set());
+  const [estadoPendiente, setEstadoPendiente] = useState("todos");
+  const [estadoAplicado, setEstadoAplicado] = useState("todos");
+
+  const base = segmentos.filter((s) => !s.aprobado);
+
+  const nombresUnicos = Array.from(new Set(base.map((s) => segNombre(s)))).sort((a, b) => a.localeCompare(b));
 
   const visibles = base
+    .filter((s) => marcasAplicado.has(s.marca_origen))
+    .filter((s) => segNombresAplicado.size === 0 || segNombresAplicado.has(segNombre(s)))
     .filter((s) => {
-      if (filtroEstado === "sin_generar") return !s.mensaje_base_email;
-      if (filtroEstado === "generado") return !!s.mensaje_base_email;
+      if (estadoAplicado === "sin_generar") return !s.mensaje_base_email;
+      if (estadoAplicado === "generado") return !!s.mensaje_base_email;
       return true;
-    })
-    .filter((s) => {
-      const q = busqueda.trim().toLowerCase();
-      if (!q) return true;
-      return (s.puesto || "").toLowerCase().includes(q) || (s.industria || "").toLowerCase().includes(q);
     });
+
+  const hayFiltrosAplicados = marcasAplicado.size < MARCAS.length || segNombresAplicado.size > 0 || estadoAplicado !== "todos";
+
+  const toggleMarcaPendiente = (m) => {
+    setMarcasPendiente((prev) => {
+      const next = new Set(prev);
+      if (next.has(m)) next.delete(m); else next.add(m);
+      return next;
+    });
+  };
+
+  const toggleSegNombrePendiente = (nombre) => {
+    setSegNombresPendiente((prev) => {
+      const next = new Set(prev);
+      if (next.has(nombre)) next.delete(nombre); else next.add(nombre);
+      return next;
+    });
+  };
+
+  const aplicarFiltros = () => {
+    setMarcasAplicado(new Set(marcasPendiente));
+    setSegNombresAplicado(new Set(segNombresPendiente));
+    setEstadoAplicado(estadoPendiente);
+    limpiarSeleccion();
+  };
+
+  const borrarFiltros = () => {
+    setMarcasPendiente(new Set(MARCAS));
+    setMarcasAplicado(new Set(MARCAS));
+    setSegNombresPendiente(new Set());
+    setSegNombresAplicado(new Set());
+    setEstadoPendiente("todos");
+    setEstadoAplicado("todos");
+    setBuscarChecklist("");
+    limpiarSeleccion();
+  };
 
   const cargarCampos = (seg) => {
     setCampos({
@@ -219,22 +358,22 @@ export default function PanelSegmentos({ segmentos, contactos, marcaFiltro, reca
           Actualizar
         </button>
       </div>
-      <p style={{ color: "#6b6759" }} className="text-sm mb-4">Cada segmento cruza industria × puesto × marca. Generá el mensaje con IA, revisalo y aprobalo — al aprobarlo pasa a "Envíos", listo para mandar.</p>
+      <p style={{ color: "#6b6759" }} className="text-sm mb-4">Todas las marcas juntas, diferenciadas por color. Generá el mensaje con IA, revisalo y aprobalo — al aprobarlo pasa a "Envíos", listo para mandar.</p>
 
-      <div className="flex items-center gap-2 flex-wrap mb-4">
-        <input
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por puesto o industria"
-          className="text-sm rounded-md p-1.5"
-          style={{ border: "1px solid #ddd" }}
-        />
-        <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
-          <option value="todos">Todos los estados</option>
-          <option value="sin_generar">Sin generar</option>
-          <option value="generado">Generado</option>
-        </select>
-      </div>
+      <PanelFiltros
+        marcasPendiente={marcasPendiente}
+        toggleMarcaPendiente={toggleMarcaPendiente}
+        nombresUnicos={nombresUnicos}
+        segNombresPendiente={segNombresPendiente}
+        toggleSegNombrePendiente={toggleSegNombrePendiente}
+        buscarChecklist={buscarChecklist}
+        setBuscarChecklist={setBuscarChecklist}
+        estadoPendiente={estadoPendiente}
+        setEstadoPendiente={setEstadoPendiente}
+        onAplicar={aplicarFiltros}
+        onBorrar={borrarFiltros}
+        hayFiltrosAplicados={hayFiltrosAplicados}
+      />
 
       {seleccionados.size > 0 && (
         <BarraAccionesSegmentos
@@ -253,15 +392,20 @@ export default function PanelSegmentos({ segmentos, contactos, marcaFiltro, reca
           No hay segmentos en borrador. Se crean solos al cargar contactos por CSV o a mano en "Contactos", y los que ya aprobaste están en "Envíos".
         </p>
       ) : !visibles.length ? (
-        <p style={{ color: "#8a8578" }} className="text-sm">Ningún segmento coincide con ese filtro.</p>
+        <p style={{ color: "#8a8578" }} className="text-sm">Ningún segmento coincide con esos filtros.</p>
       ) : (
         <div className="space-y-3">
           {visibles.map((seg) => {
             const enSegmento = contactos.filter((c) => c.segmento_id === seg.id);
             const abiertoEste = abierto === seg.id;
             const marcado = seleccionados.has(seg.id);
+            const est = estiloMarca(seg.marca_origen);
             return (
-              <div key={seg.id} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: marcado ? `1px solid ${BRAND.navy}` : "1px solid #e4dfd3" }}>
+              <div
+                key={seg.id}
+                className="rounded-xl overflow-hidden"
+                style={{ background: "#ffffff", border: marcado ? `1px solid ${BRAND.navy}` : "1px solid #e4dfd3", borderLeft: `4px solid ${est.border}` }}
+              >
                 <div className="w-full flex items-center justify-between flex-wrap gap-2 p-4" style={{ background: abiertoEste ? "#faf9f6" : marcado ? "#f5f9ff" : "transparent" }}>
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <input
@@ -272,7 +416,8 @@ export default function PanelSegmentos({ segmentos, contactos, marcaFiltro, reca
                     />
                     <button onClick={() => toggleAbierto(seg)} className="flex-1 min-w-0 text-left">
                       <strong style={{ color: BRAND.navy }}>{segNombre(seg)}</strong>{" "}
-                      <span style={{ color: "#8a8578" }} className="text-xs">{seg.marca_origen} · {enSegmento.length} contacto(s)</span>{" "}
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: est.bg, color: est.text }}>{seg.marca_origen}</span>{" "}
+                      <span style={{ color: "#8a8578" }} className="text-xs">{enSegmento.length} contacto(s)</span>{" "}
                       {!seg.mensaje_base_email && (
                         <span className="text-xs px-2 py-0.5 rounded-full font-semibold ml-1" style={{ background: "#faeeda", color: "#854f0b" }}>Sin generar</span>
                       )}
