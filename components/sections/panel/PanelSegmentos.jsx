@@ -81,21 +81,57 @@ function BarraAccionesSegmentos({
   );
 }
 
+// Checklist de filtro genérico y reutilizable: buscador arriba + lista de
+// checkboxes tildables abajo. Se usa para Segmentos, Industria y País — las
+// tres funcionan igual (tildás varios, se muestran solo esos al aplicar).
+function ChecklistFiltro({ label, opciones, seleccionados, toggle, buscar, setBuscar, placeholder }) {
+  const visibles = opciones.filter((o) => o.toLowerCase().includes(buscar.trim().toLowerCase()));
+  return (
+    <div className="min-w-0">
+      <span style={{ color: "#8a8578" }} className="text-xs font-semibold">
+        {label} {seleccionados.size > 0 && `(${seleccionados.size} tildado${seleccionados.size === 1 ? "" : "s"})`}
+      </span>
+      <input
+        value={buscar}
+        onChange={(e) => setBuscar(e.target.value)}
+        placeholder={placeholder}
+        className="w-full text-sm rounded-md p-1.5 mt-1.5 mb-1.5"
+        style={{ border: "1px solid #ddd" }}
+      />
+      <div className="max-h-40 overflow-y-auto rounded-md p-2" style={{ border: "1px solid #eee" }}>
+        {!opciones.length ? (
+          <p style={{ color: "#8a8578" }} className="text-xs">No hay datos todavía.</p>
+        ) : visibles.length === 0 ? (
+          <p style={{ color: "#8a8578" }} className="text-xs">Sin coincidencias.</p>
+        ) : (
+          visibles.map((o) => (
+            <label key={o} className="flex items-center gap-2 text-sm py-0.5 cursor-pointer">
+              <input type="checkbox" checked={seleccionados.has(o)} onChange={() => toggle(o)} />
+              <span className="truncate">{o}</span>
+            </label>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Panel de filtros: todo lo que se toca acá queda "pendiente" hasta que se
 // aprieta "Aplicar filtros" — recién ahí se actualiza la lista de abajo.
 // Reemplaza a las viejas pestañas "Todas / LiftyFive / Tu Equipo IA": la
 // marca ahora es un filtro más (podés tildar una sola o las dos), y se le
 // suma poder filtrar tildando varios segmentos puntuales (puesto ×
-// industria) para ver solo esos.
+// industria), varias industrias sueltas, o varios países, para ver solo
+// esos.
 function PanelFiltros({
   marcasPendiente, toggleMarcaPendiente,
   nombresUnicos, segNombresPendiente, toggleSegNombrePendiente,
   buscarChecklist, setBuscarChecklist,
+  industriasUnicas, industriasPendiente, toggleIndustriaPendiente, buscarIndustria, setBuscarIndustria,
+  paisesUnicos, paisesPendiente, togglePaisPendiente, buscarPais, setBuscarPais,
   estadoPendiente, setEstadoPendiente,
   onAplicar, onBorrar, hayFiltrosAplicados,
 }) {
-  const nombresVisiblesChecklist = nombresUnicos.filter((n) => n.toLowerCase().includes(buscarChecklist.trim().toLowerCase()));
-
   return (
     <div className="rounded-xl p-4 mb-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
       <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
@@ -113,7 +149,7 @@ function PanelFiltros({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <span style={{ color: "#8a8578" }} className="text-xs font-semibold">Marca</span>
           <div className="flex flex-col gap-1.5 mt-1.5">
@@ -137,30 +173,35 @@ function PanelFiltros({
           </select>
         </div>
 
-        <div className="min-w-0">
-          <span style={{ color: "#8a8578" }} className="text-xs font-semibold">
-            Segmentos {segNombresPendiente.size > 0 && `(${segNombresPendiente.size} tildado${segNombresPendiente.size === 1 ? "" : "s"} — se muestran solo esos)`}
-          </span>
-          <input
-            value={buscarChecklist}
-            onChange={(e) => setBuscarChecklist(e.target.value)}
-            placeholder="Buscar segmento para tildar..."
-            className="w-full text-sm rounded-md p-1.5 mt-1.5 mb-1.5"
-            style={{ border: "1px solid #ddd" }}
-          />
-          <div className="max-h-48 overflow-y-auto rounded-md p-2" style={{ border: "1px solid #eee" }}>
-            {nombresVisiblesChecklist.length === 0 ? (
-              <p style={{ color: "#8a8578" }} className="text-xs">Sin coincidencias.</p>
-            ) : (
-              nombresVisiblesChecklist.map((n) => (
-                <label key={n} className="flex items-center gap-2 text-sm py-0.5 cursor-pointer">
-                  <input type="checkbox" checked={segNombresPendiente.has(n)} onChange={() => toggleSegNombrePendiente(n)} />
-                  <span className="truncate">{n}</span>
-                </label>
-              ))
-            )}
-          </div>
-        </div>
+        <ChecklistFiltro
+          label="Industria"
+          opciones={industriasUnicas}
+          seleccionados={industriasPendiente}
+          toggle={toggleIndustriaPendiente}
+          buscar={buscarIndustria}
+          setBuscar={setBuscarIndustria}
+          placeholder="Buscar industria..."
+        />
+
+        <ChecklistFiltro
+          label="País"
+          opciones={paisesUnicos}
+          seleccionados={paisesPendiente}
+          toggle={togglePaisPendiente}
+          buscar={buscarPais}
+          setBuscar={setBuscarPais}
+          placeholder="Buscar país..."
+        />
+
+        <ChecklistFiltro
+          label="Segmentos"
+          opciones={nombresUnicos}
+          seleccionados={segNombresPendiente}
+          toggle={toggleSegNombrePendiente}
+          buscar={buscarChecklist}
+          setBuscar={setBuscarChecklist}
+          placeholder="Buscar segmento..."
+        />
       </div>
     </div>
   );
@@ -195,11 +236,17 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
   const [actualizando, setActualizando] = useState(false);
 
   const [buscarChecklist, setBuscarChecklist] = useState("");
+  const [buscarIndustria, setBuscarIndustria] = useState("");
+  const [buscarPais, setBuscarPais] = useState("");
 
   const [marcasPendiente, setMarcasPendiente] = useState(new Set(MARCAS));
   const [marcasAplicado, setMarcasAplicado] = useState(new Set(MARCAS));
   const [segNombresPendiente, setSegNombresPendiente] = useState(new Set());
   const [segNombresAplicado, setSegNombresAplicado] = useState(new Set());
+  const [industriasPendiente, setIndustriasPendiente] = useState(new Set());
+  const [industriasAplicado, setIndustriasAplicado] = useState(new Set());
+  const [paisesPendiente, setPaisesPendiente] = useState(new Set());
+  const [paisesAplicado, setPaisesAplicado] = useState(new Set());
   const [estadoPendiente, setEstadoPendiente] = useState("todos");
   const [estadoAplicado, setEstadoAplicado] = useState("todos");
 
@@ -236,17 +283,27 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
   const base = segmentos.filter((s) => !s.aprobado && contactos.some((c) => c.segmento_id === s.id));
 
   const nombresUnicos = Array.from(new Set(base.map((s) => segNombre(s)))).sort((a, b) => a.localeCompare(b));
+  const industriasUnicas = Array.from(new Set(base.map((s) => s.industria).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  // El país no es un campo del segmento en sí (eso es industria + puesto +
+  // marca): sale de los contactos que tiene adentro, así que un segmento
+  // pasa el filtro de país si tiene al menos un contacto en alguno de los
+  // países tildados.
+  const paisesUnicos = Array.from(
+    new Set(contactos.filter((c) => base.some((s) => s.id === c.segmento_id)).map((c) => c.pais).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
 
   const visibles = base
     .filter((s) => marcasAplicado.has(s.marca_origen))
     .filter((s) => segNombresAplicado.size === 0 || segNombresAplicado.has(segNombre(s)))
+    .filter((s) => industriasAplicado.size === 0 || industriasAplicado.has(s.industria))
+    .filter((s) => paisesAplicado.size === 0 || contactos.some((c) => c.segmento_id === s.id && paisesAplicado.has(c.pais)))
     .filter((s) => {
       if (estadoAplicado === "sin_generar") return !s.mensaje_base_email;
       if (estadoAplicado === "generado") return !!s.mensaje_base_email;
       return true;
     });
 
-  const hayFiltrosAplicados = marcasAplicado.size < MARCAS.length || segNombresAplicado.size > 0 || estadoAplicado !== "todos";
+  const hayFiltrosAplicados = marcasAplicado.size < MARCAS.length || segNombresAplicado.size > 0 || industriasAplicado.size > 0 || paisesAplicado.size > 0 || estadoAplicado !== "todos";
 
   const toggleMarcaPendiente = (m) => {
     setMarcasPendiente((prev) => {
@@ -264,9 +321,27 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
     });
   };
 
+  const toggleIndustriaPendiente = (industria) => {
+    setIndustriasPendiente((prev) => {
+      const next = new Set(prev);
+      if (next.has(industria)) next.delete(industria); else next.add(industria);
+      return next;
+    });
+  };
+
+  const togglePaisPendiente = (pais) => {
+    setPaisesPendiente((prev) => {
+      const next = new Set(prev);
+      if (next.has(pais)) next.delete(pais); else next.add(pais);
+      return next;
+    });
+  };
+
   const aplicarFiltros = () => {
     setMarcasAplicado(new Set(marcasPendiente));
     setSegNombresAplicado(new Set(segNombresPendiente));
+    setIndustriasAplicado(new Set(industriasPendiente));
+    setPaisesAplicado(new Set(paisesPendiente));
     setEstadoAplicado(estadoPendiente);
     limpiarSeleccion();
   };
@@ -276,9 +351,15 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
     setMarcasAplicado(new Set(MARCAS));
     setSegNombresPendiente(new Set());
     setSegNombresAplicado(new Set());
+    setIndustriasPendiente(new Set());
+    setIndustriasAplicado(new Set());
+    setPaisesPendiente(new Set());
+    setPaisesAplicado(new Set());
     setEstadoPendiente("todos");
     setEstadoAplicado("todos");
     setBuscarChecklist("");
+    setBuscarIndustria("");
+    setBuscarPais("");
     limpiarSeleccion();
   };
 
@@ -596,6 +677,16 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
             toggleSegNombrePendiente={toggleSegNombrePendiente}
             buscarChecklist={buscarChecklist}
             setBuscarChecklist={setBuscarChecklist}
+            industriasUnicas={industriasUnicas}
+            industriasPendiente={industriasPendiente}
+            toggleIndustriaPendiente={toggleIndustriaPendiente}
+            buscarIndustria={buscarIndustria}
+            setBuscarIndustria={setBuscarIndustria}
+            paisesUnicos={paisesUnicos}
+            paisesPendiente={paisesPendiente}
+            togglePaisPendiente={togglePaisPendiente}
+            buscarPais={buscarPais}
+            setBuscarPais={setBuscarPais}
             estadoPendiente={estadoPendiente}
             setEstadoPendiente={setEstadoPendiente}
             onAplicar={aplicarFiltros}
