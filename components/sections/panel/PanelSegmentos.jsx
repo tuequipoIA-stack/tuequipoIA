@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronDown, RefreshCw, Check, Folder, FolderPlus, Trash2 } from "lucide-react";
+import { ChevronDown, RefreshCw, Check, Folder, FolderPlus, Trash2, Filter } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { MARCAS, segNombre } from "@/lib/panel/constants";
 import { segmentosApi, gruposSegmentosApi } from "@/lib/panel/api";
@@ -84,18 +84,15 @@ function BarraAccionesSegmentos({
 // Checklist de filtro genérico y reutilizable: buscador arriba + lista de
 // checkboxes tildables abajo. Se usa para Segmentos, Industria y País — las
 // tres funcionan igual (tildás varios, se muestran solo esos al aplicar).
-function ChecklistFiltro({ label, opciones, seleccionados, toggle, buscar, setBuscar, placeholder }) {
+function ChecklistFiltro({ opciones, seleccionados, toggle, buscar, setBuscar, placeholder }) {
   const visibles = opciones.filter((o) => o.toLowerCase().includes(buscar.trim().toLowerCase()));
   return (
     <div className="min-w-0">
-      <span style={{ color: "#8a8578" }} className="text-xs font-semibold">
-        {label} {seleccionados.size > 0 && `(${seleccionados.size} tildado${seleccionados.size === 1 ? "" : "s"})`}
-      </span>
       <input
         value={buscar}
         onChange={(e) => setBuscar(e.target.value)}
         placeholder={placeholder}
-        className="w-full text-sm rounded-md p-1.5 mt-1.5 mb-1.5"
+        className="w-full text-sm rounded-md p-1.5 mb-1.5"
         style={{ border: "1px solid #ddd" }}
       />
       <div className="max-h-40 overflow-y-auto rounded-md p-2" style={{ border: "1px solid #eee" }}>
@@ -116,93 +113,152 @@ function ChecklistFiltro({ label, opciones, seleccionados, toggle, buscar, setBu
   );
 }
 
+// Una sección desplegable del panel de filtros: encabezado angosto con
+// nombre + resumen de lo tildado, se despliega hacia abajo al tocarlo. Es
+// un acordeón (solo una sección abierta a la vez) para que el panel entero
+// ocupe poco espacio.
+function SeccionFiltro({ nombre, resumen, abierta, onToggle, children }) {
+  return (
+    <div style={{ borderBottom: "1px solid #eee" }}>
+      <button onClick={onToggle} className="w-full flex items-center justify-between gap-2 py-2.5 text-left">
+        <span className="text-sm font-semibold" style={{ color: BRAND.navy }}>
+          {nombre} <span className="text-xs font-normal" style={{ color: "#8a8578" }}>({resumen})</span>
+        </span>
+        <ChevronDown size={15} style={{ color: "#8a8578", flexShrink: 0, transform: abierta ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }} />
+      </button>
+      {abierta && <div className="pb-3">{children}</div>}
+    </div>
+  );
+}
+
 // Panel de filtros: todo lo que se toca acá queda "pendiente" hasta que se
 // aprieta "Aplicar filtros" — recién ahí se actualiza la lista de abajo.
-// Reemplaza a las viejas pestañas "Todas / LiftyFive / Tu Equipo IA": la
-// marca ahora es un filtro más (podés tildar una sola o las dos), y se le
-// suma poder filtrar tildando varios segmentos puntuales (puesto ×
-// industria), varias industrias sueltas, o varios países, para ver solo
-// esos.
+// Para ocupar poco espacio, todo el panel vive detrás de un botón
+// "Filtros" (colapsado por default) y, adentro, cada criterio (marca,
+// industria, país, segmentos puntuales) es su propia sección desplegable
+// — solo una abierta a la vez.
 function PanelFiltros({
+  mostrar, setMostrar,
   marcasPendiente, toggleMarcaPendiente,
   nombresUnicos, segNombresPendiente, toggleSegNombrePendiente,
   buscarChecklist, setBuscarChecklist,
   industriasUnicas, industriasPendiente, toggleIndustriaPendiente, buscarIndustria, setBuscarIndustria,
   paisesUnicos, paisesPendiente, togglePaisPendiente, buscarPais, setBuscarPais,
   estadoPendiente, setEstadoPendiente,
-  onAplicar, onBorrar, hayFiltrosAplicados,
+  onAplicar, onBorrar, hayFiltrosAplicados, cantidadFiltrosAplicados,
 }) {
+  const [seccion, setSeccion] = useState(null);
+  const toggleSeccion = (s) => setSeccion((prev) => (prev === s ? null : s));
+
+  const ESTADO_LABEL = { todos: "todos", sin_generar: "sin generar", generado: "generado" };
+
   return (
-    <div className="rounded-xl p-4 mb-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-        <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold">Filtros</h3>
-        <div className="flex items-center gap-2">
-          <button onClick={onAplicar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md text-white" style={{ background: "#1f9e57" }}>
-            <Check size={13} />
-            Aplicar filtros
-          </button>
-          {hayFiltrosAplicados && (
-            <button onClick={onBorrar} className="text-xs px-3 py-1.5 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>
-              Borrar filtros
-            </button>
+    <div className="mb-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => setMostrar(!mostrar)}
+          className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md font-semibold"
+          style={mostrar ? { background: BRAND.navy, color: "#fff" } : { border: "1px solid #ddd", color: BRAND.navy, background: "#fff" }}
+        >
+          <Filter size={14} />
+          Filtros
+          {cantidadFiltrosAplicados > 0 && (
+            <span className="text-xs rounded-full px-1.5" style={{ background: mostrar ? "rgba(255,255,255,0.25)" : "#eaf3de", color: mostrar ? "#fff" : "#27500a" }}>
+              {cantidadFiltrosAplicados}
+            </span>
           )}
-        </div>
+          <ChevronDown size={14} style={{ transform: mostrar ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }} />
+        </button>
+        {hayFiltrosAplicados && (
+          <button onClick={onBorrar} className="text-xs px-3 py-1.5 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>
+            Borrar filtros
+          </button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-          <span style={{ color: "#8a8578" }} className="text-xs font-semibold">Marca</span>
-          <div className="flex flex-col gap-1.5 mt-1.5">
-            {MARCAS.map((m) => {
-              const est = estiloMarca(m);
-              return (
-                <label key={m} className="flex items-center gap-2 text-sm cursor-pointer">
-                  <input type="checkbox" checked={marcasPendiente.has(m)} onChange={() => toggleMarcaPendiente(m)} />
-                  <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: est.border }} />
-                  {m}
-                </label>
-              );
-            })}
+      {mostrar && (
+        <div className="rounded-xl p-4 mt-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+          <div className="flex justify-end mb-1">
+            <button onClick={onAplicar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md text-white" style={{ background: "#1f9e57" }}>
+              <Check size={13} />
+              Aplicar filtros
+            </button>
           </div>
 
-          <span style={{ color: "#8a8578" }} className="text-xs font-semibold mt-4 block">Estado</span>
-          <select value={estadoPendiente} onChange={(e) => setEstadoPendiente(e.target.value)} className="text-sm rounded-md p-1.5 mt-1.5" style={{ border: "1px solid #ddd" }}>
-            <option value="todos">Todos</option>
-            <option value="sin_generar">Sin generar</option>
-            <option value="generado">Generado</option>
-          </select>
+          <SeccionFiltro
+            nombre="Marca y estado"
+            resumen={`${marcasPendiente.size} de ${MARCAS.length}, ${ESTADO_LABEL[estadoPendiente]}`}
+            abierta={seccion === "marca"}
+            onToggle={() => toggleSeccion("marca")}
+          >
+            <div className="flex flex-col gap-1.5 mb-3">
+              {MARCAS.map((m) => {
+                const est = estiloMarca(m);
+                return (
+                  <label key={m} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={marcasPendiente.has(m)} onChange={() => toggleMarcaPendiente(m)} />
+                    <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: est.border }} />
+                    {m}
+                  </label>
+                );
+              })}
+            </div>
+            <select value={estadoPendiente} onChange={(e) => setEstadoPendiente(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
+              <option value="todos">Todos</option>
+              <option value="sin_generar">Sin generar</option>
+              <option value="generado">Generado</option>
+            </select>
+          </SeccionFiltro>
+
+          <SeccionFiltro
+            nombre="Industria"
+            resumen={industriasPendiente.size > 0 ? `${industriasPendiente.size} tildada${industriasPendiente.size === 1 ? "" : "s"}` : "todas"}
+            abierta={seccion === "industria"}
+            onToggle={() => toggleSeccion("industria")}
+          >
+            <ChecklistFiltro
+              opciones={industriasUnicas}
+              seleccionados={industriasPendiente}
+              toggle={toggleIndustriaPendiente}
+              buscar={buscarIndustria}
+              setBuscar={setBuscarIndustria}
+              placeholder="Buscar industria..."
+            />
+          </SeccionFiltro>
+
+          <SeccionFiltro
+            nombre="País"
+            resumen={paisesPendiente.size > 0 ? `${paisesPendiente.size} tildado${paisesPendiente.size === 1 ? "" : "s"}` : "todos"}
+            abierta={seccion === "pais"}
+            onToggle={() => toggleSeccion("pais")}
+          >
+            <ChecklistFiltro
+              opciones={paisesUnicos}
+              seleccionados={paisesPendiente}
+              toggle={togglePaisPendiente}
+              buscar={buscarPais}
+              setBuscar={setBuscarPais}
+              placeholder="Buscar país..."
+            />
+          </SeccionFiltro>
+
+          <SeccionFiltro
+            nombre="Segmentos"
+            resumen={segNombresPendiente.size > 0 ? `${segNombresPendiente.size} tildado${segNombresPendiente.size === 1 ? "" : "s"}` : "todos"}
+            abierta={seccion === "segmentos"}
+            onToggle={() => toggleSeccion("segmentos")}
+          >
+            <ChecklistFiltro
+              opciones={nombresUnicos}
+              seleccionados={segNombresPendiente}
+              toggle={toggleSegNombrePendiente}
+              buscar={buscarChecklist}
+              setBuscar={setBuscarChecklist}
+              placeholder="Buscar segmento..."
+            />
+          </SeccionFiltro>
         </div>
-
-        <ChecklistFiltro
-          label="Industria"
-          opciones={industriasUnicas}
-          seleccionados={industriasPendiente}
-          toggle={toggleIndustriaPendiente}
-          buscar={buscarIndustria}
-          setBuscar={setBuscarIndustria}
-          placeholder="Buscar industria..."
-        />
-
-        <ChecklistFiltro
-          label="País"
-          opciones={paisesUnicos}
-          seleccionados={paisesPendiente}
-          toggle={togglePaisPendiente}
-          buscar={buscarPais}
-          setBuscar={setBuscarPais}
-          placeholder="Buscar país..."
-        />
-
-        <ChecklistFiltro
-          label="Segmentos"
-          opciones={nombresUnicos}
-          seleccionados={segNombresPendiente}
-          toggle={toggleSegNombrePendiente}
-          buscar={buscarChecklist}
-          setBuscar={setBuscarChecklist}
-          placeholder="Buscar segmento..."
-        />
-      </div>
+      )}
     </div>
   );
 }
@@ -234,6 +290,8 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
   const [seleccionados, setSeleccionados] = useState(new Set());
   const [procesandoGrupo, setProcesandoGrupo] = useState(false);
   const [actualizando, setActualizando] = useState(false);
+
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const [buscarChecklist, setBuscarChecklist] = useState("");
   const [buscarIndustria, setBuscarIndustria] = useState("");
@@ -304,6 +362,12 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
     });
 
   const hayFiltrosAplicados = marcasAplicado.size < MARCAS.length || segNombresAplicado.size > 0 || industriasAplicado.size > 0 || paisesAplicado.size > 0 || estadoAplicado !== "todos";
+  const cantidadFiltrosAplicados =
+    (marcasAplicado.size < MARCAS.length ? 1 : 0) +
+    (industriasAplicado.size > 0 ? 1 : 0) +
+    (paisesAplicado.size > 0 ? 1 : 0) +
+    (segNombresAplicado.size > 0 ? 1 : 0) +
+    (estadoAplicado !== "todos" ? 1 : 0);
 
   const toggleMarcaPendiente = (m) => {
     setMarcasPendiente((prev) => {
@@ -670,6 +734,8 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
       {vista === "segmentos" && (
         <>
           <PanelFiltros
+            mostrar={mostrarFiltros}
+            setMostrar={setMostrarFiltros}
             marcasPendiente={marcasPendiente}
             toggleMarcaPendiente={toggleMarcaPendiente}
             nombresUnicos={nombresUnicos}
@@ -692,6 +758,7 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
             onAplicar={aplicarFiltros}
             onBorrar={borrarFiltros}
             hayFiltrosAplicados={hayFiltrosAplicados}
+            cantidadFiltrosAplicados={cantidadFiltrosAplicados}
           />
 
           {seleccionados.size > 0 && (
