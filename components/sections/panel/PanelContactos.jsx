@@ -196,6 +196,100 @@ function CampoEditable({ label, value, onChange, placeholder, type = "text" }) {
   );
 }
 
+function NuevoContactoManual({ marca, setMarca, onCreado, showToast }) {
+  const [abierto, setAbierto] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [empresa, setEmpresa] = useState("");
+  const [puesto, setPuesto] = useState("");
+  const [industria, setIndustria] = useState("");
+  const [pais, setPais] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [canal, setCanal] = useState("");
+  const [observaciones, setObservaciones] = useState("");
+  const [guardando, setGuardando] = useState(false);
+
+  const limpiar = () => {
+    setNombre(""); setEmpresa(""); setPuesto(""); setIndustria(""); setPais("");
+    setEmail(""); setTelefono(""); setCanal(""); setObservaciones("");
+  };
+
+  const guardar = async () => {
+    if (!nombre.trim()) { showToast("Falta el nombre del contacto"); return; }
+    setGuardando(true);
+    try {
+      const { importados, omitidos } = await contactosApi.bulkImport(
+        [{
+          nombre: nombre.trim(), empresa: empresa.trim(), puesto: puesto.trim(),
+          industria: industria.trim(), pais: pais.trim(), email: email.trim(),
+          telefono: telefono.trim(), canal_preferido: canal, observaciones: observaciones.trim(),
+        }],
+        marca
+      );
+      if (importados) {
+        showToast(`Contacto "${nombre.trim()}" cargado`);
+        limpiar();
+        setAbierto(false);
+        onCreado();
+      } else {
+        showToast("No se pudo cargar el contacto" + (omitidos ? " (revisá los datos)" : ""));
+      }
+    } catch (e) {
+      showToast("Error al cargar: " + e.message);
+    }
+    setGuardando(false);
+  };
+
+  if (!abierto) {
+    return (
+      <button onClick={() => setAbierto(true)} className="text-sm font-semibold px-4 py-2 rounded-md mb-5" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+        + Cargar un cliente a mano
+      </button>
+    );
+  }
+
+  return (
+    <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold">Cargar un cliente a mano</h3>
+        <label className="flex items-center gap-1.5 text-xs" style={{ color: "#8a8578" }}>
+          Se carga a:
+          <select value={marca} onChange={(e) => setMarca(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
+            {MARCAS.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </label>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+        <CampoEditable label="Nombre *" value={nombre} onChange={setNombre} />
+        <CampoEditable label="Empresa" value={empresa} onChange={setEmpresa} />
+        <CampoEditable label="Puesto" value={puesto} onChange={setPuesto} />
+        <CampoEditable label="Industria" value={industria} onChange={setIndustria} />
+        <CampoEditable label="País" value={pais} onChange={setPais} />
+        <CampoEditable label="Email" value={email} onChange={setEmail} type="email" />
+        <CampoEditable label="Teléfono" value={telefono} onChange={setTelefono} />
+        <label className="flex flex-col gap-0.5">
+          <span className="text-xs" style={{ color: "#8a8578" }}>Canal preferido</span>
+          <select value={canal} onChange={(e) => setCanal(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
+            <option value="">Sin definir</option>
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </label>
+      </div>
+      <label className="flex flex-col gap-0.5 mb-3">
+        <span className="text-xs" style={{ color: "#8a8578" }}>Observaciones</span>
+        <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} rows={2} placeholder="Notas sobre este contacto..." className="text-sm rounded-md p-1.5 resize-y" style={{ border: "1px solid #ddd" }} />
+      </label>
+      <div className="flex gap-2">
+        <button disabled={guardando} onClick={guardar} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>
+          {guardando ? "Guardando..." : "Guardar contacto"}
+        </button>
+        <button onClick={() => { limpiar(); setAbierto(false); }} className="text-xs px-3 py-1.5 rounded-md" style={{ background: "#f1efe8", color: "#4a4740" }}>Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
 function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToast }) {
   const [nombre, setNombre] = useState(contacto.nombre || "");
   const [empresa, setEmpresa] = useState(contacto.empresa || "");
@@ -583,6 +677,7 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">Todos los contactos, de todas las marcas y segmentos.</p>
 
       <ImportarCSV marca={marcaImport} setMarca={setMarcaImport} onImportado={recargar} showToast={showToast} />
+      <NuevoContactoManual marca={marcaImport} setMarca={setMarcaImport} onCreado={recargar} showToast={showToast} />
 
       <div className="flex gap-2 mb-3 flex-wrap">
         <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar nombre o empresa" className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }} />

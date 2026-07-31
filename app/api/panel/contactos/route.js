@@ -56,6 +56,8 @@ export async function POST(request) {
     const industria = (c.industria || "").trim() || "Sin especificar";
     const empresa = (c.empresa || "").trim() || null;
     const pais = (c.pais || "").trim() || null;
+    const canal_preferido = (c.canal_preferido || "").trim() || null;
+    const observaciones = (c.observaciones || "").trim() || null;
 
     const segKey = `${industria}::${puesto}::${marca}`;
     let segmentoId = segmentoCache.get(segKey);
@@ -75,6 +77,7 @@ export async function POST(request) {
 
     const payload = {
       nombre, telefono, puesto, industria, empresa, pais,
+      canal_preferido, observaciones,
       marca_origen: marca, segmento_id: segmentoId, user_id: auth.user.id,
       updated_at: new Date().toISOString(),
     };
