@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronDown, LogOut, Shield, LayoutGrid } from "lucide-react";
 import { BRAND, NAV_GROUPS } from "@/lib/constants";
@@ -9,7 +9,6 @@ import LogoMark from "@/components/LogoMark";
 import UnidadSwitcher from "@/components/UnidadSwitcher";
 
 const COLLAPSE_KEY = "tuequipoia-sidebar-collapsed";
-const GRUPO_ABIERTO_KEY = "tuequipoia-sidebar-grupo-abierto";
 const ANCHO_EXPANDIDO = 224;
 const ANCHO_COLAPSADO = 68;
 
@@ -68,8 +67,11 @@ export default function Sidebar({ active, onChange, isAdmin, mobileOpen = false,
   // sin importar la preferencia de "colapsado" que es un concepto solo de escritorio.
   const [isDesktop, setIsDesktop] = useState(true);
   // Qué grupo ("tuequipoia" / "tuequipoia-panel") está desplegado. Solo uno
-  // a la vez, como un acordeón, para no llenar la barra de botones.
-  const [grupoAbierto, setGrupoAbierto] = useState("tuequipoia");
+  // a la vez, como un acordeón, para no llenar la barra de botones. Arranca
+  // siempre plegado: cada apertura de sesión debe verse colapsado, no se
+  // recuerda el último estado entre sesiones.
+  const [grupoAbierto, setGrupoAbierto] = useState(null);
+  const montado = useRef(false);
 
   // El botón "Admin" (gestión de suscriptores) ya existía suelto; ahora
   // vive dentro del grupo "TuequipoIA" para que solo queden 2 botones
@@ -84,24 +86,21 @@ export default function Sidebar({ active, onChange, isAdmin, mobileOpen = false,
   useEffect(() => {
     const guardado = typeof window !== "undefined" && window.localStorage.getItem(COLLAPSE_KEY);
     if (guardado === "1") setCollapsed(true);
-    const grupoGuardado = typeof window !== "undefined" && window.localStorage.getItem(GRUPO_ABIERTO_KEY);
-    if (grupoGuardado) setGrupoAbierto(grupoGuardado);
     setHidratado(true);
   }, []);
 
   // Si la sección activa pertenece a un grupo, ese grupo se despliega solo
-  // (por ejemplo al entrar directo a una sección del Panel).
+  // al navegar (por ejemplo al entrar directo a una sección del Panel).
+  // No se aplica en el primer render: al abrir sesión todo debe arrancar
+  // plegado, aunque la sección activa por defecto viva dentro de un grupo.
   useEffect(() => {
+    if (!montado.current) { montado.current = true; return; }
     const grupoDeActivo = grupos.find((g) => g.items.some((it) => it.id === active));
     if (grupoDeActivo) setGrupoAbierto(grupoDeActivo.id);
   }, [active]);
 
   const toggleGrupo = (id) => {
-    setGrupoAbierto((prev) => {
-      const nuevo = prev === id ? null : id;
-      window.localStorage.setItem(GRUPO_ABIERTO_KEY, nuevo || "");
-      return nuevo;
-    });
+    setGrupoAbierto((prev) => (prev === id ? null : id));
   };
 
   useEffect(() => {
