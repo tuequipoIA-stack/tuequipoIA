@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
+import { RefreshCw } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 import { ESTADOS, ESTADO_COLOR, MARCAS, labelEstado, segNombre, fillTemplate, gmailLink, gmailAuthUserKey } from "@/lib/panel/constants";
 import { contactosApi, interaccionesApi } from "@/lib/panel/api";
@@ -673,7 +674,13 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
 
   return (
     <div>
-      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Contactos</h2>
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Contactos</h2>
+        <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+          <RefreshCw size={13} />
+          Actualizar
+        </button>
+      </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">Todos los contactos, de todas las marcas y segmentos.</p>
 
       <ImportarCSV marca={marcaImport} setMarca={setMarcaImport} onImportado={recargar} showToast={showToast} />
