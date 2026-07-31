@@ -93,3 +93,77 @@ export async function POST(request) {
 
   return NextResponse.json({ importados, omitidos });
 }
+
+// Body: { ids: [...], marca }
+// Migra contactos existentes a otra marca/lista: les reasigna marca_origen
+// y el segmento correspondiente (industria + puesto ya existentes, pero
+// bajo la nueva marca), creando ese segmento si todavía no existía.
+export async function PATCH(request) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  const body = await request.json().catch(() => ({}));
+  const { ids, marca } = body || {};
+  if (!Array.isArray(ids) || !ids.length) {
+    return NextResponse.json({ error: "Falta 'ids' (array)" }, { status: 400 });
+  }
+  if (!marca) {
+    return NextResponse.json({ error: "Falta 'marca'" }, { status: 400 });
+  }
+
+  const supabase = await createClient();
+
+  const { data: contactos, error: fetchError } = await supabase
+    .from("contactos")
+    .select("id, industria, puesto")
+    .in("id", ids);
+  if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 });
+
+  const segmentoCache = new Map();
+  let migrados = 0;
+
+  for (const c of contactos || []) {
+    const industria = c.industria || "Sin especificar";
+    const puesto = c.puesto || "Sin especificar";
+    const segKey = `${industria}::${puesto}::${marca}`;
+    let segmentoId = segmentoCache.get(segKey);
+    if (!segmentoId) {
+      const { data: seg, error: segError } = await supabase
+        .from("segmentos")
+        .upsert(
+          { industria, puesto, marca_origen: marca, user_id: auth.user.id },
+          { onConflict: "industria,puesto,marca_origen", ignoreDuplicates: false }
+        )
+        .select("id")
+        .single();
+      if (segError) continue;
+      segmentoId = seg.id;
+      segmentoCache.set(segKey, segmentoId);
+    }
+
+    const { error } = await supabase
+      .from("contactos")
+      .update({ marca_origen: marca, segmento_id: segmentoId, updated_at: new Date().toISOString() })
+      .eq("id", c.id);
+    if (!error) migrados++;
+  }
+
+  return NextResponse.json({ migrados });
+}
+
+// Body: { ids: [...] }
+export async function DELETE(request) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  const body = await request.json().catch(() => ({}));
+  const { ids } = body || {};
+  if (!Array.isArray(ids) || !ids.length) {
+    return NextResponse.json({ error: "Falta 'ids' (array)" }, { status: 400 });
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("contactos").delete().in("id", ids);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ eliminados: ids.length });
+}

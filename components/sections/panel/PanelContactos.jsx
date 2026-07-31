@@ -323,6 +323,27 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
   );
 }
 
+function BarraAcciones({ cantidad, marcaDestino, setMarcaDestino, onMigrar, onEliminar, onCancelar, procesando }) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap rounded-lg p-2.5 mb-3" style={{ background: "#eef3fb", border: "1px solid #cfe0f5" }}>
+      <span className="text-sm font-semibold" style={{ color: BRAND.navy }}>{cantidad} seleccionado{cantidad === 1 ? "" : "s"}</span>
+      <span className="text-xs" style={{ color: "#8a8578" }}>Migrar a:</span>
+      <select value={marcaDestino} onChange={(e) => setMarcaDestino(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }}>
+        {MARCAS.map((m) => <option key={m} value={m}>{m}</option>)}
+      </select>
+      <button disabled={procesando} onClick={onMigrar} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: BRAND.navy }}>
+        {procesando ? "Migrando..." : "Migrar"}
+      </button>
+      <button disabled={procesando} onClick={onEliminar} className="text-xs px-3 py-1.5 rounded-md text-white" style={{ background: "#b3453f" }}>
+        Eliminar
+      </button>
+      <button onClick={onCancelar} className="text-xs px-3 py-1.5 rounded-md ml-auto" style={{ background: "#f1efe8", color: "#4a4740" }}>
+        Cancelar selección
+      </button>
+    </div>
+  );
+}
+
 export default function PanelContactos({ contactos, segmentos, marcaFiltro, recargar, showToast }) {
   const [marcaImport, setMarcaImport] = useState(
     marcaFiltro && marcaFiltro !== "todas" ? marcaFiltro : MARCAS[0]
@@ -330,6 +351,9 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
   const [busqueda, setBusqueda] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("");
   const [abiertoId, setAbiertoId] = useState(null);
+  const [seleccionados, setSeleccionados] = useState(() => new Set());
+  const [marcaDestino, setMarcaDestino] = useState(MARCAS[0]);
+  const [procesando, setProcesando] = useState(false);
 
   // La pestaña "Marca:" de arriba filtra qué contactos se ven. Si el
   // selector de importación no sigue esa misma marca, es fácil subir un
@@ -350,7 +374,75 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
     return f;
   }, [contactos, busqueda, estadoFiltro]);
 
+  // Si cambian los filtros y algún seleccionado deja de estar visible, no
+  // pasa nada (sigue seleccionado para las acciones), pero limpiamos ids
+  // que ya no existen (por ejemplo tras eliminar).
+  useEffect(() => {
+    const idsValidos = new Set(contactos.map((c) => c.id));
+    setSeleccionados((prev) => {
+      const next = new Set([...prev].filter((id) => idsValidos.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [contactos]);
+
   const abierto = contactos.find((c) => c.id === abiertoId);
+
+  const todosFiltradosSeleccionados = filtrados.length > 0 && filtrados.every((c) => seleccionados.has(c.id));
+
+  const toggleUno = (id) => {
+    setSeleccionados((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleTodos = () => {
+    setSeleccionados((prev) => {
+      if (todosFiltradosSeleccionados) {
+        const next = new Set(prev);
+        filtrados.forEach((c) => next.delete(c.id));
+        return next;
+      }
+      const next = new Set(prev);
+      filtrados.forEach((c) => next.add(c.id));
+      return next;
+    });
+  };
+
+  const cancelarSeleccion = () => setSeleccionados(new Set());
+
+  const migrarSeleccionados = async () => {
+    const ids = [...seleccionados];
+    if (!ids.length) return;
+    setProcesando(true);
+    try {
+      const { migrados } = await contactosApi.bulkMigrar(ids, marcaDestino);
+      showToast(`${migrados} contacto${migrados === 1 ? "" : "s"} migrado${migrados === 1 ? "" : "s"} a ${marcaDestino}`);
+      cancelarSeleccion();
+      recargar();
+    } catch (e) {
+      showToast("Error al migrar: " + e.message);
+    }
+    setProcesando(false);
+  };
+
+  const eliminarSeleccionados = async () => {
+    const ids = [...seleccionados];
+    if (!ids.length) return;
+    if (!window.confirm(`¿Eliminar ${ids.length} contacto${ids.length === 1 ? "" : "s"}? Esta acción no se puede deshacer.`)) return;
+    setProcesando(true);
+    try {
+      const { eliminados } = await contactosApi.bulkRemove(ids);
+      showToast(`${eliminados} contacto${eliminados === 1 ? "" : "s"} eliminado${eliminados === 1 ? "" : "s"}`);
+      cancelarSeleccion();
+      recargar();
+    } catch (e) {
+      showToast("Error al eliminar: " + e.message);
+    }
+    setProcesando(false);
+  };
 
   return (
     <div>
@@ -367,10 +459,25 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
         </select>
       </div>
 
+      {seleccionados.size > 0 && (
+        <BarraAcciones
+          cantidad={seleccionados.size}
+          marcaDestino={marcaDestino}
+          setMarcaDestino={setMarcaDestino}
+          onMigrar={migrarSeleccionados}
+          onEliminar={eliminarSeleccionados}
+          onCancelar={cancelarSeleccion}
+          procesando={procesando}
+        />
+      )}
+
       <div className="overflow-auto rounded-xl" style={{ border: "1px solid #e4dfd3" }}>
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: "#faf9f6" }}>
+              <th className="p-2 w-8">
+                <input type="checkbox" checked={todosFiltradosSeleccionados} onChange={toggleTodos} />
+              </th>
               {["Nombre", "Empresa", "Puesto", "Marca", "Estado", "Próx. seguimiento"].map((h) => (
                 <th key={h} className="text-left p-2 text-xs" style={{ color: "#8a8578" }}>{h}</th>
               ))}
@@ -378,12 +485,16 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
           </thead>
           <tbody>
             {filtrados.length === 0 && (
-              <tr><td colSpan={6} className="p-6 text-center text-sm" style={{ color: "#8a8578" }}>Sin contactos todavía. Cargá un CSV arriba.</td></tr>
+              <tr><td colSpan={7} className="p-6 text-center text-sm" style={{ color: "#8a8578" }}>Sin contactos todavía. Cargá un CSV arriba.</td></tr>
             )}
             {filtrados.map((c) => {
               const col = ESTADO_COLOR[c.estado] || ESTADO_COLOR.nuevo;
+              const marcado = seleccionados.has(c.id);
               return (
-                <tr key={c.id} onClick={() => setAbiertoId(c.id)} className="cursor-pointer" style={{ borderTop: "1px solid #f0ece2", background: abiertoId === c.id ? "#faf9f6" : undefined }}>
+                <tr key={c.id} onClick={() => setAbiertoId(c.id)} className="cursor-pointer" style={{ borderTop: "1px solid #f0ece2", background: marcado ? "#f5f9ff" : (abiertoId === c.id ? "#faf9f6" : undefined) }}>
+                  <td className="p-2" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={marcado} onChange={() => toggleUno(c.id)} />
+                  </td>
                   <td className="p-2">{c.nombre}</td>
                   <td className="p-2" style={{ color: "#6b6759" }}>{c.empresa}</td>
                   <td className="p-2" style={{ color: "#6b6759" }}>{c.puesto}</td>
