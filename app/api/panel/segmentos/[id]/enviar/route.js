@@ -6,20 +6,21 @@ import { fillTemplate } from "@/lib/panel/constants";
 
 // Manda el email del segmento (ya generado y aprobado) a todos sus
 // contactos con un solo click, personalizando {{nombre}}/{{empresa}} por
-// contacto. Usa una casilla de Gmail propia vía SMTP (nodemailer) — hace
-// falta configurar EMAIL_ENVIO_USER (la casilla que envía) y
-// EMAIL_ENVIO_APP_PASSWORD (contraseña de aplicación de esa casilla,
-// generada en myaccount.google.com/apppasswords, no la contraseña normal)
-// como variables de entorno en Vercel.
+// contacto. Cada marca manda desde su propia casilla de Gmail vía SMTP
+// (nodemailer) — hace falta configurar, para cada marca, un par de
+// variables de entorno en Vercel con la casilla que envía y su
+// "contraseña de aplicación" (generada en myaccount.google.com/apppasswords,
+// no la contraseña normal de esa cuenta):
+//   LiftyFive:    EMAIL_ENVIO_USER_LIFTYFIVE / EMAIL_ENVIO_APP_PASSWORD_LIFTYFIVE
+//   Tu Equipo IA: EMAIL_ENVIO_USER_TUEQUIPOIA / EMAIL_ENVIO_APP_PASSWORD_TUEQUIPOIA
+const CREDENCIALES_POR_MARCA = {
+  "LiftyFive": { userVar: "EMAIL_ENVIO_USER_LIFTYFIVE", passVar: "EMAIL_ENVIO_APP_PASSWORD_LIFTYFIVE" },
+  "Tu Equipo IA": { userVar: "EMAIL_ENVIO_USER_TUEQUIPOIA", passVar: "EMAIL_ENVIO_APP_PASSWORD_TUEQUIPOIA" },
+};
+
 export async function POST(request, { params }) {
   const auth = await requireAdmin();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
-
-  const user = process.env.EMAIL_ENVIO_USER;
-  const pass = process.env.EMAIL_ENVIO_APP_PASSWORD;
-  if (!user || !pass) {
-    return NextResponse.json({ error: "Falta configurar EMAIL_ENVIO_USER y EMAIL_ENVIO_APP_PASSWORD en Vercel" }, { status: 500 });
-  }
 
   const { id } = await params;
   const supabase = await createClient();
@@ -29,6 +30,16 @@ export async function POST(request, { params }) {
   if (!seg.aprobado) return NextResponse.json({ error: "El segmento todavía no está aprobado" }, { status: 400 });
   if (!seg.mensaje_base_email || !seg.asunto_email) {
     return NextResponse.json({ error: "El segmento no tiene mensaje de email generado" }, { status: 400 });
+  }
+
+  const cred = CREDENCIALES_POR_MARCA[seg.marca_origen];
+  const user = cred ? process.env[cred.userVar] : undefined;
+  const pass = cred ? process.env[cred.passVar] : undefined;
+  if (!cred) {
+    return NextResponse.json({ error: `No hay casilla configurada para la marca "${seg.marca_origen}"` }, { status: 500 });
+  }
+  if (!user || !pass) {
+    return NextResponse.json({ error: `Falta configurar ${cred.userVar} y ${cred.passVar} en Vercel (casilla de ${seg.marca_origen})` }, { status: 500 });
   }
 
   const { data: contactos, error: fetchError } = await supabase
