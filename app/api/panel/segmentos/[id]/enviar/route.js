@@ -94,6 +94,7 @@ export async function POST(request, { params }) {
         .eq("id", c.id)
         .neq("estado", "nuevo");
     } catch (e) {
+      console.error(`[enviar] fallo al mandar a ${c.email} (marca ${seg.marca_origen}):`, e);
       detalle.push({ id: c.id, ok: false, error: e.message });
     }
   }
