@@ -78,7 +78,8 @@ export default function PanelEnvios({ segmentos, contactos, marcaFiltro, recarga
     try {
       const r = await segmentosApi.enviar(seg.id);
       setResultados((prev) => ({ ...prev, [seg.id]: r }));
-      showToast(`${r.enviados} enviado${r.enviados === 1 ? "" : "s"}${r.fallidos ? `, ${r.fallidos} con error` : ""}`);
+      const primerError = r.detalle?.find((d) => !d.ok)?.error;
+      showToast(`${r.enviados} enviado${r.enviados === 1 ? "" : "s"}${r.fallidos ? `, ${r.fallidos} con error${primerError ? `: ${primerError}` : ""}` : ""}`);
       recargar();
     } catch (e) {
       showToast("Error al enviar: " + e.message);
@@ -159,9 +160,16 @@ export default function PanelEnvios({ segmentos, contactos, marcaFiltro, recarga
               </div>
 
               {resultado && (
-                <p className="text-xs mt-2" style={{ color: resultado.fallidos ? "#854f0b" : "#27500a" }}>
-                  {resultado.enviados} enviado{resultado.enviados === 1 ? "" : "s"}{resultado.fallidos ? `, ${resultado.fallidos} con error (revisá el email de esos contactos)` : ""}.
-                </p>
+                <>
+                  <p className="text-xs mt-2" style={{ color: resultado.fallidos ? "#854f0b" : "#27500a" }}>
+                    {resultado.enviados} enviado{resultado.enviados === 1 ? "" : "s"}{resultado.fallidos ? `, ${resultado.fallidos} con error` : ""}.
+                  </p>
+                  {resultado.detalle?.filter((d) => !d.ok).map((d) => (
+                    <p key={d.id} className="text-xs mt-1" style={{ color: "#b42318" }}>
+                      {contactos.find((c) => c.id === d.id)?.email || d.id}: {d.error}
+                    </p>
+                  ))}
+                </>
               )}
 
               {colaEstaAbierta && (
