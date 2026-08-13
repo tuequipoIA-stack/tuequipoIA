@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, X, Target, Check } from "lucide-react";
+import { Ban, Plus, Trash2, X, Target, Check } from "lucide-react";
 import { BRAND, COLUMNAS_BASE, MAX_COLUMNAS_EXTRA, MESES } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
-import { uid, migrarColumna } from "@/lib/helpers";
-import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
+import { uid, migrarColumna, fechaISO } from "@/lib/helpers";
 
 // Colores pastel por columna: semana (naranja clarito), hoy (celeste), hecho (verde clarito).
 // Las columnas extra que arme el usuario quedan con el tono neutro de siempre.
@@ -16,6 +14,15 @@ const COLUMNA_COLOR = {
   hecho: { bg: "#e9f6ec", header: "#3f9457", border: "#d3ecd9" },
 };
 const COLUMNA_COLOR_DEFAULT = { bg: "#f0ece2", header: "#6b6759", border: "#e4dfd3" };
+
+// Tarjetas de las tareas "diarias" que vienen del Plan de negocio (Estrategia):
+// se distinguen con este color lila del resto de las tareas de "Tareas de hoy".
+const COLOR_PLAN_DIARIO = { bg: "#f6effc", border: "#e3d1f5", tagBg: "#efe0fb", tagText: "#7c3aed" };
+
+function hoyISO() {
+  const d = new Date();
+  return fechaISO(d.getFullYear(), d.getMonth(), d.getDate());
+}
 
 function fechaLegible(fechaISOStr) {
   if (!fechaISOStr) return null;
@@ -35,6 +42,10 @@ export default function TableroSection() {
   const [mostrarFormColumna, setMostrarFormColumna] = useState(false);
   const [arrastrando, setArrastrando] = useState(null);
 
+  // Plantillas de "tareas diarias" que salen del Plan de negocio (Estrategia).
+  // Cada día que se abre Organización, las activas se recrean solas en "hoy".
+  const [plantillasDiarias, setPlantillasDiarias] = useState([]);
+
   // --- Grandes objetivos ---
   const [objetivos, setObjetivos] = useState([]);
   const [objetivoAbiertoId, setObjetivoAbiertoId] = useState(null);
@@ -48,11 +59,25 @@ export default function TableroSection() {
   useEffect(() => {
     if (!unidadId) return;
     loadData("tablero-columnas", COLUMNAS_BASE).then(setColumnas);
-    loadData("tablero-tareas", []).then(async (d) => {
+    Promise.all([
+      loadData("tablero-tareas", []),
+      loadData("tareas-diarias-plan", []),
+    ]).then(async ([d, diarias]) => {
       const migradas = d.map((t) => ({ ...t, columna: migrarColumna(t.columna) }));
-      setTareas(migradas);
+
+      // Por cada plantilla diaria activa, si todavía no tiene una tarjeta
+      // creada para HOY, la creamos en la columna "Tareas de hoy".
+      const hoy = hoyISO();
+      const nuevas = diarias
+        .filter((p) => p.activa && !migradas.some((t) => t.recurrenteId === p.id && t.fecha === hoy))
+        .map((p) => ({ id: uid(), texto: p.texto, columna: "hoy", origen: "plan-diario", recurrenteId: p.id, fecha: hoy }));
+
+      const finalTareas = nuevas.length ? [...migradas, ...nuevas] : migradas;
+      setTareas(finalTareas);
+      setPlantillasDiarias(diarias);
+
       const huboCambios = d.some((t, i) => t.columna !== migradas[i].columna);
-      if (huboCambios) await saveData("tablero-tareas", migradas);
+      if (huboCambios || nuevas.length) await saveData("tablero-tareas", finalTareas);
     });
     loadData("grandes-objetivos", []).then(setObjetivos);
   }, [unidadId]);
@@ -78,6 +103,16 @@ export default function TableroSection() {
     const actualizado = tareas.filter((t) => t.id !== id);
     setTareas(actualizado);
     await saveData("tablero-tareas", actualizado);
+  };
+
+  // Saca del todo una tarea "diaria" del plan: desactiva la plantilla (no se
+  // vuelve a recrear mañana) y borra la tarjeta de hoy. A diferencia de
+  // eliminarTarea (que solo saca la tarjeta de hoy y vuelve a aparecer mañana).
+  const eliminarTareaDefinitiva = async (tarea) => {
+    const plantillasActualizadas = plantillasDiarias.map((p) => (p.id === tarea.recurrenteId ? { ...p, activa: false } : p));
+    setPlantillasDiarias(plantillasActualizadas);
+    await saveData("tareas-diarias-plan", plantillasActualizadas);
+    await eliminarTarea(tarea.id);
   };
 
   const agregarColumna = async () => {
@@ -163,10 +198,7 @@ export default function TableroSection() {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-1">
-        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Organización</h2>
-        <AudioAyuda texto={AUDIO_GUIONES[`tablero:${tab}`]} audioSrc={AUDIO_ARCHIVOS.tablero} />
-      </div>
+      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Organización</h2>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">
         {tab === "bajados" ? "Arrastrá las tarjetas entre columnas, o usá los botones en mobile." : "Definí tus grandes objetivos y desglosalos en tareas concretas."}
       </p>
@@ -210,11 +242,20 @@ export default function TableroSection() {
                   )}
                 </div>
                 <div className="space-y-2 min-h-[40px]">
-                  {tareas.filter((t) => t.columna === col.id).map((t) => (
+                  {tareas.filter((t) => t.columna === col.id).map((t) => {
+                    const esPlanDiario = t.origen === "plan-diario";
+                    return (
                     <div key={t.id} draggable
                       onDragStart={() => setArrastrando(t.id)}
                       onDragEnd={() => setArrastrando(null)}
-                      className="rounded-lg p-3 cursor-grab active:cursor-grabbing" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                      className="rounded-lg p-3 cursor-grab active:cursor-grabbing"
+                      style={esPlanDiario ? { background: COLOR_PLAN_DIARIO.bg, border: `1px solid ${COLOR_PLAN_DIARIO.border}` } : { background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                      {esPlanDiario && (
+                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full inline-block mb-1.5"
+                          style={{ background: COLOR_PLAN_DIARIO.tagBg, color: COLOR_PLAN_DIARIO.tagText }}>
+                          Rutina del plan
+                        </span>
+                      )}
                       <div style={{ color: BRAND.navy, textDecoration: col.id === "hecho" ? "line-through" : "none" }} className="text-sm mb-2">
                         {t.texto}
                       </div>
@@ -223,10 +264,20 @@ export default function TableroSection() {
                           className="text-[10px] px-1.5 py-1 rounded-md font-medium outline-none" style={{ background: "#eee9dd", color: "#6b6759", border: "none" }}>
                           {columnas.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                         </select>
-                        <button onClick={() => eliminarTarea(t.id)} style={{ color: "#b3453f" }}><Trash2 size={12} /></button>
+                        <div className="flex items-center gap-2">
+                          {esPlanDiario && (
+                            <button onClick={() => eliminarTareaDefinitiva(t)} title="Quitar definitivamente de mi rutina diaria (no vuelve a aparecer)" style={{ color: "#b3453f" }}>
+                              <Ban size={12} />
+                            </button>
+                          )}
+                          <button onClick={() => eliminarTarea(t.id)} title={esPlanDiario ? "Sacar solo la de hoy (vuelve a aparecer mañana)" : "Eliminar"} style={{ color: "#b3453f" }}>
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                   {tareas.filter((t) => t.columna === col.id).length === 0 && (
                     <p style={{ color: "#a89f88" }} className="text-xs text-center py-3">Sin tarjetas</p>
                   )}
@@ -285,6 +336,11 @@ export default function TableroSection() {
                   <span style={{ color: BRAND.navy }} className="text-sm font-semibold pr-4">{o.titulo}</span>
                 </div>
                 <span style={{ color: "#a89f88" }} className="text-xs">{o.tareas.length} {o.tareas.length === 1 ? "tarea" : "tareas"}</span>
+                {o.origenPlan && (
+                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full ml-2" style={{ background: COLOR_PLAN_DIARIO.tagBg, color: COLOR_PLAN_DIARIO.tagText }}>
+                    Desde tu Plan de negocio
+                  </span>
+                )}
               </div>
             ))}
 
