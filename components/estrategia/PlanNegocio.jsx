@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Calculator, Check, Loader2, Sparkles } from "lucide-react";
-import { BRAND, CADENCIAS } from "@/lib/constants";
+import { ArrowRight, Calculator, Check, Loader2, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { BRAND, CADENCIAS, MESES } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, money, calcularPlanNumeros } from "@/lib/helpers";
 import { planSystemPrompt } from "@/lib/businessContext";
 import { askClaude } from "@/lib/chat";
-import MoneyInput from "@/components/MoneyInput";
 
 const OBJETIVOS_VACIO = { tresMeses: "", seisMeses: "", unAnio: "", tresAnios: "", cincoAnios: "" };
 const HORIZONTES_REFERENCIA = [
@@ -26,6 +25,9 @@ export default function PlanNegocio({ business, onIrAOferta }) {
   const [loaded, setLoaded] = useState(false);
   const [generando, setGenerando] = useState(false);
   const [error, setError] = useState("");
+  const [editandoId, setEditandoId] = useState(null);
+  const [textoEditado, setTextoEditado] = useState("");
+  const [nuevaTareaPorCadencia, setNuevaTareaPorCadencia] = useState({});
 
   // Contexto de "Definir oferta de negocio" (solo lectura acá).
   const [cliente, setCliente] = useState(null);
@@ -114,13 +116,68 @@ export default function PlanNegocio({ business, onIrAOferta }) {
     }
   };
 
+  const mesActual = MESES[new Date().getMonth()];
+
+  // Manda una tarea tildada a donde corresponda: las diarias se vuelven una
+  // "rutina" recurrente que Organización va a recrear todos los días; el
+  // resto cae dentro de un Gran objetivo del mes en curso (uno por cadencia,
+  // se reutiliza si ya existe uno para este mes).
+  const enviarTarea = async (cadenciaId, tarea) => {
+    if (cadenciaId === "diarias") {
+      const diarias = await loadData("tareas-diarias-plan", []);
+      const actualizadas = [...diarias, { id: uid(), texto: tarea.texto, activa: true }];
+      await saveData("tareas-diarias-plan", actualizadas);
+      return;
+    }
+    const cLabel = CADENCIAS.find((c) => c.id === cadenciaId)?.label || cadenciaId;
+    const objetivos = await loadData("grandes-objetivos", []);
+    const existente = objetivos.find((o) => o.origenPlan === cadenciaId && o.mes === mesActual);
+    const nuevaTareaObj = { id: uid(), texto: tarea.texto, fecha: null };
+    const actualizados = existente
+      ? objetivos.map((o) => (o.id === existente.id ? { ...o, tareas: [...o.tareas, nuevaTareaObj] } : o))
+      : [...objetivos, { id: uid(), titulo: `${cLabel} del plan — ${mesActual}`, mes: mesActual, origenPlan: cadenciaId, tareas: [nuevaTareaObj] }];
+    await saveData("grandes-objetivos", actualizados);
+  };
+
+  // Tildar es de una sola dirección: envía la tarea y la deja bloqueada
+  // (no se puede destildar desde acá — para sacarla del todo hay que
+  // borrarla desde Organización o desde el Gran objetivo donde cayó).
   const toggleTarea = async (cadenciaId, tareaId) => {
+    const tarea = plan[cadenciaId]?.find((t) => t.id === tareaId);
+    if (!tarea || tarea.hecha) return;
+    await enviarTarea(cadenciaId, tarea);
     const actualizado = {
       ...plan,
-      [cadenciaId]: plan[cadenciaId].map((t) => (t.id === tareaId ? { ...t, hecha: !t.hecha } : t)),
+      [cadenciaId]: plan[cadenciaId].map((t) => (t.id === tareaId ? { ...t, hecha: true, enviada: true } : t)),
     };
     setPlan(actualizado);
     await saveData("plan-negocio", { form, plan: actualizado, horizonte });
+  };
+
+  const editarTareaTexto = async (cadenciaId, tareaId, nuevoTexto) => {
+    if (!nuevoTexto.trim()) return;
+    const actualizado = {
+      ...plan,
+      [cadenciaId]: plan[cadenciaId].map((t) => (t.id === tareaId ? { ...t, texto: nuevoTexto.trim() } : t)),
+    };
+    setPlan(actualizado);
+    await saveData("plan-negocio", { form, plan: actualizado, horizonte });
+  };
+
+  const eliminarTareaGenerada = async (cadenciaId, tareaId) => {
+    const actualizado = { ...plan, [cadenciaId]: plan[cadenciaId].filter((t) => t.id !== tareaId) };
+    setPlan(actualizado);
+    await saveData("plan-negocio", { form, plan: actualizado, horizonte });
+  };
+
+  const agregarTareaManual = async (cadenciaId) => {
+    const texto = (nuevaTareaPorCadencia[cadenciaId] || "").trim();
+    if (!texto) return;
+    const nueva = { id: uid(), texto, hecha: false, enviada: false };
+    const actualizado = { ...plan, [cadenciaId]: [...(plan[cadenciaId] || []), nueva] };
+    setPlan(actualizado);
+    await saveData("plan-negocio", { form, plan: actualizado, horizonte });
+    setNuevaTareaPorCadencia((prev) => ({ ...prev, [cadenciaId]: "" }));
   };
 
   if (!loaded) return null;
@@ -185,7 +242,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Costo por unidad</span>
-            <MoneyInput value={form.costoUnitario} onChange={(n) => guardarForm({ ...form, costoUnitario: n })}
+            <input type="number" value={form.costoUnitario} onChange={(e) => guardarForm({ ...form, costoUnitario: e.target.value })}
               placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
           </div>
           <div>
@@ -198,7 +255,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Sueldo mensual que querés sacar</span>
-            <MoneyInput value={form.sueldoObjetivo} onChange={(n) => guardarForm({ ...form, sueldoObjetivo: n })}
+            <input type="number" value={form.sueldoObjetivo} onChange={(e) => guardarForm({ ...form, sueldoObjetivo: e.target.value })}
               placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
           </div>
           <div>
@@ -248,42 +305,103 @@ export default function PlanNegocio({ business, onIrAOferta }) {
         {generando ? "Armando el plan..." : plan ? "Regenerar plan de acción" : "Generar plan de acción"}
       </button>
       {!puedeCalcular && (
-        <p style={{ color: "#a89f88" }} className="text-xs -mt-4 mb-6">Completá costo, margen y sueldo objetivo para calcular.</p>
+        <p style={{ color: "#a89f88" }} className="text-xs -mt-4 mb-6">
+          {Number(form.margenDeseado) >= 100
+            ? "El margen tiene que ser menor a 100% (a 100% el precio de venta se va a infinito)."
+            : "Completá costo, margen y sueldo objetivo para calcular."}
+        </p>
       )}
       {error && <p className="text-xs mb-4" style={{ color: "#b3453f" }}>{error}</p>}
 
       {plan && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {CADENCIAS.map((c) => (
-            <div key={c.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-              <div className="flex items-center justify-between mb-2">
-                <span style={{ color: BRAND.navy }} className="text-sm font-semibold">{c.label}</span>
-                {puedeCalcular && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "#eef7f6", color: "#127a79" }}>
-                    meta: {cascada[c.cascada].unidades} un.
-                  </span>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                {(plan[c.id] || []).map((t) => (
-                  <div key={t.id} className="flex items-start gap-2">
-                    <button onClick={() => toggleTarea(c.id, t.id)}
-                      className="w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5"
-                      style={t.hecha ? { background: BRAND.teal } : { border: "1.5px solid #d8d2c3" }}>
-                      {t.hecha && <Check size={10} color={BRAND.navy} />}
-                    </button>
-                    <span style={{ color: t.hecha ? "#a8a397" : "#4a4740", textDecoration: t.hecha ? "line-through" : "none" }} className="text-xs leading-snug">
-                      {t.texto}
+        <>
+          <p style={{ color: "#8a8578" }} className="text-xs mb-3">
+            Podés editar o borrar una tarea antes de tildarla. Al tildarla se manda sola: las <b>diarias</b> pasan a
+            "Tareas de hoy" en Organización y se recrean solas cada día; el resto cae dentro de un Gran objetivo del mes
+            en curso, en Organización → Grandes objetivos.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {CADENCIAS.map((c) => (
+              <div key={c.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span style={{ color: BRAND.navy }} className="text-sm font-semibold">{c.label}</span>
+                  {puedeCalcular && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "#eef7f6", color: "#127a79" }}>
+                      meta: {cascada[c.cascada].unidades} un.
                     </span>
-                  </div>
-                ))}
-                {(plan[c.id] || []).length === 0 && (
-                  <p style={{ color: "#a89f88" }} className="text-xs">Sin tareas en esta frecuencia.</p>
-                )}
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {(plan[c.id] || []).map((t) => (
+                    <div key={t.id} className="flex items-start gap-1.5 group">
+                      <button onClick={() => toggleTarea(c.id, t.id)} disabled={t.hecha}
+                        className="w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5"
+                        style={t.hecha ? { background: BRAND.teal } : { border: "1.5px solid #d8d2c3" }}>
+                        {t.hecha && <Check size={10} color={BRAND.navy} />}
+                      </button>
+
+                      {editandoId === t.id ? (
+                        <input
+                          autoFocus
+                          value={textoEditado}
+                          onChange={(e) => setTextoEditado(e.target.value)}
+                          onBlur={() => { editarTareaTexto(c.id, t.id, textoEditado); setEditandoId(null); }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur();
+                            if (e.key === "Escape") setEditandoId(null);
+                          }}
+                          className="flex-1 text-xs rounded px-1.5 py-0.5 outline-none"
+                          style={{ border: "1px solid #d8d2c3" }}
+                        />
+                      ) : (
+                        <span
+                          style={{ color: t.hecha ? "#a8a397" : "#4a4740", textDecoration: t.hecha ? "line-through" : "none" }}
+                          className="text-xs leading-snug flex-1"
+                        >
+                          {t.texto}
+                        </span>
+                      )}
+
+                      {!t.hecha && editandoId !== t.id && (
+                        <div className="hidden group-hover:flex items-center gap-1.5 shrink-0 mt-0.5">
+                          <button onClick={() => { setEditandoId(t.id); setTextoEditado(t.texto); }} style={{ color: "#8a8578" }}>
+                            <Pencil size={11} />
+                          </button>
+                          <button onClick={() => eliminarTareaGenerada(c.id, t.id)} style={{ color: "#b3453f" }}>
+                            <Trash2 size={11} />
+                          </button>
+                        </div>
+                      )}
+
+                      {t.enviada && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full shrink-0" style={{ background: "#eef7f6", color: "#127a79" }}>
+                          {c.id === "diarias" ? "En Organización" : "En Grandes objetivos"}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                  {(plan[c.id] || []).length === 0 && (
+                    <p style={{ color: "#a89f88" }} className="text-xs">Sin tareas en esta frecuencia.</p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 mt-2.5 pt-2.5" style={{ borderTop: "1px solid #f0ece2" }}>
+                  <input
+                    value={nuevaTareaPorCadencia[c.id] || ""}
+                    onChange={(e) => setNuevaTareaPorCadencia((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                    onKeyDown={(e) => e.key === "Enter" && agregarTareaManual(c.id)}
+                    placeholder="Agregar tarea..."
+                    className="flex-1 text-xs rounded-lg px-2.5 py-1.5 outline-none"
+                    style={{ border: "1px solid #e4dfd3" }}
+                  />
+                  <button onClick={() => agregarTareaManual(c.id)} style={{ color: "#127a79" }}>
+                    <Plus size={15} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
