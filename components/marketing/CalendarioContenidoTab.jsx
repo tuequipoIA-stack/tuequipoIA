@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { BRAND, TIPOS_PUBLICACION, DIAS_SEMANA, MESES, colorTipo } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { uid, fechaISO, getGrillaMes } from "@/lib/helpers";
 
-export default function CalendarioContenidoTab() {
+export default function CalendarioContenidoTab({ onVerOrigen }) {
   const { loadData, saveData, unidadId } = useUnidadStorage();
   const hoy = new Date();
   const [publicaciones, setPublicaciones] = useState([]);
@@ -104,6 +104,8 @@ export default function CalendarioContenidoTab() {
                   <div key={p.id} draggable
                     onDragStart={(e) => { e.stopPropagation(); setArrastrando(p.id); }}
                     onDragEnd={() => setArrastrando(null)}
+                    onClick={(e) => { if (p.origenPiezaId && onVerOrigen) { e.stopPropagation(); onVerOrigen(p.origenPiezaId); } }}
+                    title={p.origenPiezaId ? "Ver en Comunicación mensual" : undefined}
                     className="text-[9px] px-1 py-0.5 rounded truncate cursor-grab" style={{ background: colorTipo(p.tipo).bg, color: colorTipo(p.tipo).text }}>
                     {p.tipo}
                   </div>
@@ -127,17 +129,27 @@ export default function CalendarioContenidoTab() {
             {publicacionesDelDia.map((p) => (
               <div key={p.id} className="rounded-lg p-3" style={{ background: "#faf8f4", border: "1px solid #f0ece2" }}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: colorTipo(p.tipo).bg, color: colorTipo(p.tipo).text }}>
-                    {p.tipo}
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: colorTipo(p.tipo).bg, color: colorTipo(p.tipo).text }}>
+                      {p.tipo}
+                    </span>
+                    {p.hora && <span className="text-[10px] font-semibold" style={{ color: "#8a8578" }}>· {p.hora}</span>}
                   </span>
                   <button onClick={() => eliminar(p.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
                 </div>
                 {p.copy && <p style={{ color: "#4a4740" }} className="text-sm mb-2 whitespace-pre-wrap">{p.copy}</p>}
-                {p.link && (
-                  <a href={p.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs" style={{ color: "#127a79" }}>
-                    <ExternalLink size={11} /> Ver creativo
-                  </a>
-                )}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {p.link && (
+                    <a href={p.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs" style={{ color: "#127a79" }}>
+                      <ExternalLink size={11} /> Ver creativo
+                    </a>
+                  )}
+                  {p.origenPiezaId && onVerOrigen && (
+                    <button onClick={() => onVerOrigen(p.origenPiezaId)} className="flex items-center gap-1 text-xs font-semibold" style={{ color: "#127a79" }}>
+                      <ArrowUpRight size={11} /> Ver en Comunicación mensual
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
             {loaded && publicacionesDelDia.length === 0 && (

@@ -1,37 +1,6 @@
 "use client";
 
-import { BRAND } from "@/lib/constants";
-
-const PILARES = [
-  {
-    numero: "01",
-    porcentaje: "25%",
-    etiqueta: "Atracción",
-    titulo: "Educativo",
-    texto: "Enseñás algo útil de tu mundo. No vendés. Generás autoridad y guardados — la métrica que más valora el algoritmo en 2026. Tutoriales, mitos, errores comunes, datos.",
-  },
-  {
-    numero: "02",
-    porcentaje: "25%",
-    etiqueta: "Conexión",
-    titulo: "Inspiracional",
-    texto: "Mostrás tu por qué, tu historia, tu detrás de escena, tus valores. Convierte seguidores fríos en comunidad. Reduce la fricción para que después te compren.",
-  },
-  {
-    numero: "03",
-    porcentaje: "20%",
-    etiqueta: "Autoridad",
-    titulo: "Prueba social",
-    texto: "Resultados, testimonios, antes y después, casos. Es el pilar que más convierte en negocios chicos. Mostrás que lo que ofrecés ya funciona.",
-  },
-  {
-    numero: "04",
-    porcentaje: "20%",
-    etiqueta: "Venta",
-    titulo: "Oferta directa",
-    texto: "Mostrás producto, servicio, precio, beneficio. Sin culpa. Si no vendés explícitamente, nadie compra. La gente necesita que le digas qué hacer.",
-  },
-];
+import { BRAND, PILARES_CONTENIDO as PILARES } from "@/lib/constants";
 
 const REGLA_FILAS = [
   { pilar: "Educativo", frecuencia: "4 piezas", formato: "Reel o carrusel", objetivo: "Alcance + Guardado" },
