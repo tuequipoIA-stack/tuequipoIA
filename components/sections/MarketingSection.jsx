@@ -4,23 +4,26 @@ import { useState } from "react";
 import { BRAND } from "@/lib/constants";
 import CalendarioContenidoTab from "@/components/marketing/CalendarioContenidoTab";
 import PilaresContenidoTab from "@/components/marketing/PilaresContenidoTab";
+import ComunicacionMensualTab from "@/components/marketing/ComunicacionMensualTab";
 import MarketingSidebar from "@/components/marketing/MarketingSidebar";
-import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
 export default function MarketingSection() {
   const [vista, setVista] = useState("calendario");
+  const [focoPiezaId, setFocoPiezaId] = useState(null);
   const tabs = [
     { id: "calendario", label: "Calendario de contenido" },
+    { id: "comunicacion", label: "Comunicación mensual" },
     { id: "pilares", label: "Pilares de contenido" },
   ];
 
+  const irAlOrigen = (piezaId) => {
+    setFocoPiezaId(piezaId);
+    setVista("comunicacion");
+  };
+
   return (
     <div>
-      <div className="flex items-center gap-2 mb-1">
-        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Marketing</h2>
-        <AudioAyuda texto={AUDIO_GUIONES[`marketing:${vista}`]} audioSrc={AUDIO_ARCHIVOS.marketing} />
-      </div>
+      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Marketing</h2>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">A quién le hablás, qué le ofrecés, y cuándo se lo contás.</p>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
@@ -34,7 +37,8 @@ export default function MarketingSection() {
             ))}
           </div>
 
-          {vista === "calendario" && <CalendarioContenidoTab />}
+          {vista === "calendario" && <CalendarioContenidoTab onVerOrigen={irAlOrigen} />}
+          {vista === "comunicacion" && <ComunicacionMensualTab focoPiezaId={focoPiezaId} onLimpiarFoco={() => setFocoPiezaId(null)} />}
           {vista === "pilares" && <PilaresContenidoTab />}
         </div>
 
