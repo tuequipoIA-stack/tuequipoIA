@@ -6,6 +6,8 @@ import CalendarioContenidoTab from "@/components/marketing/CalendarioContenidoTa
 import PilaresContenidoTab from "@/components/marketing/PilaresContenidoTab";
 import ComunicacionMensualTab from "@/components/marketing/ComunicacionMensualTab";
 import MarketingSidebar from "@/components/marketing/MarketingSidebar";
+import AudioAyuda from "@/components/AudioAyuda";
+import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
 export default function MarketingSection() {
   const [vista, setVista] = useState("calendario");
@@ -23,7 +25,10 @@ export default function MarketingSection() {
 
   return (
     <div>
-      <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">Marketing</h2>
+      <div className="flex items-center gap-2 mb-1">
+        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Marketing</h2>
+        <AudioAyuda texto={AUDIO_GUIONES[`marketing:${vista}`]} audioSrc={AUDIO_ARCHIVOS.marketing} />
+      </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">A quién le hablás, qué le ofrecés, y cuándo se lo contás.</p>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
