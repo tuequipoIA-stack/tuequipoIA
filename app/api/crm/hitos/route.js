@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// Mantenimiento mensual de un proyecto (toggle del modal de conversión
-// "Marcar como Ganado"). Un proyecto tiene a lo sumo un mantenimiento.
+// Hitos/entregables de un proyecto (ventas_hitos) — tab "Avance del
+// proyecto" de la ficha en Ventas → Seguimiento.
 
 export async function GET(request) {
   const supabase = await createClient();
@@ -18,16 +18,16 @@ export async function GET(request) {
   }
 
   const { data, error } = await supabase
-    .from("ventas_mantenimiento")
+    .from("ventas_hitos")
     .select("*")
     .eq("proyecto_id", proyectoId)
-    .maybeSingle();
+    .order("fecha", { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ mantenimiento: data || null });
+  return NextResponse.json({ hitos: data || [] });
 }
 
 export async function POST(request) {
@@ -38,24 +38,21 @@ export async function POST(request) {
   }
 
   const body = await request.json();
-  const { unidadId, proyectoId, montoMensual } = body;
-  if (!unidadId || !proyectoId) {
-    return NextResponse.json({ error: "Falta unidadId o proyectoId" }, { status: 400 });
+  const { proyectoId, nombre } = body;
+  if (!proyectoId) {
+    return NextResponse.json({ error: "Falta proyectoId" }, { status: 400 });
   }
-  if (!montoMensual) {
-    return NextResponse.json({ error: "Falta el monto mensual" }, { status: 400 });
+  if (!nombre || !nombre.trim()) {
+    return NextResponse.json({ error: "Falta el nombre del hito" }, { status: 400 });
   }
 
   const { data, error } = await supabase
-    .from("ventas_mantenimiento")
+    .from("ventas_hitos")
     .insert({
       user_id: user.id,
-      unidad_id: unidadId,
       proyecto_id: proyectoId,
-      monto_mensual: montoMensual,
-      dia_cobro: body.diaCobro || null,
-      proximo_cobro: body.proximoCobro || null,
-      estado: "activo",
+      nombre: nombre.trim(),
+      fecha: body.fecha || null,
     })
     .select()
     .single();
@@ -64,5 +61,5 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ mantenimiento: data });
+  return NextResponse.json({ hito: data });
 }
