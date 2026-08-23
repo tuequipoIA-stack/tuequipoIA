@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Clock } from "lucide-react";
+import { Plus, Clock, Trophy } from "lucide-react";
 import { BRAND, CRM_MODOS, CRM_ETAPAS_PIPELINE } from "@/lib/constants";
 import { useUnidad } from "@/components/UnidadProvider";
 import { money } from "@/lib/helpers";
 import ProspectoModal from "@/components/crm/ProspectoModal";
+import ConversionModal from "@/components/crm/ConversionModal";
 
 // Columnas visuales del tablero: las 4 etapas intermedias + una columna
 // final que agrupa "ganado" y "perdido" (igual que el mockup de referencia).
@@ -33,6 +34,7 @@ function PipelineBoard({ unidadId }) {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [prospectoEditando, setProspectoEditando] = useState(null);
   const [arrastrando, setArrastrando] = useState(null);
+  const [prospectoConvirtiendo, setProspectoConvirtiendo] = useState(null);
 
   useEffect(() => {
     if (!unidadId) return;
@@ -83,6 +85,44 @@ function PipelineBoard({ unidadId }) {
     });
     const data = await res.json();
     if (data.prospecto) setProspectos((prev) => prev.map((p) => (p.id === id ? data.prospecto : p)));
+  };
+
+  const confirmarConversion = async (datos) => {
+    const prospecto = prospectoConvirtiendo;
+    const resProyecto = await fetch("/api/crm/proyectos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        unidadId,
+        prospectoOrigenId: prospecto.id,
+        cliente: datos.cliente,
+        servicio: datos.servicio,
+        monto: datos.monto,
+        formaPago: datos.formaPago,
+        responsable: datos.responsable,
+        fechaInicio: datos.fechaInicio,
+        mantenimientoActivo: datos.mantenimientoActivo,
+      }),
+    });
+    const dataProyecto = await resProyecto.json();
+    if (!dataProyecto.proyecto) return;
+
+    if (datos.mantenimientoActivo) {
+      await fetch("/api/crm/mantenimiento", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          unidadId,
+          proyectoId: dataProyecto.proyecto.id,
+          montoMensual: datos.montoMensual,
+          diaCobro: datos.diaCobro,
+          proximoCobro: datos.proximoCobro,
+        }),
+      });
+    }
+
+    await moverProspecto(prospecto.id, "ganado");
+    setProspectoConvirtiendo(null);
   };
 
   const prospectosActivos = prospectos.filter((p) => p.etapa !== "ganado" && p.etapa !== "perdido");
@@ -154,6 +194,13 @@ function PipelineBoard({ unidadId }) {
                           className="mt-2 text-[10px] px-1.5 py-1 rounded-md font-medium outline-none w-full" style={{ background: "#eee9dd", color: "#6b6759", border: "none" }}>
                           {CRM_ETAPAS_PIPELINE.map((e) => <option key={e.id} value={e.id}>{e.label}</option>)}
                         </select>
+                        {p.etapa !== "ganado" && p.etapa !== "perdido" && (
+                          <button onClick={(e) => { e.stopPropagation(); setProspectoConvirtiendo(p); }}
+                            className="mt-2 w-full flex items-center justify-center gap-1.5 rounded-md py-1.5 text-[11px] font-semibold"
+                            style={{ background: BRAND.teal, color: BRAND.navy }}>
+                            <Trophy size={11} /> Marcar como Ganado
+                          </button>
+                        )}
                       </div>
                     );
                   })}
@@ -168,6 +215,7 @@ function PipelineBoard({ unidadId }) {
       )}
 
       <ProspectoModal open={modalAbierto} initial={prospectoEditando} onClose={cerrarModal} onSave={guardarProspecto} onDelete={eliminarProspecto} />
+      <ConversionModal open={!!prospectoConvirtiendo} prospecto={prospectoConvirtiendo} onClose={() => setProspectoConvirtiendo(null)} onConfirm={confirmarConversion} />
     </div>
   );
 }
