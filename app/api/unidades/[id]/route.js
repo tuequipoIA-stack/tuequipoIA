@@ -31,6 +31,7 @@ export async function PATCH(request, { params }) {
   if (body.nombre !== undefined) cambios.nombre = body.nombre.trim();
   if (body.rubro !== undefined) cambios.rubro = body.rubro || null;
   if (body.tipoNegocio !== undefined) cambios.tipo_negocio = body.tipoNegocio;
+  if (body.crmModos !== undefined) cambios.crm_modos = Array.isArray(body.crmModos) ? body.crmModos : [];
 
   const { data, error } = await supabase
     .from("unidades_negocio")

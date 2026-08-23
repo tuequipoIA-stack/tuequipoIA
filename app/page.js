@@ -49,7 +49,7 @@ function AppShell({ isAdmin, bloqueado }) {
   useEffect(() => {
     if (!unidadId) { setBusiness(null); return; }
     loadData("negocio-perfil", null).then((b) => {
-      setBusiness(b || { nombre: unidadActual?.nombre, rubro: unidadActual?.rubro, tipoNegocio: unidadActual?.tipo_negocio });
+      setBusiness(b || { nombre: unidadActual?.nombre, rubro: unidadActual?.rubro, tipoNegocio: unidadActual?.tipo_negocio, crmModos: unidadActual?.crm_modos || [] });
     });
   }, [unidadId]);
 
@@ -172,7 +172,7 @@ export default function TuEquipoIA() {
     const res = await fetch("/api/unidades", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: perfil.nombre || "Mi negocio", rubro: perfil.rubro, tipoNegocio: perfil.tipoNegocio }),
+      body: JSON.stringify({ nombre: perfil.nombre || "Mi negocio", rubro: perfil.rubro, tipoNegocio: perfil.tipoNegocio, crmModos: perfil.crmModos }),
     });
     const data = await res.json();
     const unidad = data.unidad;
