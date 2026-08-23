@@ -7,6 +7,8 @@ import { useUnidad } from "@/components/UnidadProvider";
 import { money } from "@/lib/helpers";
 import ProspectoModal from "@/components/crm/ProspectoModal";
 import ConversionModal from "@/components/crm/ConversionModal";
+import SuscripcionesBoard from "@/components/crm/SuscripcionesBoard";
+import PacientesBoard from "@/components/crm/PacientesBoard";
 
 // Columnas visuales del tablero: las 4 etapas intermedias + una columna
 // final que agrupa "ganado" y "perdido" (igual que el mockup de referencia).
@@ -241,11 +243,16 @@ export default function CrmSection({ business }) {
   }
 
   const labelModo = (id) => CRM_MODOS.find((m) => m.id === id)?.label || id;
+  const SUBTITULOS = {
+    pipeline: "Seguimiento de posibles clientes, desde el primer contacto hasta que cierran.",
+    suscripciones: "Clientes con cobro recurrente. El cobro y el vínculo se siguen por separado.",
+    pacientes: "Pacientes o clientes recurrentes, organizados por fase del vínculo.",
+  };
 
   return (
     <div>
       <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">CRM</h2>
-      <p style={{ color: "#6b6759" }} className="text-sm mb-4">Seguimiento de posibles clientes, desde el primer contacto hasta que cierran.</p>
+      <p style={{ color: "#6b6759" }} className="text-sm mb-4">{SUBTITULOS[modoActivo]}</p>
 
       {modosActivos.length > 1 && (
         <div className="flex gap-1.5 mb-5">
@@ -259,11 +266,8 @@ export default function CrmSection({ business }) {
       )}
 
       {modoActivo === "pipeline" && <PipelineBoard unidadId={unidadId} />}
-      {modoActivo !== "pipeline" && (
-        <p style={{ color: "#8a8578" }} className="text-sm">
-          El modo &quot;{labelModo(modoActivo)}&quot; todavía se está construyendo. Próximamente.
-        </p>
-      )}
+      {modoActivo === "suscripciones" && <SuscripcionesBoard unidadId={unidadId} />}
+      {modoActivo === "pacientes" && <PacientesBoard unidadId={unidadId} />}
     </div>
   );
 }
