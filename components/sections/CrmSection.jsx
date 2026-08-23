@@ -9,6 +9,7 @@ import ProspectoModal from "@/components/crm/ProspectoModal";
 import ConversionModal from "@/components/crm/ConversionModal";
 import SuscripcionesBoard from "@/components/crm/SuscripcionesBoard";
 import PacientesBoard from "@/components/crm/PacientesBoard";
+import CrmDashboard from "@/components/crm/CrmDashboard";
 
 // Columnas visuales del tablero: las 4 etapas intermedias + una columna
 // final que agrupa "ganado" y "perdido" (igual que el mockup de referencia).
@@ -242,32 +243,33 @@ export default function CrmSection({ business }) {
     );
   }
 
-  const labelModo = (id) => CRM_MODOS.find((m) => m.id === id)?.label || id;
+  const labelModo = (id) => (id === "dashboard" ? "Dashboard" : CRM_MODOS.find((m) => m.id === id)?.label || id);
   const SUBTITULOS = {
     pipeline: "Seguimiento de posibles clientes, desde el primer contacto hasta que cierran.",
     suscripciones: "Clientes con cobro recurrente. El cobro y el vínculo se siguen por separado.",
     pacientes: "Pacientes o clientes recurrentes, organizados por fase del vínculo.",
+    dashboard: "KPIs y embudo del CRM, de un vistazo.",
   };
+  const tabsAMostrar = [...modosActivos, "dashboard"];
 
   return (
     <div>
       <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold mb-1">CRM</h2>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">{SUBTITULOS[modoActivo]}</p>
 
-      {modosActivos.length > 1 && (
-        <div className="flex gap-1.5 mb-5">
-          {modosActivos.map((m) => (
-            <button key={m} onClick={() => setModoActivo(m)} className="px-3 py-1.5 rounded-md text-xs font-medium"
-              style={modoActivo === m ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
-              {labelModo(m)}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="flex gap-1.5 mb-5">
+        {tabsAMostrar.map((m) => (
+          <button key={m} onClick={() => setModoActivo(m)} className="px-3 py-1.5 rounded-md text-xs font-medium"
+            style={modoActivo === m ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+            {labelModo(m)}
+          </button>
+        ))}
+      </div>
 
       {modoActivo === "pipeline" && <PipelineBoard unidadId={unidadId} />}
       {modoActivo === "suscripciones" && <SuscripcionesBoard unidadId={unidadId} />}
       {modoActivo === "pacientes" && <PacientesBoard unidadId={unidadId} />}
+      {modoActivo === "dashboard" && <CrmDashboard unidadId={unidadId} />}
     </div>
   );
 }
