@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader2, Upload } from "lucide-react";
-import { BRAND, TIPOS_NEGOCIO } from "@/lib/constants";
+import { BRAND, TIPOS_NEGOCIO, CRM_MODOS } from "@/lib/constants";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { useUnidad } from "@/components/UnidadProvider";
 import { money } from "@/lib/helpers";
@@ -211,6 +211,7 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
   const [nombre, setNombre] = useState(business?.nombre || "");
   const [rubro, setRubro] = useState(business?.rubro || "");
   const [tipoNegocio, setTipoNegocio] = useState(business?.tipoNegocio || "productos");
+  const [crmModos, setCrmModos] = useState(business?.crmModos || []);
   const [guardandoDatos, setGuardandoDatos] = useState(false);
   const [guardadoDatos, setGuardadoDatos] = useState(false);
 
@@ -219,7 +220,12 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
     setNombre(business?.nombre || "");
     setRubro(business?.rubro || "");
     setTipoNegocio(business?.tipoNegocio || "productos");
+    setCrmModos(business?.crmModos || []);
   }, [business, unidadId]);
+
+  const toggleCrmModo = (id) => {
+    setCrmModos((prev) => (prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]));
+  };
 
   const [logoSrc, setLogoSrc] = useState(null);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
@@ -245,10 +251,11 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
 
   const guardarDatos = async () => {
     setGuardandoDatos(true);
-    const actualizado = { ...business, nombre, rubro, tipoNegocio };
+    const crmModosGuardar = tipoNegocio === "servicios" ? crmModos : [];
+    const actualizado = { ...business, nombre, rubro, tipoNegocio, crmModos: crmModosGuardar };
     await saveData("negocio-perfil", actualizado);
     if (unidadId) {
-      try { await renombrarUnidad(unidadId, { nombre, rubro, tipoNegocio }); } catch (e) { /* no bloquea el guardado principal */ }
+      try { await renombrarUnidad(unidadId, { nombre, rubro, tipoNegocio, crmModos: crmModosGuardar }); } catch (e) { /* no bloquea el guardado principal */ }
     }
     onBusinessUpdate?.(actualizado);
     setGuardandoDatos(false);
@@ -373,6 +380,25 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
         <p style={{ color: "#a89f88" }} className="text-xs mb-3">
           Esto define cómo se arma la sección de Finanzas: {tipoNegocio === "servicios" ? "solo vas a ver costos fijos." : "vas a poder armar el costo de cada producto con sus ingredientes."}
         </p>
+
+        {tipoNegocio === "servicios" && (
+          <div className="mb-3">
+            <span style={{ color: "#8a8578" }} className="text-xs block mb-1">¿Cómo es tu forma de trabajar? (podés elegir más de una)</span>
+            <div className="space-y-2">
+              {CRM_MODOS.map((m) => (
+                <button key={m.id} type="button" onClick={() => toggleCrmModo(m.id)}
+                  className="w-full text-left rounded-lg px-3 py-2"
+                  style={crmModos.includes(m.id)
+                    ? { background: BRAND.teal, color: BRAND.navy }
+                    : { background: "#f0ece2", color: "#6b6759" }}>
+                  <div className="text-sm font-medium">{m.label}</div>
+                  <div className="text-xs mt-0.5" style={{ opacity: 0.8 }}>{m.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <button onClick={guardarDatos} disabled={guardandoDatos}
           className="rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50"
           style={{ background: BRAND.teal, color: BRAND.navy }}>

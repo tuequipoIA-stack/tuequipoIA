@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BRAND, ETAPAS, TIEMPOS, FACTURACIONES, CANALES, DESAFIOS, TIPOS_NEGOCIO } from "@/lib/constants";
+import { BRAND, ETAPAS, TIEMPOS, FACTURACIONES, CANALES, DESAFIOS, TIPOS_NEGOCIO, CRM_MODOS } from "@/lib/constants";
 import Chip from "./Chip";
 import BrandHeader from "./BrandHeader";
 
@@ -9,7 +9,7 @@ export default function Onboarding({ onStart }) {
   const [step, setStep] = useState(0);
   const [perfil, setPerfil] = useState({
     nombre: "", rubro: "", tipoNegocio: "", etapa: "", tiempoFuncionando: "", facturacionMensual: "",
-    canalVenta: "", desafios: [], objetivo3Meses: "",
+    canalVenta: "", desafios: [], objetivo3Meses: "", crmModos: [],
   });
 
   const update = (k, v) => setPerfil((p) => ({ ...p, [k]: v }));
@@ -17,6 +17,12 @@ export default function Onboarding({ onStart }) {
     setPerfil((p) => ({
       ...p,
       desafios: p.desafios.includes(id) ? p.desafios.filter((d) => d !== id) : [...p.desafios, id],
+    }));
+  };
+  const toggleCrmModo = (id) => {
+    setPerfil((p) => ({
+      ...p,
+      crmModos: p.crmModos.includes(id) ? p.crmModos.filter((m) => m !== id) : [...p.crmModos, id],
     }));
   };
 
@@ -49,6 +55,24 @@ export default function Onboarding({ onStart }) {
         </div>
       ),
     },
+    ...(perfil.tipoNegocio === "servicios" ? [{
+      title: "¿Cómo es tu forma de trabajar?",
+      body: (
+        <div className="space-y-2">
+          <p style={{ color: "#8b8b9a" }} className="text-xs mb-2">Elegí una o más (esto define qué vas a ver en CRM)</p>
+          {CRM_MODOS.map((m) => (
+            <button key={m.id} onClick={() => toggleCrmModo(m.id)}
+              className="w-full text-left rounded-lg px-4 py-3"
+              style={perfil.crmModos.includes(m.id)
+                ? { background: BRAND.teal, color: BRAND.navy }
+                : { background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }}>
+              <div className="font-semibold text-sm">{m.label}</div>
+              <div className="text-xs mt-0.5" style={{ opacity: 0.85 }}>{m.desc}</div>
+            </button>
+          ))}
+        </div>
+      ),
+    }] : []),
     {
       title: "¿En qué etapa estás?",
       body: (

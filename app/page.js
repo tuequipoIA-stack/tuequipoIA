@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle, Menu } from "lucide-react";
-import { BRAND, EQUIPO_HABILITADO } from "@/lib/constants";
+import { BRAND, EQUIPO_HABILITADO, CRM_HABILITADO } from "@/lib/constants";
 import LogoMark from "@/components/LogoMark";
 import * as storage from "@/lib/storage";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
@@ -23,6 +23,7 @@ import FinanzasSection from "@/components/sections/FinanzasSection";
 import EstrategiaSection from "@/components/sections/EstrategiaSection";
 import TableroSection from "@/components/sections/TableroSection";
 import PerfilSection from "@/components/sections/PerfilSection";
+import CrmSection from "@/components/sections/CrmSection";
 import AdminSection from "@/components/sections/AdminSection";
 import PanelSection from "@/components/sections/panel/PanelSection";
 
@@ -49,7 +50,7 @@ function AppShell({ isAdmin, bloqueado }) {
   useEffect(() => {
     if (!unidadId) { setBusiness(null); return; }
     loadData("negocio-perfil", null).then((b) => {
-      setBusiness(b || { nombre: unidadActual?.nombre, rubro: unidadActual?.rubro, tipoNegocio: unidadActual?.tipo_negocio });
+      setBusiness(b || { nombre: unidadActual?.nombre, rubro: unidadActual?.rubro, tipoNegocio: unidadActual?.tipo_negocio, crmModos: unidadActual?.crm_modos || [] });
     });
   }, [unidadId]);
 
@@ -60,6 +61,7 @@ function AppShell({ isAdmin, bloqueado }) {
 
   const enPerfil = section === "perfil";
   const restringirContenido = bloqueado && !enPerfil;
+  const mostrarCrm = CRM_HABILITADO && (business?.crmModos?.length > 0);
 
   if (!unidadId && !isAdmin) {
     return <PantallaCarga />;
@@ -98,7 +100,7 @@ function AppShell({ isAdmin, bloqueado }) {
         </span>
       </div>
       <div className="flex-1 flex min-h-0">
-        <Sidebar active={section} onChange={setSection} isAdmin={isAdmin}
+        <Sidebar active={section} onChange={setSection} isAdmin={isAdmin} mostrarCrm={mostrarCrm}
           mobileOpen={mobileNavOpen} onCloseMobile={() => setMobileNavOpen(false)} />
         <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-4 md:p-6 relative">
           <HelpButton />
@@ -109,6 +111,7 @@ function AppShell({ isAdmin, bloqueado }) {
             {section === "marketing" && <MarketingSection />}
             {section === "ventas" && <VentasSection business={business} />}
             {section === "clientes" && <ClientesSection />}
+            {section === "crm" && mostrarCrm && <CrmSection business={business} />}
             {section === "finanzas" && <FinanzasSection business={business} />}
             {section === "estrategia" && <EstrategiaSection business={business} />}
             {section === "dashboard" && <DashboardSection business={business} />}
@@ -172,7 +175,7 @@ export default function TuEquipoIA() {
     const res = await fetch("/api/unidades", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: perfil.nombre || "Mi negocio", rubro: perfil.rubro, tipoNegocio: perfil.tipoNegocio }),
+      body: JSON.stringify({ nombre: perfil.nombre || "Mi negocio", rubro: perfil.rubro, tipoNegocio: perfil.tipoNegocio, crmModos: perfil.crmModos }),
     });
     const data = await res.json();
     const unidad = data.unidad;

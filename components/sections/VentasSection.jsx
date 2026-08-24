@@ -10,6 +10,7 @@ import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 import SearchableSelect from "@/components/SearchableSelect";
 import ClienteModal from "@/components/ClienteModal";
 import MoneyInput from "@/components/MoneyInput";
+import SeguimientoBoard from "@/components/ventas/SeguimientoBoard";
 
 const OTRO = "__otro__";
 const MESES_LABEL = [
@@ -185,7 +186,9 @@ export default function VentasSection({ business }) {
         <AudioAyuda texto={AUDIO_GUIONES[`ventas:${vista}`]} audioSrc={AUDIO_ARCHIVOS.ventas} />
       </div>
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">
-        {vista === "carga" ? "Cargá cada producto vendido, día por día." : "Filtrá y explorá todos tus movimientos de venta."}
+        {vista === "carga" ? "Cargá cada producto vendido, día por día."
+          : vista === "dashboard" ? "Filtrá y explorá todos tus movimientos de venta."
+          : "Proyectos ganados en el CRM, desde el contrato hasta el cobro."}
       </p>
 
       <div className="flex gap-1.5 mb-5 flex-wrap">
@@ -196,6 +199,10 @@ export default function VentasSection({ business }) {
         <button onClick={() => setVista("dashboard")} className="px-3 py-1.5 rounded-md text-xs font-medium"
           style={vista === "dashboard" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
           Dashboard
+        </button>
+        <button onClick={() => setVista("seguimiento")} className="px-3 py-1.5 rounded-md text-xs font-medium"
+          style={vista === "seguimiento" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          Seguimiento
         </button>
       </div>
 
@@ -541,6 +548,8 @@ export default function VentasSection({ business }) {
           )}
         </>
       )}
+
+      {vista === "seguimiento" && <SeguimientoBoard unidadId={unidadId} />}
 
       <ClienteModal
         open={clienteModalAbierto}

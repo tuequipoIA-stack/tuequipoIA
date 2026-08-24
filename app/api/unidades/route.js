@@ -46,7 +46,7 @@ export async function POST(request) {
     return NextResponse.json({ error: SIN_ACCESO_ERROR }, { status: 403 });
   }
 
-  const { nombre, rubro, tipoNegocio } = await request.json();
+  const { nombre, rubro, tipoNegocio, crmModos } = await request.json();
   if (!nombre || !nombre.trim()) {
     return NextResponse.json({ error: "Falta el nombre de la unidad" }, { status: 400 });
   }
@@ -58,6 +58,7 @@ export async function POST(request) {
       nombre: nombre.trim(),
       rubro: rubro || null,
       tipo_negocio: tipoNegocio || "productos",
+      crm_modos: Array.isArray(crmModos) ? crmModos : [],
     })
     .select()
     .single();

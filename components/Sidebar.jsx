@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronDown, LogOut, Shield, LayoutGrid } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, LogOut, Shield, LayoutGrid, Handshake } from "lucide-react";
 import { BRAND, NAV_GROUPS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import LogoMark from "@/components/LogoMark";
@@ -59,7 +59,7 @@ function GroupButton({ label, icon: Icon, collapsed, open, onToggle, activeInsid
   );
 }
 
-export default function Sidebar({ active, onChange, isAdmin, mobileOpen = false, onCloseMobile }) {
+export default function Sidebar({ active, onChange, isAdmin, mostrarCrm = false, mobileOpen = false, onCloseMobile }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [hidratado, setHidratado] = useState(false);
@@ -77,10 +77,15 @@ export default function Sidebar({ active, onChange, isAdmin, mobileOpen = false,
   // vive dentro del grupo "TuequipoIA" para que solo queden 2 botones
   // de primer nivel, tal como se pidió.
   const grupos = NAV_GROUPS.map((g) => {
-    if (g.id === "tuequipoia" && isAdmin) {
-      return { ...g, items: [...g.items, { id: "admin", label: "Admin", icon: Shield }] };
+    if (g.id !== "tuequipoia") return g;
+    let items = g.items;
+    if (mostrarCrm) {
+      const idxVentas = items.findIndex((it) => it.id === "ventas");
+      const item = { id: "crm", label: "CRM", icon: Handshake };
+      items = idxVentas === -1 ? [...items, item] : [...items.slice(0, idxVentas + 1), item, ...items.slice(idxVentas + 1)];
     }
-    return g;
+    if (isAdmin) items = [...items, { id: "admin", label: "Admin", icon: Shield }];
+    return { ...g, items };
   }).filter((g) => !g.adminOnly || isAdmin);
 
   useEffect(() => {
