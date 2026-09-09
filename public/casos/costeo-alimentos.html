@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El peso que ya pagaste — Tu Equipo IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=DM+Mono:wght@400;500&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1AABAA;
+  --teal-900:#0B5453;
+  --teal-700:#12817F;
+  --teal-600:#158F8E;
+  --teal-300:#6FCFCE;
+  --teal-100:#D6F0EF;
+  --noche:#1A1A2E;
+  --crema:#F4F1EC;
+  --blanco:#FFFFFF;
+  --mango:#F4A259;
+  --sep:#E7E2D9;
+  --sombra:0 12px 32px rgba(26,26,46,.10);
+  --ease:cubic-bezier(.22,.8,.28,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+
+body{
+  margin:0;background:var(--crema);color:var(--noche);
+  font-family:"Figtree",system-ui,sans-serif;
+  font-size:18px;line-height:1.5;font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-variation-settings:"wdth" 112,"wght" 800;
+  font-weight:800;text-transform:uppercase;
+  line-height:.95;letter-spacing:.005em;margin:0;
+}
+.mono{
+  font-family:"DM Mono",ui-monospace,monospace;
+  text-transform:uppercase;letter-spacing:.14em;
+  font-weight:500;font-size:13px;
+}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+:focus-visible{outline:3px solid var(--mango);outline-offset:3px}
+
+.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
+p{max-width:60ch}
+
+/* ---------- header ---------- */
+header.top{
+  position:sticky;top:0;z-index:40;background:rgba(244,241,236,.95);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--sep);padding:16px 0;
+}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.lockup{display:flex;align-items:center;gap:11px}
+.mark{
+  width:38px;height:38px;border-radius:10px;background:var(--teal);
+  display:grid;place-items:center;color:var(--blanco);
+  font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:14px;letter-spacing:.02em;flex:none;
+}
+.wordmark{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:15px;line-height:.9;letter-spacing:.01em;color:var(--noche)}
+.wordmark small{display:block;font-size:15px}
+nav a{
+  font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
+  font-size:11.5px;color:var(--teal-700);text-decoration:none;margin-left:22px;
+  padding-bottom:3px;border-bottom:2px solid transparent;transition:border-color 140ms var(--ease);
+}
+nav a:hover{border-color:var(--teal)}
+@media(max-width:820px){nav{display:none}}
+
+/* ---------- hero ---------- */
+.hero{padding:90px 0 34px}
+.eyebrow{color:var(--teal-700);margin-bottom:22px;display:block}
+h1{font-size:clamp(42px,8.4vw,96px);max-width:13ch;margin-bottom:28px}
+h1 mark{background:none;color:var(--teal-700)}
+.lede{font-size:21px;max-width:52ch;margin:0 0 14px}
+.foot-note{font-size:15px;color:var(--teal-900);opacity:.75;max-width:56ch;margin-top:26px}
+
+/* ---------- recorrido ---------- */
+.panel{
+  background:var(--blanco);border-radius:28px;box-shadow:var(--sombra);
+  padding:40px 38px;margin-top:20px;
+}
+@media(max-width:640px){.panel{padding:28px 22px;border-radius:18px}}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:30px}
+.panel-head h3{font-size:19px;max-width:22ch}
+.panel-head p{font-size:16px;max-width:44ch;margin:0;color:var(--teal-900)}
+
+.stage{display:grid;grid-template-columns:186px 1fr 116px;gap:20px;align-items:center;
+  padding:14px 0;border-bottom:1px solid var(--sep)}
+.stage-name{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:13px;line-height:1.15;letter-spacing:.01em}
+.stage-name em{display:block;font-family:"Figtree";font-style:normal;font-weight:400;
+  text-transform:none;font-size:14px;color:var(--teal-900);opacity:.7;margin-top:4px;letter-spacing:0}
+.bar{height:24px;background:var(--sep);border-radius:10px;overflow:hidden;position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--teal);border-radius:10px;
+  transform-origin:left;transform:scaleX(0);animation:grow 240ms var(--ease) forwards}
+@keyframes grow{to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.bar i{transform:scaleX(1)}}
+.kg{text-align:right;font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:19px;letter-spacing:.005em}
+.kg small{display:block;font-family:"DM Mono",monospace;font-weight:400;font-size:11px;
+  letter-spacing:.1em;color:var(--teal-700);margin-top:4px}
+.stage.final{border-bottom:none}
+.stage.final .bar i{background:var(--noche)}
+.stage.final .kg{font-size:25px}
+@media(max-width:720px){.stage{grid-template-columns:1fr 96px;gap:6px 14px}.bar{grid-column:1/-1;order:3;margin-top:6px}}
+
+.verdict{margin-top:26px;background:var(--noche);color:var(--blanco);
+  border-radius:28px;padding:30px 32px;font-size:19px;max-width:none}
+.verdict p{max-width:56ch;margin:0;color:rgba(255,255,255,.9)}
+.verdict b{color:var(--teal-300);font-weight:600}
+
+/* ---------- sections ---------- */
+section{padding:86px 0}
+section.dark{background:var(--noche);color:var(--blanco)}
+section.dark h2{color:var(--blanco)}
+section.dark h2 mark{background:none;color:var(--teal-300)}
+section.dark p{color:rgba(255,255,255,.9)}
+section.dark .eyebrow{color:var(--teal-300)}
+h2{font-size:clamp(30px,4.6vw,50px);max-width:17ch;margin-bottom:20px}
+h2 mark{background:none;color:var(--teal-700)}
+.sec-lede{font-size:19px;margin-bottom:44px}
+
+/* fuentes dispersas */
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:16px}
+.src{background:var(--blanco);border-radius:18px;padding:24px 24px;box-shadow:var(--sombra)}
+.src .who{color:var(--teal-700);margin-bottom:10px;display:block}
+.src p{margin:0;font-size:16px}
+.gap-line{margin-top:36px;padding-top:26px;border-top:3px solid var(--noche);
+  font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;
+  font-size:clamp(20px,2.6vw,27px);line-height:1.1;max-width:26ch}
+
+/* preguntas */
+.q{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:start;
+  padding:20px 0;border-bottom:1px solid rgba(255,255,255,.16)}
+.q:first-of-type{border-top:3px solid var(--teal-300)}
+.q p{margin:0;font-size:19.5px;max-width:50ch}
+.q span{color:var(--teal-300);padding-top:6px;white-space:nowrap}
+
+/* cadena */
+.chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:16px}
+.link{background:var(--blanco);border-radius:18px;padding:22px 20px;box-shadow:var(--sombra)}
+.link .step-n{color:var(--teal-700);display:block;margin-bottom:12px}
+.link b{display:block;font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:14px;margin-bottom:7px;letter-spacing:.01em}
+.link p{margin:0;font-size:15.5px;color:var(--teal-900)}
+
+/* antes / después */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:54px}
+.ba>div{border-radius:28px;padding:30px 28px}
+.ba .antes{background:var(--sep)}
+.ba .despues{background:var(--teal);color:var(--blanco)}
+.ba h3{font-size:17px;margin-bottom:16px}
+.ba .despues h3{color:var(--blanco)}
+.ba ul{margin:0;padding-left:20px}
+.ba li{font-size:16.5px;margin-bottom:12px}
+.ba .antes li{color:var(--noche)}
+.ba .despues li{color:rgba(255,255,255,.92)}
+@media(max-width:720px){.ba{grid-template-columns:1fr}}
+
+/* simulador */
+.sim{display:grid;grid-template-columns:1fr 1.05fr;gap:16px;margin-top:12px}
+@media(max-width:860px){.sim{grid-template-columns:1fr}}
+.controls{background:var(--blanco);border-radius:28px;padding:32px 30px;box-shadow:var(--sombra)}
+.readout{background:var(--noche);border-radius:28px;padding:32px 30px;color:var(--blanco)}
+.ctrl{margin-bottom:22px}
+.ctrl label{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:9px}
+.ctrl .lbl{font-size:15px;color:var(--noche);max-width:30ch}
+.ctrl .val{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;font-size:17px;
+  color:var(--teal-700);letter-spacing:.005em}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:4px;
+  background:var(--sep);border-radius:999px;outline:none;margin:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
+  border-radius:999px;background:var(--teal);cursor:grab;border:none}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:999px;
+  background:var(--teal);cursor:grab;border:none}
+.reset{background:none;border:none;padding:0;cursor:pointer;color:var(--teal-700);
+  font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;
+  border-bottom:2px solid var(--sep);padding-bottom:3px;transition:border-color 140ms var(--ease)}
+.reset:hover{border-color:var(--teal)}
+.readout .cap{color:var(--teal-300);display:block}
+.big{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:clamp(40px,6.4vw,58px);line-height:1;letter-spacing:.005em;margin:8px 0 8px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px;padding-top:24px;
+  border-top:1px solid rgba(255,255,255,.18)}
+.split .big{font-size:clamp(28px,4.4vw,36px)}
+.mini{margin-top:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.18);
+  font-size:16px;color:rgba(255,255,255,.9);max-width:48ch}
+.mini b{color:var(--teal-300);font-weight:600}
+.alerta b{color:var(--mango)}
+
+/* tabla */
+.tabla-wrap{overflow-x:auto;margin-top:14px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th{font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
+  font-size:11px;font-weight:500;color:var(--teal-700);text-align:left;
+  padding:0 14px 12px 0;border-bottom:3px solid var(--noche)}
+td{padding:14px 14px 14px 0;border-bottom:1px solid var(--sep);font-size:16.5px}
+td.n,th.n{text-align:right;padding-right:0}
+td.n{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;font-size:16px}
+tr.sum td{border-bottom:none;border-top:3px solid var(--noche);
+  font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;font-size:15px}
+tr.sum td.n{font-size:19px;text-transform:none}
+
+/* cierre */
+.pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:16px;margin-bottom:46px}
+.paso{background:rgba(255,255,255,.06);border-radius:18px;padding:24px 22px}
+.paso .step-n{color:var(--teal-300);display:block;margin-bottom:12px}
+.paso b{display:block;font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:14px;margin-bottom:7px;color:var(--blanco);letter-spacing:.01em}
+.paso p{margin:0;font-size:15.5px;color:rgba(255,255,255,.82)}
+.cta{
+  display:inline-block;background:var(--mango);color:var(--noche);text-decoration:none;
+  border-radius:999px;padding:17px 34px;font-family:"Archivo";
+  font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;font-size:16px;
+  letter-spacing:.01em;transition:transform 140ms var(--ease)
+}
+.cta:hover{transform:translateY(-2px)}
+footer{padding:34px 0 58px;font-size:14.5px;color:var(--teal-900);opacity:.7}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="lockup">
+      <div class="mark">AI</div>
+      <div class="wordmark">Tu<small>Equipo</small></div>
+    </div>
+    <nav>
+      <a href="#recorrido">Recorrido</a>
+      <a href="#hoy">Hoy</a>
+      <a href="#preguntas">Preguntas</a>
+      <a href="#simulador">Simulador</a>
+      <a href="#despues">Después</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <span class="mono eyebrow">Costeo para fábricas de alimentos</span>
+  <h1>El peso que ya <mark>pagaste</mark></h1>
+  <p class="lede">Entre la materia prima que entra a tu planta y el producto que sale, se pierde entre un cuarto y la mitad del peso.</p>
+  <p class="lede">Esa pérdida ya está pagada. Está en la factura del proveedor. Lo que casi nunca está es en tu planilla.</p>
+  <p class="foot-note">Ejemplo trabajado sobre una fábrica de mermeladas de seis personas. Los valores son ilustrativos. La mecánica es la misma para conservas, lácteos, panificados, snacks, molienda o fraccionamiento.</p>
+</div>
+
+<div class="wrap" id="recorrido">
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Qué le pasa a una compra de 100 kg</h3>
+      <p>Cada etapa se lleva una parte. Ninguna desaparece del costo: se reparte, en silencio, entre los frascos que sí vendés.</p>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Llega la fruta<em>Factura del proveedor</em></div>
+      <div class="bar"><i style="width:100%;animation-delay:.04s"></i></div>
+      <div class="kg num">100,0 kg</div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">Selección<em>Fruta golpeada o verde</em></div>
+      <div class="bar"><i style="width:91%;animation-delay:.1s"></i></div>
+      <div class="kg num">91,0 kg<small>−9,0</small></div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">Pelado y carozo<em>Descarte de proceso</em></div>
+      <div class="bar"><i style="width:74%;animation-delay:.16s"></i></div>
+      <div class="kg num">74,0 kg<small>−17,0</small></div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">Envasado<em>Residuo en la olla, derrame, ajuste de llenado</em></div>
+      <div class="bar"><i style="width:71.8%;animation-delay:.22s"></i></div>
+      <div class="kg num">71,8 kg<small>−2,2</small></div>
+    </div>
+    <div class="stage final">
+      <div class="stage-name">Producto vendible<em>Ya con el azúcar sumado, frascos de 420 g listos para facturar</em></div>
+      <div class="bar"><i style="width:71.8%;animation-delay:.28s"></i></div>
+      <div class="kg num">213 frascos</div>
+    </div>
+  </div>
+
+  <div class="verdict">
+    <p>De los 100 kg que compraste, <b>28 kg nunca llegaron a un frasco</b>. Los 213 que vendés pagan la fruta que se descartó, el carozo, la cáscara y el residuo que quedó en la olla. Todo eso ya está adentro del precio de cada uno.</p>
+  </div>
+</div>
+
+<section id="hoy">
+  <div class="wrap">
+    <span class="mono eyebrow">El problema</span>
+    <h2>Tu costo vive en <mark>seis lugares</mark></h2>
+    <p class="sec-lede">No falta información. Está toda. El problema es que ninguna parte habla con la otra, y cada una la escribió alguien distinto en un momento distinto.</p>
+
+    <div class="sources">
+      <div class="src"><span class="mono who">Cajón del escritorio</span><p>Los remitos del proveedor. Tienen el peso real que llegó, que casi nunca es el que se pidió.</p></div>
+      <div class="src"><span class="mono who">Planilla de compras</span><p>Lo que se pagó, cargado por mes. No distingue qué compra fue a qué producción.</p></div>
+      <div class="src"><span class="mono who">Cuaderno de planta</span><p>Cuántas ollas salieron y cuántos frascos se llenaron. A mano, sin fecha en la mitad de las hojas.</p></div>
+      <div class="src"><span class="mono who">Planilla de costos</span><p>Armada hace ocho meses. Nadie recuerda de dónde salió el porcentaje de merma que tiene cargado.</p></div>
+      <div class="src"><span class="mono who">Facturas de servicios</span><p>Gas y luz de toda la planta en un monto mensual que no se reparte entre productos.</p></div>
+      <div class="src"><span class="mono who">La cabeza del dueño</span><p>Qué proveedor manda mejor mercadería y cuál producto «no da». Nunca se escribió.</p></div>
+    </div>
+
+    <p class="gap-line">No tenés un costo. Tenés varios, y usás el más optimista.</p>
+  </div>
+</section>
+
+<section class="dark" id="preguntas">
+  <div class="wrap">
+    <span class="mono eyebrow">Lo que hoy no se puede responder</span>
+    <h2>Seis preguntas que la planilla <mark>no contesta</mark></h2>
+    <p class="sec-lede">No son preguntas de contador. Son las que aparecen cuando un cliente te pide lista de precios, cuando sube la fruta, o cuando la ganancia del mes no coincide con el Excel.</p>
+
+    <div class="q"><p>De los 100 kg que compré la semana pasada, ¿cuántos terminaron adentro de un frasco?</p><span class="mono">Rendimiento</span></div>
+    <div class="q"><p>¿Cuánto me costó el frasco este mes, con la fruta que compré este mes?</p><span class="mono">Costo real</span></div>
+    <div class="q"><p>Este proveedor me sale más barato por kilo, ¿pero me deja más descarte que el otro?</p><span class="mono">Proveedor</span></div>
+    <div class="q"><p>De mis nueve productos, ¿cuáles me dejan plata y cuáles subsidio con los demás?</p><span class="mono">Mezcla</span></div>
+    <div class="q"><p>Si la fruta sube 20%, ¿a cuánto tengo que vender para no perder margen?</p><span class="mono">Precio</span></div>
+    <div class="q"><p>Este lote que me devolvieron, ¿con qué compra se hizo y qué otros lotes salieron de ahí?</p><span class="mono">Trazabilidad</span></div>
+  </div>
+</section>
+
+<section id="simulador">
+  <div class="wrap">
+    <span class="mono eyebrow">Probalo con tus números</span>
+    <h2>El número que <mark>no estás viendo</mark></h2>
+    <p class="sec-lede">Movés una variable y el costo se recalcula con la misma lógica con la que trabaja el sistema. Sirve para ver cuánto mueve la aguja cada decisión que hoy tomás a ojo.</p>
+
+    <div class="sim">
+      <div class="controls">
+        <div class="ctrl">
+          <label for="s1"><span class="lbl">Precio de la fruta, por kilo</span><span class="val num" id="v1">$1.800</span></label>
+          <input type="range" id="s1" min="1200" max="2800" step="50" value="1800">
+        </div>
+        <div class="ctrl">
+          <label for="s2"><span class="lbl">Descarte de selección, pelado y carozo</span><span class="val num" id="v2">26%</span></label>
+          <input type="range" id="s2" min="14" max="42" step="1" value="26">
+        </div>
+        <div class="ctrl">
+          <label for="s3"><span class="lbl">Costo de la hora de planta</span><span class="val num" id="v3">$3.200</span></label>
+          <input type="range" id="s3" min="1800" max="6500" step="100" value="3200">
+        </div>
+        <div class="ctrl">
+          <label for="s4"><span class="lbl">Frasco, tapa y etiqueta, por unidad</span><span class="val num" id="v4">$310</span></label>
+          <input type="range" id="s4" min="160" max="620" step="10" value="310">
+        </div>
+        <div class="ctrl">
+          <label for="s5"><span class="lbl">Precio de venta mayorista por frasco</span><span class="val num" id="v5">$2.100</span></label>
+          <input type="range" id="s5" min="1400" max="3400" step="50" value="2100">
+        </div>
+        <button class="reset" id="reset">Volver a los valores base</button>
+      </div>
+
+      <div class="readout">
+        <span class="mono cap">Costo real por frasco</span>
+        <div class="big num" id="rCost">$1.642</div>
+        <span class="mono cap">Sobre <span class="num" id="rUnits">213</span> frascos por cada 100 kg</span>
+
+        <div class="split">
+          <div>
+            <span class="mono cap">Margen según tu planilla</span>
+            <div class="big num" id="rNaive">46%</div>
+          </div>
+          <div>
+            <span class="mono cap">Margen real</span>
+            <div class="big num" id="rReal">22%</div>
+          </div>
+        </div>
+
+        <p class="mini" id="rNote">Tu planilla calcula sobre la fruta comprada y los frascos teóricos. No descuenta el descarte ni el residuo, y no le carga al producto ni una hora de planta ni un peso de energía. La diferencia es de <b id="rGap">$512</b> por frasco.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="despues">
+  <div class="wrap">
+    <span class="mono eyebrow">Cómo queda</span>
+    <h2>Cada kilo atado <mark>a un lote</mark></h2>
+    <p class="sec-lede">No cambia cómo trabajás. Cambia que cada kilo que entra queda pegado a un lote, y ese lote se arrastra hasta el frasco que sale. Todo lo demás se deduce solo.</p>
+
+    <div class="chain">
+      <div class="link"><span class="mono step-n">Paso 01</span><b>Compra</b><p>Peso recibido, precio pagado y proveedor. Se abre el lote.</p></div>
+      <div class="link"><span class="mono step-n">Paso 02</span><b>Producción</b><p>Qué lotes se usaron, cuánto se descartó y por qué causa.</p></div>
+      <div class="link"><span class="mono step-n">Paso 03</span><b>Indirectos</b><p>Gas, energía y horas de planta repartidos por producción, no por mes.</p></div>
+      <div class="link"><span class="mono step-n">Paso 04</span><b>Terminado</b><p>Unidades buenas, rechazos y costo unitario cerrado del lote.</p></div>
+      <div class="link"><span class="mono step-n">Paso 05</span><b>Margen</b><p>Precio de lista contra el costo del lote que despachaste.</p></div>
+    </div>
+
+    <div class="ba">
+      <div class="antes">
+        <h3>Antes</h3>
+        <ul>
+          <li>El costo del frasco es un número que alguien calculó una vez.</li>
+          <li>La merma es un porcentaje fijo que nadie revisa.</li>
+          <li>Si un lote sale mal, no sabés de qué compra vino.</li>
+          <li>Los precios se actualizan por inflación, no por costo.</li>
+          <li>Recién en el cierre de año sabés qué producto pierde plata.</li>
+          <li>Comparás proveedores mirando el precio por kilo.</li>
+        </ul>
+      </div>
+      <div class="despues">
+        <h3>Después</h3>
+        <ul>
+          <li>El costo se recalcula con cada compra y cada producción.</li>
+          <li>La merma se mide por etapa, por producto y por causa.</li>
+          <li>Cada frasco despachado apunta al lote y a la compra que lo originó.</li>
+          <li>Los precios se mueven cuando se mueve el costo del lote.</li>
+          <li>Los productos se ordenan por margen real, mes a mes.</li>
+          <li>Comparás proveedores por costo del kilo aprovechado.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:58px;font-size:17px">El costo de un frasco, abierto</h3>
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr><th>Componente</th><th>De dónde sale el dato</th><th class="n">Por frasco</th><th class="n">Peso</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Fruta aprovechada</td><td>Compra, neta de descarte</td><td class="n">$845</td><td class="n">51%</td></tr>
+          <tr><td>Azúcar y aditivos</td><td>Compra del mes</td><td class="n">$223</td><td class="n">14%</td></tr>
+          <tr><td>Frasco, tapa y etiqueta</td><td>Compra de envases</td><td class="n">$310</td><td class="n">19%</td></tr>
+          <tr><td>Horas de planta</td><td>Horas cargadas a esa producción</td><td class="n">$180</td><td class="n">11%</td></tr>
+          <tr><td>Gas y energía</td><td>Factura repartida por lote</td><td class="n">$85</td><td class="n">5%</td></tr>
+          <tr class="sum"><td>Costo del frasco</td><td></td><td class="n">$1.642</td><td class="n">100%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:15px;color:var(--teal-900);opacity:.8;margin-top:16px">La fruta descartada no aparece como línea aparte: ya está adentro de la primera. Los 74 kg que aprovechás cargan el precio de los 100 que compraste. Esa es exactamente la línea que tu planilla no ve.</p>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="wrap">
+    <span class="mono eyebrow">Cómo arrancamos</span>
+    <h2>Tu sistema, en <mark>cuatro pasos</mark></h2>
+    <p class="sec-lede">No hace falta que ordenes nada antes. El desorden de hoy es el punto de partida, no un requisito.</p>
+
+    <div class="pasos">
+      <div class="paso"><span class="mono step-n">Paso 01</span><b>Charla de 15 minutos</b><p>Nos contás cómo produce tu planta, con las palabras que usás en la planta.</p></div>
+      <div class="paso"><span class="mono step-n">Paso 02</span><b>Modelo de tu proceso</b><p>Te lo devolvemos armado para que lo corrijas. Todavía sin construir nada.</p></div>
+      <div class="paso"><span class="mono step-n">Paso 03</span><b>Primer lote costeado</b><p>Cargamos una producción real tuya y ves el costo abierto de un producto que conocés.</p></div>
+      <div class="paso"><span class="mono step-n">Paso 04</span><b>Sistema andando</b><p>Con tu equipo cargando, acompañado las primeras semanas hasta que sea rutina.</p></div>
+    </div>
+
+    <a class="cta" href="https://wa.me/5492617268115">Escribinos por WhatsApp</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Tu Equipo IA · Costeo y trazabilidad para fábricas de alimentos</div>
+    <div class="mono">@tuequipoia</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var B={p:1800,d:26,h:3200,env:310,v:2100};
+  var ids=['s1','s2','s3','s4','s5'], keys=['p','d','h','env','v'], S={};
+  var HORAS=12, CONC=0.78, RESIDUO=0.97, ENERGIA=18000, ADITIVOS=6500, AZUCAR_KG=950;
+  function fmt(n){return '$'+Math.round(n).toLocaleString('es-AR');}
+
+  function calc(){
+    var kg=100;
+    var pulpa=kg*(1-S.d/100)*RESIDUO;
+    var azucar=pulpa*0.6;
+    var post=(pulpa+azucar)*CONC;
+    var buenos=Math.max(1,Math.floor(post*1000/420));
+
+    var total=kg*S.p + azucar*AZUCAR_KG + ADITIVOS + buenos*S.env + ENERGIA + HORAS*S.h;
+    var real=total/buenos;
+
+    // lo que calcula la planilla: sin descarte, sin residuo, sin horas ni energía
+    var azucarN=kg*0.6, postN=(kg+azucarN)*CONC;
+    var brutosN=Math.max(1,Math.floor(postN*1000/420));
+    var naive=(kg*S.p + azucarN*AZUCAR_KG + ADITIVOS + brutosN*S.env)/brutosN;
+
+    var mReal=(S.v-real)/S.v*100, mNaive=(S.v-naive)/S.v*100;
+
+    document.getElementById('rCost').textContent=fmt(real);
+    document.getElementById('rUnits').textContent=buenos;
+    document.getElementById('rNaive').textContent=Math.round(mNaive)+'%';
+    var rr=document.getElementById('rReal');
+    rr.textContent=Math.round(mReal)+'%';
+    rr.style.color = mReal<8 ? 'var(--mango)' : 'var(--teal-300)';
+
+    var note=document.getElementById('rNote');
+    if(mReal<0){
+      note.className='mini alerta';
+      note.innerHTML='A este precio, cada frasco sale con una pérdida de <b>'+fmt(real-S.v)+'</b>. Tu planilla, mientras tanto, sigue mostrando ganancia.';
+    }else{
+      note.className='mini';
+      note.innerHTML='Tu planilla calcula sobre la fruta comprada y los frascos teóricos. No descuenta el descarte ni el residuo, y no le carga al producto ni una hora de planta ni un peso de energía. La diferencia es de <b>'+fmt(real-naive)+'</b> por frasco.';
+    }
+  }
+
+  function sync(i){
+    S[keys[i]]=parseFloat(document.getElementById(ids[i]).value);
+    var lbl=document.getElementById('v'+(i+1));
+    lbl.textContent=(i===1)?String(S[keys[i]]).replace('.',',')+'%':fmt(S[keys[i]]);
+  }
+
+  ids.forEach(function(id,i){
+    sync(i);
+    document.getElementById(id).addEventListener('input',function(){sync(i);calc();});
+  });
+
+  document.getElementById('reset').addEventListener('click',function(){
+    document.getElementById('s1').value=B.p; document.getElementById('s2').value=B.d;
+    document.getElementById('s3').value=B.h; document.getElementById('s4').value=B.env;
+    document.getElementById('s5').value=B.v;
+    ids.forEach(function(_,i){sync(i);}); calc();
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>

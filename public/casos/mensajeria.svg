@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 275" role="img" aria-label="Recorrido de envios con estado por parada">
+<rect width="400" height="275" fill="#eef7f6"/>
+<path d="M60 200 C 120 200, 120 96, 190 96 S 280 200, 344 132" fill="none" stroke="#1AABAA" stroke-width="3" stroke-linecap="round" opacity=".5" stroke-dasharray="1 9"/>
+<circle cx="60" cy="200" r="13" fill="#1AABAA"/>
+<circle cx="150" cy="112" r="13" fill="#1AABAA"/>
+<circle cx="232" cy="126" r="13" fill="#22c3c1"/>
+<circle cx="344" cy="132" r="13" fill="#fff" stroke="#1AABAA" stroke-width="3"/>
+<g font-family="Sora, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#0d5f5e">
+<text x="44" y="232">RETIRO</text><text x="126" y="94">ENTREGADO</text><text x="206" y="160">EN RUTA</text><text x="312" y="114">PENDIENTE</text>
+</g>
+</svg>

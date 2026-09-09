@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 275" role="img" aria-label="De 100 kg comprados quedan 72 kg vendibles">
+<rect width="400" height="275" fill="#eef7f6"/>
+<g font-family="Sora, system-ui, sans-serif" font-size="12" font-weight="600" fill="#0d5f5e">
+<rect x="46" y="76" width="290" height="20" rx="5" fill="#1AABAA"/><text x="344" y="91">100</text>
+<rect x="46" y="108" width="264" height="20" rx="5" fill="#1AABAA" opacity=".82"/><text x="344" y="123">91</text>
+<rect x="46" y="140" width="215" height="20" rx="5" fill="#1AABAA" opacity=".64"/><text x="344" y="155">74</text>
+<rect x="46" y="172" width="208" height="20" rx="5" fill="#22c3c1"/><text x="344" y="187">72</text>
+</g>
+<text x="46" y="60" font-family="Sora, system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="1.4" fill="#12807f">COMPRA 100 KG</text>
+<text x="46" y="224" font-family="Sora, system-ui, sans-serif" font-size="19" font-weight="800" fill="#1A1A2E">28 kg que ya pagaste</text>
+<line x1="46" y1="240" x2="354" y2="240" stroke="#1AABAA" stroke-width="1.5" opacity=".3"/>
+</svg>
