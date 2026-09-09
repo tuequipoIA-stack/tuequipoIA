@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BRAND, WHATSAPP_LINK, EMAIL_CONTACTO } from "@/lib/constants";
+import CasosDeUso from "@/components/CasosDeUso";
 
 const INSTAGRAM_URL = "https://www.instagram.com/tu_equipo.ia/";
 
@@ -88,6 +89,7 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-6">
             <a href="#portal" className="text-[13px] font-semibold" style={{ color: "#b4b4c4" }}>Portal para emprendedores</a>
             <a href="#software" className="text-[13px] font-semibold" style={{ color: "#b4b4c4" }}>Software a medida</a>
+            <a href="#casos" className="text-[13px] font-semibold" style={{ color: "#b4b4c4" }}>Casos de uso</a>
             <a href="#contacto" className="text-[13px] font-semibold" style={{ color: "#b4b4c4" }}>Contacto</a>
           </div>
           <div className="flex items-center gap-2.5">
@@ -280,6 +282,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* CASOS DE USO */}
+      <CasosDeUso />
 
       {/* COMO TRABAJAMOS */}
       <section className="py-20 relative overflow-hidden" style={{ background: BRAND.navy }}>
