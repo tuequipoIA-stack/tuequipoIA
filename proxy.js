@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/auth/callback", "/reset-password"];
+// "/casos" es público: son las demos de casos de uso que se muestran desde la
+// landing, tanto la página que las enmarca (/casos/<slug>) como el HTML
+// autocontenido que va adentro del iframe (/casos/<slug>.html).
+const PUBLIC_PATHS = ["/login", "/signup", "/auth/callback", "/reset-password", "/casos"];
 
 // El gating por estado de suscripción (nunca se suscribió vs. suscripción
 // vencida) se resuelve del lado del cliente en app/page.js, no acá: un

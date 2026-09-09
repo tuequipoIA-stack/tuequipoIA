@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 275" role="img" aria-label="Tablero de seguimiento de clientes en tres columnas">
+<rect width="400" height="275" fill="#eef7f6"/>
+<rect x="34" y="58" width="104" height="180" rx="12" fill="#fff" opacity=".8"/>
+<rect x="148" y="58" width="104" height="180" rx="12" fill="#fff" opacity=".8"/>
+<rect x="262" y="58" width="104" height="180" rx="12" fill="#fff" opacity=".8"/>
+<rect x="44" y="74" width="84" height="30" rx="7" fill="#1AABAA"/>
+<rect x="44" y="112" width="84" height="30" rx="7" fill="#1AABAA" opacity=".45"/>
+<rect x="158" y="74" width="84" height="30" rx="7" fill="#1AABAA" opacity=".62"/>
+<rect x="272" y="74" width="84" height="30" rx="7" fill="#22c3c1"/>
+<rect x="272" y="112" width="84" height="30" rx="7" fill="#22c3c1" opacity=".45"/>
+<text x="34" y="44" font-family="Sora, system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="1.2" fill="#12807f">CONTACTO / PROPUESTA / CERRADO</text>
+</svg>
