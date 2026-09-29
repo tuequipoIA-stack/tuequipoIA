@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 275" role="img" aria-label="Sobre el mismo costo, el mayorista deja 70% y el público 180%">
+<rect width="400" height="275" fill="#eef7f6"/>
+<text x="46" y="60" font-family="Sora, system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="1.4" fill="#12807f">MARGEN SOBRE EL MISMO COSTO</text>
+<g font-family="Sora, system-ui, sans-serif" font-size="12" font-weight="600" fill="#0d5f5e">
+<rect x="46" y="80" width="104" height="22" rx="5" fill="#D6F0EF"/><rect x="150" y="80" width="73" height="22" rx="5" fill="#1AABAA" opacity=".55"/><text x="232" y="95">Mayorista +70%</text>
+<rect x="46" y="118" width="104" height="22" rx="5" fill="#D6F0EF"/><rect x="150" y="118" width="187" height="22" rx="5" fill="#1AABAA"/><text x="46" y="158" font-size="11" fill="#12807f">Público +180%</text>
+</g>
+<g transform="translate(300,160)">
+<rect width="54" height="40" rx="10" fill="#1A1A2E"/>
+<path d="M14 40 L14 50 L24 40 Z" fill="#1A1A2E"/>
+<rect x="11" y="12" width="32" height="4" rx="2" fill="#6FCFCE"/>
+<rect x="11" y="22" width="22" height="4" rx="2" fill="#6FCFCE" opacity=".6"/>
+</g>
+<text x="46" y="224" font-family="Sora, system-ui, sans-serif" font-size="19" font-weight="800" fill="#1A1A2E">El pedido que llega armado</text>
+<line x1="46" y1="240" x2="354" y2="240" stroke="#1AABAA" stroke-width="1.5" opacity=".3"/>
+</svg>

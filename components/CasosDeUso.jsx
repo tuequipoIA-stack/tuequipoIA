@@ -78,7 +78,7 @@ export default function CasosDeUso() {
           mismo material que le mostramos al cliente antes de construirlo.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {CASOS_DE_USO.map((caso) => (
             <Tarjeta key={caso.slug} caso={caso} />
           ))}

@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El pedido que llega armado — Tu Equipo IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#1AABAA;
+  --teal-900:#0B5453;
+  --teal-700:#12817F;
+  --teal-600:#158F8E;
+  --teal-300:#6FCFCE;
+  --teal-100:#D6F0EF;
+  --noche:#1A1A2E;
+  --crema:#F4F1EC;
+  --blanco:#FFFFFF;
+  --mango:#F4A259;
+  --sep:#E7E2D9;
+  --sombra:0 12px 32px rgba(26,26,46,.10);
+  --ease:cubic-bezier(.22,.8,.28,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+
+body{
+  margin:0;background:var(--crema);color:var(--noche);
+  font-family:"Figtree",system-ui,sans-serif;
+  font-size:18px;line-height:1.5;font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-variation-settings:"wdth" 112,"wght" 800;
+  font-weight:800;text-transform:uppercase;
+  line-height:.95;letter-spacing:.005em;margin:0;
+}
+.mono{
+  font-family:"DM Mono",ui-monospace,monospace;
+  text-transform:uppercase;letter-spacing:.14em;
+  font-weight:500;font-size:13px;
+}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+:focus-visible{outline:3px solid var(--mango);outline-offset:3px}
+
+.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
+.wrap.wide{max-width:1200px}
+@media(max-width:640px){.wrap{padding:0 16px}}
+p{max-width:60ch}
+
+/* ---------- header ---------- */
+header.top{
+  position:sticky;top:0;z-index:40;background:rgba(244,241,236,.95);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--sep);padding:16px 0;
+}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.lockup{display:flex;align-items:center;gap:11px}
+.mark{
+  width:38px;height:38px;border-radius:10px;background:var(--teal);
+  display:grid;place-items:center;color:var(--blanco);
+  font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:14px;letter-spacing:.02em;flex:none;
+}
+.wordmark{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:15px;line-height:.9;letter-spacing:.01em;color:var(--noche)}
+.wordmark small{display:block;font-size:15px}
+nav.site a{
+  font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
+  font-size:11.5px;color:var(--teal-700);text-decoration:none;margin-left:22px;
+  padding-bottom:3px;border-bottom:2px solid transparent;transition:border-color 140ms var(--ease);
+}
+nav.site a:hover{border-color:var(--teal)}
+@media(max-width:820px){nav.site{display:none}}
+
+/* ---------- hero ---------- */
+.hero{padding:90px 0 34px}
+.eyebrow{color:var(--teal-700);margin-bottom:22px;display:block}
+h1{font-size:clamp(42px,8.4vw,96px);max-width:13ch;margin-bottom:28px}
+h1 mark{background:none;color:var(--teal-700)}
+.lede{font-size:21px;max-width:52ch;margin:0 0 14px}
+.foot-note{font-size:15px;color:var(--teal-900);opacity:.75;max-width:56ch;margin-top:26px}
+
+/* ---------- canales ---------- */
+.panel{
+  background:var(--blanco);border-radius:28px;box-shadow:var(--sombra);
+  padding:40px 38px;margin-top:20px;
+}
+@media(max-width:640px){.panel{padding:28px 22px;border-radius:18px}}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:30px}
+.panel-head h3{font-size:19px;max-width:22ch}
+.panel-head p{font-size:16px;max-width:44ch;margin:0;color:var(--teal-900)}
+
+.stage{display:grid;grid-template-columns:186px 1fr 130px;gap:20px;align-items:center;
+  padding:14px 0;border-bottom:1px solid var(--sep)}
+.stage-name{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:13px;line-height:1.15;letter-spacing:.01em}
+.stage-name em{display:block;font-family:"Figtree",system-ui,sans-serif;font-style:normal;font-weight:400;
+  text-transform:none;font-size:14px;color:var(--teal-900);opacity:.7;margin-top:4px;letter-spacing:0}
+.bar{height:24px;background:var(--sep);border-radius:10px;overflow:hidden;position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--teal);border-radius:10px;
+  transform-origin:left;transform:scaleX(0);animation:grow 240ms var(--ease) forwards}
+.bar i.cost{background:var(--teal-100)}
+@keyframes grow{to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.bar i{transform:scaleX(1)}}
+.kg{text-align:right;font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;
+  font-size:19px;letter-spacing:.005em}
+.kg small{display:block;font-family:"DM Mono",monospace;font-weight:400;font-size:11px;
+  letter-spacing:.1em;color:var(--teal-700);margin-top:4px}
+.stage.final{border-bottom:none}
+.stage.final .bar i:not(.cost){background:var(--noche)}
+.stage.final .kg{font-size:25px}
+@media(max-width:720px){.stage{grid-template-columns:1fr 110px;gap:6px 14px}.bar{grid-column:1/-1;order:3;margin-top:6px}}
+
+.verdict{margin-top:26px;background:var(--noche);color:var(--blanco);
+  border-radius:28px;padding:30px 32px;font-size:19px;max-width:none}
+.verdict p{max-width:56ch;margin:0;color:rgba(255,255,255,.9)}
+.verdict b{color:var(--teal-300);font-weight:600}
+
+/* ---------- sections ---------- */
+section{padding:86px 0}
+section.dark{background:var(--noche);color:var(--blanco)}
+section.dark h2{color:var(--blanco)}
+section.dark h2 mark{background:none;color:var(--teal-300)}
+section.dark p{color:rgba(255,255,255,.9)}
+section.dark .eyebrow{color:var(--teal-300)}
+h2{font-size:clamp(30px,4.6vw,50px);max-width:17ch;margin-bottom:20px}
+h2 mark{background:none;color:var(--teal-700)}
+.sec-lede{font-size:19px;margin-bottom:44px}
+
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:16px}
+.src{background:var(--blanco);border-radius:18px;padding:24px 24px;box-shadow:var(--sombra)}
+.src .who{color:var(--teal-700);margin-bottom:10px;display:block}
+.src p{margin:0;font-size:16px}
+.gap-line{margin-top:36px;padding-top:26px;border-top:3px solid var(--noche);
+  font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;
+  font-size:clamp(20px,2.6vw,27px);line-height:1.1;max-width:26ch}
+
+.q{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:start;
+  padding:20px 0;border-bottom:1px solid rgba(255,255,255,.16)}
+.q:first-of-type{border-top:3px solid var(--teal-300)}
+.q p{margin:0;font-size:19.5px;max-width:50ch}
+.q span{color:var(--teal-300);padding-top:6px;white-space:nowrap}
+
+.chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+.link{background:var(--blanco);border-radius:18px;padding:22px 20px;box-shadow:var(--sombra)}
+.link .step-n{color:var(--teal-700);display:block;margin-bottom:12px}
+.link b{display:block;font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:14px;margin-bottom:7px;letter-spacing:.01em}
+.link p{margin:0;font-size:15.5px;color:var(--teal-900)}
+
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:54px}
+.ba>div{border-radius:28px;padding:30px 28px}
+.ba .antes{background:var(--sep)}
+.ba .despues{background:var(--teal);color:var(--blanco)}
+.ba h3{font-size:17px;margin-bottom:16px}
+.ba .despues h3{color:var(--blanco)}
+.ba ul{margin:0;padding-left:20px}
+.ba li{font-size:16.5px;margin-bottom:12px}
+.ba .antes li{color:var(--noche)}
+.ba .despues li{color:rgba(255,255,255,.95)}
+@media(max-width:720px){.ba{grid-template-columns:1fr}}
+
+.tabla-wrap{overflow-x:auto;margin-top:14px}
+.tabla{width:100%;border-collapse:collapse;min-width:520px}
+.tabla th{font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
+  font-size:11px;font-weight:500;color:var(--teal-700);text-align:left;
+  padding:0 14px 12px 0;border-bottom:3px solid var(--noche)}
+.tabla td{padding:14px 14px 14px 0;border-bottom:1px solid var(--sep);font-size:16.5px;vertical-align:top}
+.tabla td.n{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;font-size:16px;white-space:nowrap}
+
+.pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:16px;margin-bottom:46px}
+.paso{background:rgba(255,255,255,.06);border-radius:18px;padding:24px 22px}
+.paso .step-n{color:var(--teal-300);display:block;margin-bottom:12px}
+.paso b{display:block;font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;
+  text-transform:uppercase;font-size:14px;margin-bottom:7px;color:var(--blanco);letter-spacing:.01em}
+.paso p{margin:0;font-size:15.5px;color:rgba(255,255,255,.82)}
+.cta{
+  display:inline-block;background:var(--mango);color:var(--noche);text-decoration:none;
+  border-radius:999px;padding:17px 34px;font-family:"Archivo",system-ui,sans-serif;
+  font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;font-size:16px;
+  letter-spacing:.01em;transition:transform 140ms var(--ease)
+}
+.cta:hover{transform:translateY(-2px)}
+footer{padding:34px 0 58px;font-size:14.5px;color:var(--teal-900);opacity:.7}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+
+/* =====================================================================
+   Maqueta interactiva (todo va dentro de #app para no chocar con la página)
+   ===================================================================== */
+#app{
+  --surface:#FFFFFF; --bg:var(--crema); --sunken:#EFEBE4; --ink:var(--noche); --muted:#6B6759; --line:var(--sep);
+  --acc:var(--teal); --acc-ink:var(--teal-700); --acc-soft:var(--teal-100); --on-acc:var(--noche);
+  --ok:#2A7148; --ok-bg:#DCEFE2; --warn:#8A5410; --warn-bg:#FCE7CF; --crit:#A13A28; --crit-bg:#F5DCD5; --info:#2F5A8F; --info-bg:#DDE7F3;
+  --wa-bg:#EFEAE2; --wa-in:#FFFFFF; --wa-out:#D9FDD3; --wa-head:#075E54; --wa-ink:#111B21; --wa-meta:#667781; --wa-link:#027EB5;
+  --r:12px;
+  font-size:15px;line-height:1.45;color:var(--ink);
+  background:var(--bg);border:1px solid var(--line);border-radius:28px;box-shadow:var(--sombra);overflow:hidden;
+}
+#app{scroll-margin-top:84px}
+#app p{max-width:none}
+#app h3,#app h4{margin:0;max-width:none;line-height:1;font-family:"Archivo",system-ui,sans-serif;
+  font-variation-settings:"wdth" 112,"wght" 800;font-weight:800;text-transform:uppercase;letter-spacing:.005em}
+#app button,#app input,#app select,#app textarea{font:inherit;color:inherit}
+#app button{cursor:pointer}
+#app [hidden]{display:none!important}
+#app .muted{color:var(--muted)}
+#app .kick{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-ink);display:block;margin-bottom:10px}
+
+.app-bar{background:var(--noche);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px 16px;flex-wrap:wrap}
+.app-id{display:flex;align-items:center;gap:10px}
+.app-id .dot{width:30px;height:30px;border-radius:8px;background:var(--teal);display:grid;place-items:center;
+  font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;font-size:12px;color:var(--noche)}
+.app-id b{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;font-size:15px;letter-spacing:.02em}
+.app-id span{font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-300)}
+.app-steps{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.app-step{border:1px solid transparent;background:transparent;color:#B4B4C4;padding:7px 12px;border-radius:999px;display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.app-step em{font-style:normal;font-family:"DM Mono",monospace;font-size:12px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:1px solid #4A4A66}
+.app-step:hover{color:#fff}
+.app-step[aria-current="true"]{background:var(--teal);color:var(--noche)}
+.app-step[aria-current="true"] em{border-color:var(--noche)}
+.app-flag{width:100%;font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8A8AA3;
+  border-top:1px solid #2E2E48;padding-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.app-main{padding:28px 26px 32px}
+@media(max-width:640px){.app-main{padding:20px 14px 24px}.app-bar{padding:12px 14px}}
+
+.view-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.view-head h3{font-size:clamp(22px,3vw,30px)}
+.view-head p{margin:.6em 0 0;color:var(--teal-900);font-size:15px;max-width:62ch}
+
+#app .btn{border:1px solid var(--line);background:var(--surface);padding:9px 14px;border-radius:8px;font-weight:600;font-size:14px}
+#app .btn:hover{border-color:var(--acc)}
+#app .btn.primary{background:var(--acc);border-color:var(--acc);color:var(--on-acc);font-weight:700}
+#app .btn.primary:disabled{opacity:.45;cursor:not-allowed}
+#app .btn.ghost{background:transparent;border-color:transparent;padding-inline:4px;color:var(--acc-ink);justify-self:start}
+#app .btn.sm{padding:5px 10px;font-size:13px}
+
+/* 1 · WhatsApp */
+.wa-layout{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:40px;align-items:start}
+.phone{width:100%;max-width:390px;height:720px;border:10px solid #0d0d0d;border-radius:38px;overflow:hidden;display:flex;flex-direction:column;background:var(--wa-bg);box-shadow:0 20px 50px -20px rgba(0,0,0,.45)}
+.wa-head{background:var(--wa-head);color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.wa-av{width:38px;height:38px;border-radius:50%;background:var(--noche);border:2px solid var(--teal-300);display:grid;place-items:center;font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;color:var(--teal-300);font-size:14px}
+.wa-head b{display:block;font-size:15px}
+.wa-head small{opacity:.8;font-size:12px}
+.wa-body{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:6px;background-color:var(--wa-bg);background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:14px 14px}
+.wa-day{align-self:center;background:#fff;color:var(--wa-meta);font-size:12px;padding:4px 10px;border-radius:8px;margin:4px 0;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.wa-sys{align-self:center;background:#FFF3C4;color:#54656F;font-size:11.5px;padding:5px 10px;border-radius:8px;text-align:center;max-width:90%}
+.msg{max-width:84%;padding:6px 9px 18px;border-radius:8px;font-size:14px;color:var(--wa-ink);position:relative;white-space:pre-wrap;word-wrap:break-word;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.msg.in{align-self:flex-start;background:var(--wa-in);border-top-left-radius:2px}
+.msg.out{align-self:flex-end;background:var(--wa-out);border-top-right-radius:2px}
+.msg .t{position:absolute;right:8px;bottom:3px;font-size:11px;color:var(--wa-meta)}
+.msg .tick{color:#53BDEB;margin-left:3px}
+.msg .tag{display:block;font-size:11px;color:var(--wa-meta);margin-bottom:3px}
+.wa-link{display:block;margin:6px 0 4px;border-radius:6px;overflow:hidden;background:#F0F2F5;color:var(--wa-ink);border:0;width:100%;text-align:left;padding:0;white-space:normal}
+.wa-link .img{height:92px;background:var(--noche);display:flex;align-items:center;justify-content:center;gap:4px;flex-direction:column}
+.wa-link .img b{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;font-size:26px;letter-spacing:.04em;color:#fff;text-transform:uppercase}
+.wa-link .img span{font-size:10px;letter-spacing:.2em;color:var(--teal-300);text-transform:uppercase;font-family:"DM Mono",monospace}
+.wa-link .meta{padding:7px 9px}
+.wa-link .meta b{display:block;font-size:13.5px}
+.wa-link .meta small{color:var(--wa-meta);font-size:12px}
+.wa-link .url{color:var(--wa-link);font-size:13.5px;display:block;padding:0 9px 7px}
+.wa-link:hover .meta b{text-decoration:underline}
+.wa-input{background:#F0F2F5;padding:8px;display:flex;gap:8px;align-items:center}
+.wa-input div{flex:1;background:#fff;border-radius:20px;padding:9px 14px;color:var(--wa-meta);font-size:14px}
+.wa-input span{width:40px;height:40px;border-radius:50%;background:#00A884;display:grid;place-items:center;color:#fff;font-size:17px}
+
+.how{display:grid;gap:14px}
+.how h4{font-size:24px}
+.how-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.how-list li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}
+.how-list li>span{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;font-size:28px;color:var(--acc-ink);line-height:1}
+.how-list b{display:block;margin-bottom:2px}
+.how-list p{margin:0;color:var(--muted);font-size:14px}
+.callout{background:var(--acc-soft);border-radius:var(--r);padding:14px 16px;font-size:14px}
+.callout b{display:block;margin-bottom:2px}
+
+/* 2 · Tienda */
+.shop-wrap{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:40px;align-items:start}
+.shop{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;position:relative}
+.shop-hero{background:var(--noche);color:#fff;padding:20px 18px 18px}
+.shop-hero h4{font-size:30px;letter-spacing:.03em}
+.shop-hero p{margin:6px 0 0;color:#B4B4C4;font-size:13px}
+.deliv{margin-top:12px;background:#24243C;border:1px solid #34345A;border-radius:8px;padding:9px 11px;font-size:13px;color:#fff}
+.deliv b{color:var(--teal-300)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface);scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+.chip:hover{border-color:var(--acc);background:var(--acc-soft)}
+.cats{max-height:600px;overflow-y:auto}
+.cat{padding:16px 16px 6px;border-bottom:1px solid var(--line)}
+.cat-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.cat-h h4{font-size:20px}
+.cat-h span{font-size:12px;color:var(--muted)}
+.cat .note{margin:4px 0 8px;font-size:13px;color:var(--muted)}
+.rows{list-style:none;margin:0;padding:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px dashed var(--line)}
+.row:first-child{border-top:0}
+.row b{font-weight:600;font-size:14.5px}
+.row small{display:block;color:var(--muted);font-size:12.5px}
+.row.has b{color:var(--acc-ink)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.stepper button{border:0;background:transparent;width:34px;height:32px;font-size:18px;line-height:1;font-weight:600}
+.stepper button:hover{background:var(--acc-soft)}
+.stepper output{min-width:24px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.row.has .stepper{border-color:var(--acc)}
+.cartbar{position:sticky;bottom:0;padding:12px 14px;background:var(--surface);border-top:1px solid var(--line)}
+.cartbar button{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--acc);color:var(--on-acc);border:0;border-radius:10px;padding:13px 16px;font-weight:700;font-size:15px}
+.cartbar button:disabled{background:var(--sunken);color:var(--muted);cursor:default}
+.checkout{padding:16px;display:grid;gap:18px;max-height:740px;overflow-y:auto}
+.checkout h4{font-size:19px}
+.lines{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.lines li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:14px}
+.lines li .lt{min-width:70px;text-align:right;font-weight:600}
+.sum{display:grid;gap:4px;font-size:14px;border-top:1px solid var(--line);padding-top:10px}
+.sum div{display:flex;justify-content:space-between}
+.sum .tot{font-weight:700;font-size:17px;padding-top:4px}
+.field{display:grid;gap:4px}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 11px;width:100%}
+.field input[readonly]{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.when{border:1px solid var(--acc);background:var(--acc-soft);border-radius:10px;padding:12px}
+.when b{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;font-size:19px;display:block;line-height:1.1;margin:2px 0}
+.when small{color:var(--teal-900)}
+.pays{display:grid;gap:6px}
+.pay{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:9px 11px;cursor:pointer}
+.pay input{margin-top:3px;accent-color:var(--teal-700)}
+.pay small{display:block;color:var(--muted)}
+.pay:has(input:checked){border-color:var(--acc);background:var(--acc-soft)}
+.warnline{color:var(--crit);font-size:13px}
+
+.side h4{font-size:24px;margin-bottom:12px}
+.side p{color:var(--muted);margin:0 0 14px;max-width:60ch}
+.spec{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.spec li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;font-size:14px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.spec li b{font-family:"DM Mono",monospace;font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-ink);padding-top:2px}
+
+/* 3 · Operación */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.tab{border:0;background:transparent;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+.tab .n{font-size:12px;background:var(--sunken);border-radius:999px;padding:1px 7px;margin-left:6px}
+.dates{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.dchip{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;text-align:left;line-height:1.2}
+.dchip b{display:block;font-size:14px;text-transform:capitalize}
+.dchip small{color:var(--muted);font-size:12px}
+.dchip[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat small{display:block;font-size:12px;color:var(--muted)}
+.stat b{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.15;display:block}
+.stat .sub{font-size:12px;color:var(--muted)}
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+#app table{border-collapse:collapse;width:100%;font-size:14px;min-width:0}
+#app th{font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-ink);font-weight:500;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--sunken)}
+#app td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
+#app tr:last-child td{border-bottom:0}
+#app td.r,#app th.r{text-align:right}
+#app td.r{font-variant-numeric:tabular-nums;white-space:nowrap}
+#app th button{border:0;background:none;padding:0;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit}
+#app th button[data-on="1"]{color:var(--noche);font-weight:600}
+#app tr.fresh td{background:var(--acc-soft)}
+#app td b{white-space:nowrap}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.p-nuevo{background:var(--info-bg);color:var(--info)}
+.p-confirmado{background:var(--acc-soft);color:var(--teal-900)}
+.p-prep{background:var(--warn-bg);color:var(--warn)}
+.p-listo,.p-entregado{background:var(--ok-bg);color:var(--ok)}
+.p-reparto{background:var(--info-bg);color:var(--info)}
+.p-paid{background:var(--ok-bg);color:var(--ok)}
+.p-cash{background:var(--warn-bg);color:var(--warn)}
+.p-wait{background:var(--crit-bg);color:var(--crit)}
+.stsel{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:4px 6px;font-size:13px}
+.items{font-size:13px;color:var(--muted);max-width:34ch}
+.small{font-size:12.5px}
+
+.prod-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+.pn{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pn-h{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pn-h h4{font-size:17px}
+.pn-h small{color:var(--muted);font-size:12.5px}
+.pgroup{padding:10px 14px;border-bottom:1px solid var(--line)}
+.pgroup:last-child{border-bottom:0}
+.pgroup h4{font-size:15px;display:flex;justify-content:space-between;margin-bottom:6px}
+.pgroup h4 span{font-family:"Figtree",system-ui,sans-serif;font-variation-settings:normal;text-transform:none;font-size:13px;color:var(--muted);font-weight:500}
+.pitem{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:14px;cursor:pointer}
+.pitem input{accent-color:var(--teal-700);width:17px;height:17px}
+.pitem .qn{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}
+.pitem.done span:not(.qn){text-decoration:line-through;color:var(--muted)}
+.pbar{height:6px;background:var(--sunken);border-radius:3px;overflow:hidden;margin-top:6px}
+.pbar i{display:block;height:100%;background:var(--acc)}
+.pack{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13.5px}
+.pack:last-child{border-bottom:0}
+.pack b{font-size:14px}
+.pack ul{margin:4px 0 0;padding-left:18px;color:var(--muted)}
+
+.zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.stop{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13.5px;align-items:start}
+.stop:last-child{border-bottom:0}
+.stop .i{width:24px;height:24px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-weight:700;font-size:12px}
+.stop.ok .i{background:var(--ok-bg);color:var(--ok)}
+.stop b{display:block;font-size:14px}
+.stop .addr{color:var(--muted)}
+.stop .right{text-align:right;display:grid;gap:5px;justify-items:end}
+.zmeta{display:flex;gap:14px;padding:8px 14px;background:var(--sunken);font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.zmeta b{color:var(--ink)}
+
+/* 4 · Datos */
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi small{display:block;font-size:12px;color:var(--muted)}
+.kpi b{font-family:"Archivo",system-ui,sans-serif;font-variation-settings:"wdth" 112,"wght" 800;font-size:27px;line-height:1.15;font-variant-numeric:tabular-nums;display:block}
+.kpi .d{font-size:12px;font-weight:600}
+.kpi .d.up{color:var(--ok)}
+.kpi .sub{font-size:12px;color:var(--muted)}
+.kpi.dark{background:var(--noche);border-color:var(--noche);color:#fff}
+.kpi.dark small{color:#B4B4C4}
+.kpi.dark b{color:var(--teal-300)}
+.kpi.dark .d.up{color:var(--teal-300)}
+.dgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;margin-bottom:18px;align-items:start}
+.chart{padding:12px 14px}
+.chart svg{width:100%;height:auto;display:block}
+.chart svg text{fill:var(--muted);font-family:"Figtree",sans-serif;font-size:11px}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .b-cost{fill:var(--teal-100)}
+.chart .b-mar{fill:var(--teal)}
+.chart .v{fill:var(--ink);font-weight:600}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);padding:0 14px 12px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.hbars{padding:12px 14px;display:grid;gap:10px}
+.hb{display:grid;grid-template-columns:110px minmax(0,1fr) 84px;gap:10px;align-items:center;font-size:13.5px}
+.hb .track{height:14px;background:var(--sunken);border-radius:3px;overflow:hidden}
+.hb .track i{display:block;height:100%;background:var(--acc)}
+.hb .r{text-align:right;font-variant-numeric:tabular-nums}
+.channel{padding:14px;display:grid;gap:12px}
+.chrow{display:grid;grid-template-columns:96px minmax(0,1fr) 110px;gap:10px;align-items:center;font-size:13.5px}
+.chrow .track{height:22px;background:var(--sunken);border-radius:4px;overflow:hidden;display:flex}
+.chrow .track i{display:block;height:100%}
+.chrow .c{background:var(--teal-100)}
+.chrow .m{background:var(--teal)}
+.chrow .m.may{background:#9AA3A2}
+.chrow .r{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.markup{font-weight:700}
+.markup.hi{color:var(--ok)}
+.markup.lo{color:var(--warn)}
+.fnote{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--noche);color:#fff;padding:11px 16px;border-radius:10px;font-size:14px;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);z-index:50;max-width:calc(100% - 32px)}
+
+@media (max-width:980px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dgrid,.prod-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:860px){
+  .wa-layout,.shop-wrap{grid-template-columns:minmax(0,1fr)}
+  .phone,.shop{margin-inline:auto}
+  .shop{max-width:440px;width:100%}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-steps{margin-left:0}
+}
+@media (max-width:520px){
+  .phone{height:620px;border-width:6px;border-radius:26px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-step{padding:6px 9px;font-size:13px}
+  .app-step .lbl{display:none}
+  .app-step[aria-current="true"] .lbl{display:inline}
+  .zones{grid-template-columns:minmax(0,1fr)}
+  .hb{grid-template-columns:84px minmax(0,1fr) 74px}
+  .chrow{grid-template-columns:76px minmax(0,1fr) 92px}
+  .spec li{grid-template-columns:minmax(0,1fr)}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .msg.new{animation:pop .25s ease-out}
+  @keyframes pop{from{transform:translateY(6px);opacity:.3}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="lockup">
+      <div class="mark">AI</div>
+      <div class="wordmark">Tu<small>Equipo</small></div>
+    </div>
+    <nav class="site">
+      <a href="#canales">Canales</a>
+      <a href="#hoy">Hoy</a>
+      <a href="#preguntas">Preguntas</a>
+      <a href="#demo">Demo</a>
+      <a href="#despues">Después</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <span class="mono eyebrow">Pedidos minoristas para fábricas de alimentos</span>
+  <h1>El pedido que llega <mark>armado</mark></h1>
+  <p class="lede">Una fábrica de congelados le vende a mayoristas y quiere venderle también al público, donde cada producto deja más del doble de margen.</p>
+  <p class="lede">El obstáculo no es la demanda. Es que cada pedido por WhatsApp llega como un audio, una foto o un mensaje suelto que alguien tiene que transcribir, cobrar, preparar y repartir.</p>
+  <p class="foot-note">Ejemplo trabajado sobre una fábrica de comidas congeladas: pizzas, empanadas, tartas y pastas. Precios, costos, clientes y pedidos son ilustrativos. La mecánica es la misma para viandas, panificados, pastas frescas o cualquier fábrica que quiera vender directo.</p>
+</div>
+
+<div class="wrap" id="canales">
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Lo mismo que producís, vendido a dos clientes</h3>
+      <p>El costo de la mercadería es igual en los dos canales. Lo que cambia es cuánto queda arriba de ese costo.</p>
+    </div>
+
+    <div class="stage">
+      <div class="stage-name">Costo de producir<em>Materia prima, envase y horas de cocina</em></div>
+      <div class="bar"><i class="cost" style="width:35.7%;animation-delay:.04s"></i></div>
+      <div class="kg num">$ 10.000</div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">Venta a mayorista<em>60 a 80% sobre el costo</em></div>
+      <div class="bar"><i style="width:60.7%;animation-delay:.1s"></i><i class="cost" style="width:35.7%;animation-delay:.1s"></i></div>
+      <div class="kg num">$ 17.000<small>+ $ 7.000</small></div>
+    </div>
+    <div class="stage final">
+      <div class="stage-name">Venta al público<em>Unos 180% sobre el costo, pedido a pedido</em></div>
+      <div class="bar"><i style="width:100%;animation-delay:.16s"></i><i class="cost" style="width:35.7%;animation-delay:.16s"></i></div>
+      <div class="kg num">$ 28.000<small>+ $ 18.000</small></div>
+    </div>
+  </div>
+
+  <div class="verdict">
+    <p>Con la misma producción, vender al público deja <b>$ 18.000 en lugar de $ 7.000</b>: dos veces y media más margen. Pero ese margen se cobra de a un pedido por vez, y cada pedido hoy cuesta tiempo de alguien del equipo.</p>
+  </div>
+</div>
+
+<section id="hoy">
+  <div class="wrap">
+    <span class="mono eyebrow">El problema</span>
+    <h2>Tu pedido vive en <mark>seis lugares</mark></h2>
+    <p class="sec-lede">Los clientes están. Escriben, piden, pagan. El problema es que cada dato del pedido queda en un lugar distinto y nadie los junta hasta la noche anterior al reparto.</p>
+
+    <div class="sources">
+      <div class="src"><span class="mono who">El chat de WhatsApp</span><p>Audios, fotos de la historia destacada y «¿me mandás lo mismo que la otra vez?».</p></div>
+      <div class="src"><span class="mono who">La lista de precios</span><p>Un PDF o una historia de Instagram que queda vieja cada vez que sube la harina o el queso.</p></div>
+      <div class="src"><span class="mono who">Las capturas de pago</span><p>Comprobantes de transferencia mezclados con el resto del chat, sin saber a qué pedido corresponden.</p></div>
+      <div class="src"><span class="mono who">El cuaderno de cocina</span><p>Lo que hay que tener listo mañana, sumado a mano mirando el celular, pedido por pedido.</p></div>
+      <div class="src"><span class="mono who">La hoja del repartidor</span><p>Direcciones copiadas del chat, sin orden por zona y sin saber a quién hay que cobrarle en la puerta.</p></div>
+      <div class="src"><span class="mono who">La cabeza del dueño</span><p>Qué zona se reparte qué día, cuál es el mínimo y qué cliente pide siempre lo mismo. Nunca se escribió.</p></div>
+    </div>
+
+    <p class="gap-line">Cada pedido se escribe tres veces antes de salir por la puerta.</p>
+  </div>
+</section>
+
+<section class="dark" id="preguntas">
+  <div class="wrap">
+    <span class="mono eyebrow">Lo que hoy no se puede responder</span>
+    <h2>Seis preguntas que el chat <mark>no contesta</mark></h2>
+    <p class="sec-lede">Aparecen el día anterior al reparto, cuando hay que decidir qué hornear, qué cargar en el auto y a quién cobrarle.</p>
+
+    <div class="q"><p>¿Cuántas pizzas de cuatro quesos tengo que tener listas para el jueves?</p><span class="mono">Producción</span></div>
+    <div class="q"><p>De los pedidos de mañana, ¿cuáles ya pagaron y cuáles hay que cobrar en la puerta?</p><span class="mono">Cobro</span></div>
+    <div class="q"><p>¿En qué orden recorre el repartidor Godoy Cruz y cuánto efectivo tiene que rendir?</p><span class="mono">Reparto</span></div>
+    <div class="q"><p>Si un cliente de Maipú pide hoy a las siete de la tarde, ¿qué día le llega?</p><span class="mono">Entrega</span></div>
+    <div class="q"><p>De todo lo que vendo, ¿qué producto me deja más plata por pedido y cuál casi nada?</p><span class="mono">Margen</span></div>
+    <div class="q"><p>¿Cuántos de los clientes del mes pasado volvieron a comprar?</p><span class="mono">Clientes</span></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <span class="mono eyebrow">Probalo</span>
+    <h2>Del chat a <mark>la puerta</mark></h2>
+    <p class="sec-lede">Recorrelo en orden. Primero como cliente: escribe por WhatsApp y arma su pedido en la tienda. Después como fábrica: qué preparar, por dónde repartir y cuánto dejó cada venta. Si confirmás un pedido en el paso 2, aparece en el paso 3.</p>
+  </div>
+  <div class="wrap wide">
+    <div id="app">
+      <div class="app-bar">
+        <div class="app-id"><div class="dot">AI</div><div><b>Pedidos minoristas</b><br><span>Hecho por Tu Equipo IA</span></div></div>
+        <div class="app-steps" id="appSteps" role="tablist" aria-label="Pasos del recorrido">
+          <button class="app-step" data-view="wa"><em>1</em><span class="lbl">WhatsApp</span></button>
+          <button class="app-step" data-view="shop"><em>2</em><span class="lbl">Tienda</span></button>
+          <button class="app-step" data-view="ops"><em>3</em><span class="lbl">Operación</span></button>
+          <button class="app-step" data-view="data"><em>4</em><span class="lbl">Datos</span></button>
+        </div>
+        <div class="app-flag"><span>Maqueta · precios, costos, clientes y pedidos son de ejemplo</span><span id="appToday"></span></div>
+      </div>
+      <div class="app-main">
+        <div id="v-wa"></div>
+        <div id="v-shop" hidden></div>
+        <div id="v-ops" hidden></div>
+        <div id="v-data" hidden></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="despues" style="padding-top:20px">
+  <div class="wrap">
+    <span class="mono eyebrow">Cómo queda</span>
+    <h2>Cada pedido se escribe <mark>una sola vez</mark></h2>
+    <p class="sec-lede">El cliente lo arma en la tienda. Desde ahí, el mismo pedido alimenta la cocina, el reparto y los números. Nadie vuelve a copiar nada.</p>
+
+    <div class="chain">
+      <div class="link"><span class="mono step-n">Paso 01</span><b>Mensaje</b><p>Respuesta automática de WhatsApp con el link a la tienda. Sin bot, sin costo por mensaje.</p></div>
+      <div class="link"><span class="mono step-n">Paso 02</span><b>Tienda</b><p>Productos, sabores y cantidades. Calcula envío, mínimo y el día de entrega según la zona.</p></div>
+      <div class="link"><span class="mono step-n">Paso 03</span><b>Confirmación</b><p>Vuelve a WhatsApp con el resumen escrito, la fecha y los datos de pago.</p></div>
+      <div class="link"><span class="mono step-n">Paso 04</span><b>Cocina</b><p>El total por producto para cada día de entrega y una bolsa armada por pedido.</p></div>
+      <div class="link"><span class="mono step-n">Paso 05</span><b>Reparto</b><p>Hoja de ruta por zona con dirección, bultos y lo que hay que cobrar.</p></div>
+      <div class="link"><span class="mono step-n">Paso 06</span><b>Números</b><p>Ventas, margen por producto, zonas y clientes que repiten.</p></div>
+    </div>
+
+    <div class="ba">
+      <div class="antes">
+        <h3>Antes</h3>
+        <ul>
+          <li>Alguien transcribe cada pedido desde un audio o un mensaje suelto.</li>
+          <li>La lista de precios es un PDF que nadie actualiza a tiempo.</li>
+          <li>Los comprobantes se pierden entre los mensajes del chat.</li>
+          <li>Lo que hay que producir se suma a mano la noche anterior.</li>
+          <li>El repartidor sale con direcciones copiadas y sin saber qué cobrar.</li>
+          <li>Recién a fin de mes se sabe si vender al público dejó plata.</li>
+        </ul>
+      </div>
+      <div class="despues">
+        <h3>Después</h3>
+        <ul>
+          <li>El pedido llega estructurado, con producto, sabor y cantidad.</li>
+          <li>El catálogo se cambia en un lugar y el cliente ve el precio vigente.</li>
+          <li>Cada pago queda atado a su pedido y se marca con un clic.</li>
+          <li>La cocina ve el total por producto para cada día de reparto.</li>
+          <li>El repartidor tiene su hoja de ruta por zona con el efectivo a cobrar.</li>
+          <li>El margen por producto y por zona se ve pedido a pedido.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:58px;font-size:17px">Las reglas que la tienda aplica sola</h3>
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead><tr><th>Regla</th><th>Cómo funciona</th><th>En el ejemplo</th></tr></thead>
+        <tbody>
+          <tr><td>Pedido mínimo</td><td>El botón de confirmar no se habilita hasta llegar al mínimo.</td><td class="n">$ 20.000</td></tr>
+          <tr><td>Envío</td><td>Se suma solo y desaparece al pasar el monto de envío gratis.</td><td class="n">$ 2.500 · gratis desde $ 35.000</td></tr>
+          <tr><td>Horario de corte</td><td>Lo que entra después del corte pasa al siguiente día de esa zona.</td><td class="n">18 h del día anterior</td></tr>
+          <tr><td>Zonas</td><td>Cada zona tiene sus días de reparto, su franja horaria y su hora de salida.</td><td class="n">6 zonas</td></tr>
+          <tr><td>Pago</td><td>El cliente elige y el mensaje de confirmación cambia según el medio.</td><td class="n">Transferencia · link · efectivo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:15px;color:var(--teal-900);opacity:.8;margin-top:16px">Todo se puede cambiar desde el panel: precios, sabores, zonas, horarios y mínimos. No hace falta pedirnos una modificación para subir un precio.</p>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="wrap">
+    <span class="mono eyebrow">Cómo arrancamos</span>
+    <h2>Tu sistema, en <mark>cuatro pasos</mark></h2>
+    <p class="sec-lede">No hace falta que ordenes nada antes. El chat de hoy es el punto de partida, no un requisito.</p>
+
+    <div class="pasos">
+      <div class="paso"><span class="mono step-n">Paso 01</span><b>Charla de 15 minutos</b><p>Nos contás qué vendés, cómo te llegan hoy los pedidos y cómo repartís.</p></div>
+      <div class="paso"><span class="mono step-n">Paso 02</span><b>Maqueta navegable</b><p>Te devolvemos una como esta, con tus productos y tus zonas, para que la corrijas antes de construir nada.</p></div>
+      <div class="paso"><span class="mono step-n">Paso 03</span><b>Primera entrega en una semana</b><p>Con tu visto bueno, en siete días tenés la tienda andando para probar con pedidos reales.</p></div>
+      <div class="paso"><span class="mono step-n">Paso 04</span><b>Sistema andando</b><p>Entregamos la semana siguiente y acompañamos a tu equipo dos semanas hasta que sea rutina.</p></div>
+    </div>
+
+    <a class="cta" href="https://wa.me/5492617268115" target="_blank" rel="noopener">Escribinos por WhatsApp</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Tu Equipo IA · Pedidos minoristas por WhatsApp para fábricas de alimentos</div>
+    <div class="mono">@tu_equipo.ia</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+/* ================= Catálogo de ejemplo ================= */
+const STORE='La Fábrica';
+const CATS=[
+ {id:'pizzas',name:'Pizzas',one:'Pizza',unit:'unidad',short:'u.',note:'Lista para hornear · 8 porciones',price:9500,cost:3300,
+  flav:[['Mozzarella'],['Especial',1000,450],['4 quesos',1500,800],['Fugazzeta',0,150],['Napolitana',500,250],['Provolone',1500,750],['De la casa',1500,650],['Doble mozza',1000,600]]},
+ {id:'empanadas',name:'Empanadas',one:'Empanadas',unit:'docena',short:'doc.',note:'Docena de un mismo sabor, para horno',price:14000,cost:4900,
+  flav:[['Carne',0,300],['Jamón y queso'],['Verdura',-500,-400],['Pollo',0,100],['Caprese',500,200]]},
+ {id:'tartas',name:'Tartas',one:'Tarta',unit:'unidad',short:'u.',note:'Tarta grande · 6 porciones',price:11000,cost:3800,
+  flav:[['Jamón y queso'],['Verdura',-500,-300],['Zapallo',-500,-450],['Pollo',500,300],['Zapallito',-500,-400],['Brócoli',0,-100]]},
+ {id:'sorrentinos',name:'Sorrentinos',one:'Sorrentinos',unit:'bandeja x 12',short:'band.',note:'Del freezer a la olla, 6 a 8 minutos',price:10500,cost:3600,
+  flav:[['Jamón y queso'],['4 quesos',800,550]]},
+ {id:'canelones',name:'Canelones',one:'Canelones',unit:'bandeja x 6',short:'band.',note:'Con salsa, directo al horno',price:11500,cost:4000,
+  flav:[['Jamón y queso'],['Pollo y verdura',0,150],['Verdura y ricota',-500,-350]]},
+ {id:'lasagna',name:'Lasagna',one:'Lasagna',unit:'bandeja 1 kg',short:'band.',note:'Jamón, queso, carne y verdura',price:12500,cost:4600,flav:[['Clásica']]},
+ {id:'pastel',name:'Pastel de papas',one:'Pastel de papas',unit:'bandeja 1 kg',short:'band.',note:'Relleno de carne y puré gratinado',price:12000,cost:4200,flav:[['Clásico']]},
+];
+const PROD={};const PLIST=[];
+CATS.forEach(c=>c.flav.forEach(f=>{const k=c.id+'|'+f[0];const p={k,cat:c,flav:f[0],price:c.price+(f[1]||0),cost:c.cost+(f[2]||0),label:c.flav.length>1?c.one+' '+f[0]:c.one};PROD[k]=p;PLIST.push(p)}));
+
+const ZONES=[
+ {id:'ciudad',name:'Ciudad',days:[2,4,6],win:'10 a 13 h',out:'09:30'},
+ {id:'gc',name:'Godoy Cruz',days:[2,4,6],win:'14 a 18 h',out:'13:30'},
+ {id:'guay',name:'Guaymallén',days:[3,5],win:'10 a 13 h',out:'09:30'},
+ {id:'lh',name:'Las Heras',days:[3,5],win:'14 a 18 h',out:'13:30'},
+ {id:'maipu',name:'Maipú',days:[4,6],win:'15 a 19 h',out:'14:30'},
+ {id:'lujan',name:'Luján de Cuyo',days:[3,6],win:'15 a 19 h',out:'14:30'},
+];
+const ZB={};ZONES.forEach(z=>ZB[z.id]=z);
+const MIN_ORDER=20000, FREE_SHIP=35000, SHIP=2500, CUTOFF=18;
+
+/* ================= Fechas (la demo corre sobre el día de hoy) ================= */
+const NOW=new Date();NOW.setSeconds(0,0);
+const DN=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const DS=['dom','lun','mar','mié','jue','vie','sáb'];
+const addD=(d,n)=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x};
+const dk=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dm=d=>d.getDate()+'/'+(d.getMonth()+1);
+const fmtD=d=>DN[d.getDay()]+' '+dm(d);
+const hm=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+function nextDelivery(zid,from=new Date()){const z=ZB[zid];for(let i=1;i<15;i++){const d=addD(from,i);if(!z.days.includes(d.getDay()))continue;const cut=addD(d,-1);cut.setHours(CUTOFF);if(cut>from)return d}return addD(from,7)}
+
+const money=n=>'$ '+Math.round(n).toLocaleString('es-AR');
+const short=n=>n>=1e6?'$ '+(n/1e6).toFixed(1).replace('.',',')+' M':'$ '+Math.round(n/1000)+' mil';
+const pct=n=>Math.round(n*100)+'%';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ================= Datos de ejemplo ================= */
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(20260928);
+const pick=a=>a[Math.floor(R()*a.length)];
+const NAMES=['Carolina Díaz','Martín Sosa','Florencia Ruiz','Gustavo Pérez','Valeria Molina','Diego Ortiz','Soledad Castro','Pablo Giménez','Romina Aguirre','Federico Luna','Natalia Vega','Ignacio Rojas','Mariana Quiroga','Lucas Benítez','Paula Herrera','Emiliano Ríos','Agustina Correa','Sebastián Funes','Julieta Ponce','Matías Videla','Daniela Lucero','Hernán Ojeda','Camila Arce','Rodrigo Bustos','Andrea Salinas','Tomás Guzmán','Verónica Olguín','Nicolás Ferreyra','Cecilia Pizarro','Maximiliano Tello','Laura Mercado','Joaquín Gil','Gabriela Moyano','Esteban Coria','Lorena Villegas','Franco Carrizo','Silvina Muñoz','Leandro Páez','Victoria Morales','Alejandro Suárez','Brenda Ávila','Ezequiel Vargas'];
+const STREETS={ciudad:['Av. Colón','Belgrano','Sarmiento','Perú','Av. Emilio Civit','Chile','Rivadavia'],gc:['San Martín Sur','Perito Moreno','Tomba','Rivadavia','Joaquín V. González'],guay:['Godoy Cruz','Bandera de los Andes','Av. Libertador','Pedro Molina'],lh:['San Miguel','Independencia','Regalado Olguín','Av. Champagnat'],maipu:['Ozamis','Padre Vázquez','Urquiza','Sarmiento'],lujan:['San Martín','Sáenz Peña','Roque Sáenz Peña','Terrada']};
+const CUSTS=NAMES.map((n,i)=>{const z=ZONES[i%ZONES.length].id;return{name:n,zone:z,phone:'+54 9 261 '+(4+Math.floor(R()*3))+String(Math.floor(R()*90+10))+'-'+String(Math.floor(R()*9000+1000)),addr:pick(STREETS[z])+' '+(100+Math.floor(R()*2800))}});
+const CAT_W=[['pizzas',32],['empanadas',30],['tartas',12],['sorrentinos',8],['canelones',7],['lasagna',6],['pastel',5]];
+const wcat=()=>{let t=R()*100,s=0;for(const[c,w]of CAT_W){s+=w;if(t<s)return c}return'pizzas'};
+let NEXT_ID=900;
+function makeOrder(date,zid,status){
+  const pool=CUSTS.filter(c=>c.zone===zid);const c=pool[Math.floor(Math.pow(R(),1.6)*pool.length)];
+  const n=1+Math.floor(R()*3);const lines={};
+  for(let i=0;i<n;i++){const cid=wcat();const cat=CATS.find(x=>x.id===cid);const f=pick(cat.flav)[0];const k=cat.id+'|'+f;lines[k]=(lines[k]||0)+1+(R()<.35?1:0)+(R()<.08?1:0)}
+  const L=Object.entries(lines).map(([k,q])=>({k,qty:q,price:PROD[k].price,cost:PROD[k].cost}));
+  const r=R();const pay=r<.5?'transferencia':r<.8?'mp':'efectivo';
+  const sb=L.reduce((s,l)=>s+l.qty*l.price,0);
+  return{id:NEXT_ID++,cust:c,zone:zid,date,lines:L,pay,paid:status==='entregado',status,ship:sb>=FREE_SHIP?0:SHIP,notes:''};
+}
+const ORDERS=[];
+for(let d=-28;d<=-1;d++){const day=addD(NOW,d);const wk=Math.floor((d+28)/7);
+  ZONES.forEach(z=>{if(!z.days.includes(day.getDay()))return;const n=1+Math.floor(R()*2.2+wk*0.4);for(let i=0;i<n;i++)ORDERS.push(makeOrder(day,z.id,'entregado'))})}
+for(let d=1;d<=6;d++){const day=addD(NOW,d);
+  ZONES.forEach(z=>{if(!z.days.includes(day.getDay()))return;const n=2+Math.floor(R()*3);for(let i=0;i<n;i++){
+    let st=d===1?(R()<.6?'prep':'confirmado'):d===2?'confirmado':(R()<.45?'nuevo':'confirmado');
+    const o=makeOrder(day,z.id,st);o.paid=o.pay!=='efectivo'&&st!=='nuevo';ORDERS.push(o)}})}
+const sub=o=>o.lines.reduce((s,l)=>s+l.qty*l.price,0);
+const tot=o=>sub(o)+o.ship;
+const cost=o=>o.lines.reduce((s,l)=>s+l.qty*l.cost,0);
+const STATUS=[['nuevo','Nuevo'],['confirmado','Confirmado'],['prep','En preparación'],['listo','Listo para salir'],['reparto','En reparto'],['entregado','Entregado']];
+const SL=Object.fromEntries(STATUS);
+const PAYL={transferencia:'Transferencia',mp:'Link Mercado Pago',efectivo:'Efectivo al recibir'};
+function payPill(o){if(o.paid)return'<span class="pill p-paid">Pagado</span>';if(o.pay==='efectivo')return'<span class="pill p-cash">Cobrar '+money(tot(o))+'</span>';return'<span class="pill p-wait">Esperando pago</span>'}
+function itemsTxt(o){return o.lines.map(l=>l.qty+' '+PROD[l.k].cat.short+' '+PROD[l.k].label).join(' · ')}
+
+/* ================= Estado ================= */
+const t0=new Date(NOW.getTime()-14*60000);
+const S={view:'wa',cart:{},checkout:false,opsTab:'pedidos',opsDate:null,sortBy:'contrib',done:new Set(),fresh:null,scrollTop:0,
+  form:{name:'Carla Gómez',phone:'+54 9 261 555-0142',zone:'ciudad',addr:'Av. Colón 1240, depto 3B',notes:'',pay:'transferencia'},
+  chat:[
+    {day:'Hoy'},
+    {sys:'Los mensajes de '+STORE+' se envían con plantillas automáticas. No hay un bot conversando.'},
+    {out:1,t:hm(t0),text:'Hola! Quería hacer un pedido 🙂'},
+    {in:1,t:hm(t0),tag:'Respuesta automática',text:'¡Hola! Gracias por escribir a '+STORE+' 👋\nArmá tu pedido en nuestra tienda: elegís productos, sabores y cantidades.',link:true,after:'Cuando lo confirmes te llega por acá el día y la franja de entrega.'}
+  ]};
+
+/* ================= Navegación ================= */
+const $=s=>document.querySelector(s);
+$('#appToday').textContent='Hoy: '+fmtD(NOW);
+function go(v,scroll){S.view=v;['wa','shop','ops','data'].forEach(x=>$('#v-'+x).hidden=x!==v);
+  document.querySelectorAll('.app-step').forEach(b=>b.setAttribute('aria-current',b.dataset.view===v));
+  render();
+  if(scroll){const top=$('#app').getBoundingClientRect().top;if(top<0||top>window.innerHeight*.5)$('#app').scrollIntoView({block:'start'})}}
+$('#appSteps').addEventListener('click',e=>{const b=e.target.closest('.app-step');if(b)go(b.dataset.view,true)});
+function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>el.hidden=true,4200)}
+function render(){({wa:rWA,shop:rShop,ops:rOps,data:rData})[S.view]()}
+
+/* ================= 1 · WhatsApp ================= */
+function rWA(){
+  const msgs=S.chat.map(m=>{
+    if(m.day)return`<div class="wa-day">${m.day}</div>`;
+    if(m.sys)return`<div class="wa-sys">${esc(m.sys)}</div>`;
+    const cls=(m.out?'out':'in')+(m.isNew?' new':'');
+    const link=m.link?`<button class="wa-link" data-go="shop"><div class="img"><b>${STORE}</b><span>Congelados</span></div><div class="meta"><b>Hacé tu pedido · ${STORE}</b><small>Pizzas, empanadas, tartas, pastas y más</small></div><span class="url">tutienda.com.ar/pedido</span></button>`:'';
+    return`<div class="msg ${cls}">${m.tag?`<span class="tag">${m.tag}</span>`:''}${esc(m.text)}${link}${m.after?'\n'+esc(m.after):''}<span class="t">${m.t}${m.out?'<span class="tick">✓✓</span>':''}</span></div>`}).join('');
+  $('#v-wa').innerHTML=`
+  <div class="view-head"><div><span class="kick">Paso 1 · Lo que ve el cliente</span><h3>El pedido arranca en WhatsApp</h3>
+  <p>El cliente escribe y recibe al instante un mensaje fijo con el link a la tienda. Tocá el link para seguir el recorrido.</p></div>
+  <button class="btn sm" id="resetChat">Reiniciar conversación</button></div>
+  <div class="wa-layout">
+    <div class="phone">
+      <div class="wa-head"><div class="wa-av">LF</div><div><b>${STORE} Congelados</b><small>Cuenta de empresa</small></div></div>
+      <div class="wa-body" id="waBody">${msgs}</div>
+      <div class="wa-input"><div>Mensaje</div><span>➤</span></div>
+    </div>
+    <div class="how">
+      <h4>Cómo funciona sin gastar en IA</h4>
+      <ol class="how-list">
+        <li><span>1</span><div><b>Respuesta automática con link</b><p>Mensaje de bienvenida de WhatsApp Business con el link a la tienda. Es un texto fijo: no hay bot que interprete lo que escribe el cliente, así que no consume tokens.</p></div></li>
+        <li><span>2</span><div><b>El cliente arma el pedido en la tienda</b><p>Elige productos, sabores y cantidades; carga dirección y zona. La tienda calcula el día y la franja de entrega según la zona y el horario de corte (18 h del día anterior).</p></div></li>
+        <li><span>3</span><div><b>Confirma y vuelve a WhatsApp</b><p>Se abre el chat con el resumen ya escrito. Al enviarlo, sale la confirmación con fecha, franja y datos de pago. El pedido queda registrado para preparación y reparto.</p></div></li>
+      </ol>
+      <div class="callout"><b>Pago por WhatsApp</b>El cliente elige transferencia, link de Mercado Pago o efectivo al recibir. Si transfiere, manda el comprobante al mismo chat y alguien del equipo lo marca como pagado en Operación.</div>
+    </div>
+  </div>`;
+  const b=$('#waBody');b.scrollTop=b.scrollHeight;
+  $('#resetChat').onclick=()=>{S.chat=S.chat.slice(0,4);rWA()};
+  S.chat.forEach(m=>delete m.isNew);
+}
+$('#app').addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){S.checkout=false;go(g.dataset.go,true)}});
+
+/* ================= 2 · Tienda ================= */
+const cartCount=()=>Object.values(S.cart).reduce((a,b)=>a+b,0);
+const cartSub=()=>Object.entries(S.cart).reduce((s,[k,q])=>s+q*PROD[k].price,0);
+function stepper(k){const q=S.cart[k]||0;return`<div class="stepper"><button data-dec="${k}" aria-label="Quitar uno">−</button><output>${q}</output><button data-inc="${k}" aria-label="Agregar uno">+</button></div>`}
+function rShop(){
+  const n=cartCount(),st=cartSub();
+  const nd=nextDelivery(S.form.zone);
+  let inner;
+  if(!S.checkout){
+    inner=`<nav class="chips">${CATS.map(c=>`<button class="chip" data-scroll="${c.id}">${c.name}</button>`).join('')}</nav>
+    <div class="cats" id="cats">${CATS.map(c=>`<div class="cat" id="cat-${c.id}"><div class="cat-h"><h4>${c.name}</h4><span>${c.unit}</span></div><p class="note">${c.note}</p>
+      <ul class="rows">${c.flav.map(f=>{const p=PROD[c.id+'|'+f[0]];return`<li class="row${S.cart[p.k]?' has':''}"><div><b>${c.flav.length>1?f[0]:c.name}</b><small class="num">${money(p.price)}</small></div>${stepper(p.k)}</li>`}).join('')}</ul></div>`).join('')}</div>
+    <div class="cartbar"><button id="toCheckout" ${n?'':'disabled'}><span>${n?'Ver mi pedido · '+n+' '+(n===1?'producto':'productos'):'Tu carrito está vacío'}</span><span class="num">${n?money(st):''}</span></button></div>`;
+  }else{
+    const f=S.form,ship=st>=FREE_SHIP?0:SHIP,total=st+ship;
+    const lines=Object.entries(S.cart).map(([k,q])=>`<li><span>${PROD[k].label}<small class="muted"> · ${PROD[k].cat.unit}</small></span>${stepper(k)}<span class="lt num">${money(q*PROD[k].price)}</span></li>`).join('');
+    inner=`<div class="checkout">
+      <button class="btn ghost" id="back">← Seguir eligiendo</button>
+      <h4>Tu pedido</h4>
+      <ul class="lines">${lines||'<li class="muted">No hay productos.</li>'}</ul>
+      <div class="sum num"><div><span>Subtotal</span><span>${money(st)}</span></div><div><span>Envío</span><span>${ship?money(ship):'Gratis'}</span></div>
+      ${ship?`<div class="muted small"><span>Te faltan ${money(FREE_SHIP-st)} para envío gratis</span></div>`:''}
+      <div class="tot"><span>Total</span><span>${money(total)}</span></div></div>
+      <div style="display:grid;gap:10px"><h4>Entrega</h4>
+        <div class="grid2"><div class="field"><label for="f-name">Nombre</label><input id="f-name" data-f="name" value="${esc(f.name)}"></div>
+        <div class="field"><label for="f-phone">WhatsApp</label><input id="f-phone" value="${esc(f.phone)}" readonly></div></div>
+        <div class="field"><label for="f-zone">Zona</label><select id="f-zone" data-f="zone">${ZONES.map(z=>`<option value="${z.id}" ${z.id===f.zone?'selected':''}>${z.name} · ${z.days.map(d=>DS[d]).join(', ')}</option>`).join('')}</select></div>
+        <div class="field"><label for="f-addr">Dirección</label><input id="f-addr" data-f="addr" value="${esc(f.addr)}"></div>
+        <div class="when"><small>Tu pedido llega el</small><b>${fmtD(nd)}</b><span>entre ${ZB[f.zone].win}</span></div>
+        <div class="field"><label for="f-notes">Aclaraciones para el repartidor</label><textarea id="f-notes" data-f="notes" rows="2" placeholder="Ej.: timbre 3B, dejar en portería">${esc(f.notes)}</textarea></div>
+      </div>
+      <div style="display:grid;gap:8px"><h4>Pago</h4><div class="pays">
+        ${[['transferencia','Transferencia','Te pasamos el alias por WhatsApp y nos mandás el comprobante'],['mp','Link de Mercado Pago','Tarjeta de débito, crédito o dinero en cuenta'],['efectivo','Efectivo al recibir','Pagás al repartidor']].map(([v,t,s])=>`<label class="pay"><input type="radio" name="pay" value="${v}" ${f.pay===v?'checked':''}><span><b>${t}</b><small>${s}</small></span></label>`).join('')}
+      </div></div>
+      ${st<MIN_ORDER?`<div class="warnline">El pedido mínimo es ${money(MIN_ORDER)}. Te faltan ${money(MIN_ORDER-st)}.</div>`:''}
+      <button class="btn primary" id="confirm" ${st<MIN_ORDER?'disabled':''} style="padding:13px">Confirmar y enviar por WhatsApp</button>
+    </div>`;
+  }
+  $('#v-shop').innerHTML=`
+  <div class="view-head"><div><span class="kick">Paso 2 · Lo que ve el cliente</span><h3>La tienda: elegir, sumar y confirmar</h3>
+  <p>El catálogo con los productos y sabores de la fábrica. Probá sumar productos, cambiar la zona y confirmar el pedido.</p></div></div>
+  <div class="shop-wrap">
+    <div class="shop">
+      <div class="shop-hero"><h4>${STORE}</h4><p>Comidas congeladas listas para hornear</p>
+      <div class="deliv">Pedí hoy antes de las ${CUTOFF} h. Próxima entrega en ${ZB[S.form.zone].name}: <b>${fmtD(nd)}</b>, ${ZB[S.form.zone].win}.</div></div>
+      ${inner}
+    </div>
+    <div class="side">
+      <h4>Qué resuelve la tienda</h4>
+      <p>El pedido llega estructurado, sin que nadie tenga que transcribir un audio o un mensaje suelto. Cada confirmación alimenta directo la planilla de producción y la hoja de ruta.</p>
+      <ul class="spec">
+        <li><b>Catálogo</b><span>7 categorías y ${PLIST.length} productos con sus sabores. Precio por unidad, docena o bandeja.</span></li>
+        <li><b>Reglas</b><span>Pedido mínimo ${money(MIN_ORDER)}. Envío ${money(SHIP)}, gratis desde ${money(FREE_SHIP)}. Corte a las ${CUTOFF} h del día anterior.</span></li>
+        <li><b>Zonas</b><span>Cada zona tiene sus días y su franja. La fecha de entrega se calcula sola.</span></li>
+        <li><b>Registro</b><span>Cliente, dirección, zona, productos, pago y estado. Se ve en el paso 3.</span></li>
+        <li><b>WhatsApp</b><span>El link wa.me abre el chat con el resumen escrito. La confirmación sale por plantilla.</span></li>
+      </ul>
+    </div>
+  </div>`;
+  const cats=$('#cats');if(cats&&S.scrollTop)cats.scrollTop=S.scrollTop;
+}
+$('#v-shop').addEventListener('click',e=>{
+  const t=e.target;const cats=$('#cats');if(cats)S.scrollTop=cats.scrollTop;
+  if(t.dataset.inc){S.cart[t.dataset.inc]=(S.cart[t.dataset.inc]||0)+1;rShop();return}
+  if(t.dataset.dec){const k=t.dataset.dec;if(S.cart[k]>1)S.cart[k]--;else delete S.cart[k];if(S.checkout&&!cartCount())S.checkout=false;rShop();return}
+  if(t.dataset.scroll){const el=$('#cat-'+t.dataset.scroll);cats.scrollTo({top:el.offsetTop-cats.offsetTop,behavior:'smooth'});return}
+  if(t.closest('#toCheckout')){S.checkout=true;S.scrollTop=0;rShop();return}
+  if(t.id==='back'){S.checkout=false;rShop();return}
+  if(t.id==='confirm'){confirmOrder()}
+});
+$('#v-shop').addEventListener('input',e=>{const k=e.target.dataset.f;if(k&&k!=='zone')S.form[k]=e.target.value});
+$('#v-shop').addEventListener('change',e=>{if(e.target.name==='pay')S.form.pay=e.target.value;if(e.target.dataset.f==='zone'){S.form.zone=e.target.value;rShop()}});
+
+function confirmOrder(){
+  const f=S.form;const L=Object.entries(S.cart).map(([k,q])=>({k,qty:q,price:PROD[k].price,cost:PROD[k].cost}));
+  const st=L.reduce((s,l)=>s+l.qty*l.price,0);
+  const o={id:NEXT_ID++,cust:{name:f.name||'Cliente',phone:f.phone,addr:f.addr,zone:f.zone},zone:f.zone,date:nextDelivery(f.zone),lines:L,pay:f.pay,paid:false,status:'nuevo',ship:st>=FREE_SHIP?0:SHIP,notes:f.notes};
+  ORDERS.push(o);S.fresh=o.id;S.opsDate=dk(o.date);S.opsTab='pedidos';
+  const z=ZB[o.zone];const now=hm(new Date());
+  S.chat.push({out:1,t:now,isNew:1,text:`Hola! Confirmo mi pedido #${o.id}\n${L.map(l=>'• '+l.qty+' '+PROD[l.k].cat.short+' '+PROD[l.k].label).join('\n')}\nTotal: ${money(tot(o))}\nEntrega: ${fmtD(o.date)}, ${z.win}\n${o.cust.addr} (${z.name})\nPago: ${PAYL[o.pay]}`});
+  const payTxt=o.pay==='transferencia'?'Para pagar, transferí al alias LAFABRICA.CONGELADOS (ejemplo) y mandanos el comprobante por acá.':o.pay==='mp'?'Pagá desde este link: mpago.la/pedido-'+o.id+' (ejemplo).':'Pagás en efectivo al recibir. Si podés, tené el monto justo.';
+  S.chat.push({in:1,t:now,isNew:1,tag:'Mensaje automático',text:`✅ ¡Pedido #${o.id} recibido, ${o.cust.name.split(' ')[0]}!\n\n📦 Te llega el ${fmtD(o.date)} entre ${z.win}.\n📍 ${o.cust.addr}, ${z.name}\n💳 Total: ${money(tot(o))}\n\n${payTxt}\n\nTe avisamos cuando salga el repartidor.`});
+  S.cart={};S.checkout=false;
+  go('wa',true);toast(`Pedido #${o.id} registrado. Ya aparece en el paso 3, Operación.`);
+}
+
+/* ================= 3 · Operación ================= */
+function upcoming(){return ORDERS.filter(o=>o.date>NOW)}
+function upDates(){return[...new Set(upcoming().map(o=>dk(o.date)))].sort()}
+function rOps(){
+  const up=upcoming();const dates=upDates();
+  if(!S.opsDate||(S.opsDate!=='all'&&!dates.includes(S.opsDate)))S.opsDate=dates[0];
+  const day=up.filter(o=>dk(o.date)===S.opsDate);
+  const dObj=day[0]?day[0].date:new Date();
+  const tabs=[['pedidos','Pedidos',up.length],['prod','Producción',null],['log','Logística',null],['zonas','Zonas y horarios',null]];
+  const dateChips=`<div class="dates">${S.opsTab==='pedidos'?`<button class="dchip" data-date="all" aria-pressed="${S.opsDate==='all'}"><b>Todos</b><small>${up.length} pedidos</small></button>`:''}${dates.map(k=>{const os=up.filter(o=>dk(o.date)===k);return`<button class="dchip" data-date="${k}" aria-pressed="${S.opsDate===k}"><b>${fmtD(os[0].date)}</b><small>${os.length} pedidos · ${short(os.reduce((s,o)=>s+tot(o),0))}</small></button>`}).join('')}</div>`;
+  let body='';
+  if(S.opsTab==='pedidos'){
+    const list=(S.opsDate==='all'?up:day).slice().sort((a,b)=>a.date-b.date||a.zone.localeCompare(b.zone));
+    const nuevos=list.filter(o=>o.status==='nuevo').length, wait=list.filter(o=>!o.paid&&o.pay!=='efectivo').length;
+    const cash=list.filter(o=>o.pay==='efectivo'&&!o.paid);
+    body=`<div class="stats">
+      <div class="stat"><small>Pedidos</small><b>${list.length}</b><div class="sub">${nuevos} nuevos sin revisar</div></div>
+      <div class="stat"><small>Facturación</small><b class="num">${short(list.reduce((s,o)=>s+tot(o),0))}</b><div class="sub">Ticket promedio ${money(list.reduce((s,o)=>s+tot(o),0)/(list.length||1))}</div></div>
+      <div class="stat"><small>Esperando pago</small><b>${wait}</b><div class="sub">Transferencia o link sin comprobante</div></div>
+      <div class="stat"><small>A cobrar en efectivo</small><b class="num">${short(cash.reduce((s,o)=>s+tot(o),0))}</b><div class="sub">${cash.length} pedidos</div></div>
+    </div>
+    <div class="tbl-wrap"><table style="min-width:900px"><thead><tr><th>#</th><th>Cliente</th><th>Zona</th><th>Entrega</th><th>Productos</th><th class="r">Total</th><th>Pago</th><th>Estado</th></tr></thead><tbody>
+    ${list.map(o=>`<tr class="${o.id===S.fresh?'fresh':''}"><td class="num"><b>${o.id}</b></td><td><b>${esc(o.cust.name)}</b><div class="muted small">${esc(o.cust.phone)}</div></td><td>${ZB[o.zone].name}</td><td style="white-space:nowrap">${DS[o.date.getDay()]} ${dm(o.date)}<div class="muted small">${ZB[o.zone].win}</div></td><td><div class="items">${itemsTxt(o)}</div></td><td class="r"><b>${money(tot(o))}</b></td><td>${payPill(o)}<div class="muted" style="font-size:12px;margin-top:3px">${PAYL[o.pay]}</div>${!o.paid&&o.pay!=='efectivo'?`<button class="btn sm" data-paid="${o.id}" style="margin-top:5px">Marcar pagado</button>`:''}</td>
+    <td><select class="stsel" data-st="${o.id}" aria-label="Estado del pedido ${o.id}">${STATUS.map(([v,l])=>`<option value="${v}" ${o.status===v?'selected':''}>${l}</option>`).join('')}</select><div style="margin-top:5px"><span class="pill p-${o.status}">${SL[o.status]}</span></div></td></tr>`).join('')}
+    </tbody></table></div>`;
+  }else if(S.opsTab==='prod'){
+    const agg={};day.forEach(o=>o.lines.forEach(l=>agg[l.k]=(agg[l.k]||0)+l.qty));
+    const totalU=Object.values(agg).reduce((a,b)=>a+b,0);
+    const doneU=Object.entries(agg).filter(([k])=>S.done.has(S.opsDate+'|'+k)).reduce((s,[,q])=>s+q,0);
+    const firstOut=day.map(o=>ZB[o.zone].out).sort()[0]||'—';
+    const groups=CATS.map(c=>{const items=c.flav.map(f=>c.id+'|'+f[0]).filter(k=>agg[k]);if(!items.length)return'';const sm=items.reduce((s,k)=>s+agg[k],0);
+      return`<div class="pgroup"><h4>${c.name}<span>${sm} ${c.unit}${sm>1&&c.unit==='unidad'?'es':sm>1&&c.unit==='docena'?'s':''}</span></h4>${items.map(k=>{const d=S.done.has(S.opsDate+'|'+k);return`<label class="pitem${d?' done':''}"><input type="checkbox" data-done="${k}" ${d?'checked':''}><span>${c.flav.length>1?PROD[k].flav:c.name}</span><span class="qn">${agg[k]}</span></label>`}).join('')}</div>`}).join('');
+    body=`<div class="stats">
+      <div class="stat"><small>Pedidos del día</small><b>${day.length}</b><div class="sub">${fmtD(dObj)}</div></div>
+      <div class="stat"><small>Unidades a preparar</small><b>${totalU}</b><div class="sub">Pizzas, docenas y bandejas</div></div>
+      <div class="stat"><small>Listo antes de</small><b>${firstOut}</b><div class="sub">Sale el primer reparto</div></div>
+      <div class="stat"><small>Avance</small><b>${totalU?pct(doneU/totalU):'0%'}</b><div class="pbar"><i style="width:${totalU?doneU/totalU*100:0}%"></i></div></div>
+    </div>
+    <div class="prod-grid">
+      <div class="pn"><div class="pn-h"><h4>Qué hay que tener listo</h4><small>Tildá cada ítem cuando esté preparado</small></div>${groups||'<div class="pgroup muted">Sin pedidos para este día.</div>'}</div>
+      <div class="pn"><div class="pn-h"><h4>Armado por pedido</h4><small>Una bolsa por pedido, rotulada</small></div>
+        ${day.slice().sort((a,b)=>ZB[a.zone].out.localeCompare(ZB[b.zone].out)||a.zone.localeCompare(b.zone)).map(o=>`<div class="pack"><b>#${o.id} · ${esc(o.cust.name)}</b> <span class="muted">· ${ZB[o.zone].name}, sale ${ZB[o.zone].out}</span><ul>${o.lines.map(l=>`<li>${l.qty} ${PROD[l.k].cat.short} ${PROD[l.k].label}</li>`).join('')}</ul></div>`).join('')}
+      </div>
+    </div>`;
+  }else if(S.opsTab==='log'){
+    const zs=ZONES.filter(z=>day.some(o=>o.zone===z.id));
+    const bultos=os=>os.reduce((s,o)=>s+o.lines.reduce((a,l)=>a+l.qty,0),0);
+    body=`<div class="stats">
+      <div class="stat"><small>Paradas</small><b>${day.length}</b><div class="sub">${zs.length} zonas</div></div>
+      <div class="stat"><small>Bultos</small><b>${bultos(day)}</b><div class="sub">Productos a cargar</div></div>
+      <div class="stat"><small>Entregados</small><b>${day.filter(o=>o.status==='entregado').length} / ${day.length}</b><div class="sub">Se actualiza al marcar</div></div>
+      <div class="stat"><small>Efectivo a rendir</small><b class="num">${short(day.filter(o=>o.pay==='efectivo').reduce((s,o)=>s+tot(o),0))}</b><div class="sub">Cobros en puerta</div></div>
+    </div>
+    <div class="zones">${zs.map(z=>{const os=day.filter(o=>o.zone===z.id);return`<div class="pn"><div class="pn-h"><h4>${z.name}</h4><small>${z.win} · sale ${z.out}</small></div>
+      <div class="zmeta"><span><b>${os.length}</b> paradas</span><span><b>${bultos(os)}</b> bultos</span><span>Cobrar <b>${money(os.filter(o=>!o.paid).reduce((s,o)=>s+tot(o),0))}</b></span></div>
+      ${os.map((o,i)=>{const ok=o.status==='entregado';return`<div class="stop${ok?' ok':''}"><span class="i">${ok?'✓':i+1}</span><div><b>${esc(o.cust.name)} <span class="muted num" style="font-weight:400">#${o.id}</span></b><div class="addr">${esc(o.cust.addr)} · ${esc(o.cust.phone)}</div><div class="muted small">${o.lines.reduce((a,l)=>a+l.qty,0)} bultos${o.notes?' · '+esc(o.notes):''}</div></div>
+      <div class="right">${payPill(o)}${ok?'<span class="pill p-entregado">Entregado</span>':`<button class="btn sm" data-deliver="${o.id}">Entregado</button>`}</div></div>`}).join('')}</div>`}).join('')||'<p class="muted">Sin repartos para este día.</p>'}</div>`;
+  }else{
+    body=`<div class="tbl-wrap"><table style="min-width:640px"><thead><tr><th>Zona</th><th>Días de entrega</th><th>Franja</th><th>Sale el reparto</th><th>Corte de pedidos</th><th class="r">Pedidos próximos</th></tr></thead><tbody>
+    ${ZONES.map(z=>`<tr><td><b>${z.name}</b></td><td style="text-transform:capitalize">${z.days.map(d=>DN[d]).join(', ')}</td><td>${z.win}</td><td class="num">${z.out}</td><td>${CUTOFF} h del día anterior</td><td class="r">${up.filter(o=>o.zone===z.id).length}</td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="fnote">Estas reglas son las que usa la tienda para calcular la fecha que ve el cliente. Envío ${money(SHIP)}, gratis desde ${money(FREE_SHIP)}. Pedido mínimo ${money(MIN_ORDER)}.</p>`;
+  }
+  $('#v-ops').innerHTML=`
+  <div class="view-head"><div><span class="kick">Paso 3 · Por dentro</span><h3>Operación del día</h3>
+  <p>Pedidos, lo que tiene que preparar cocina y la hoja de ruta del repartidor, todo desde los mismos pedidos que entran por la tienda.</p></div></div>
+  <div class="tabs" role="tablist">${tabs.map(([id,l,n])=>`<button class="tab" role="tab" data-tab="${id}" aria-selected="${S.opsTab===id}">${l}${n!=null?`<span class="n">${n}</span>`:''}</button>`).join('')}</div>
+  ${S.opsTab!=='zonas'?dateChips:''}${body}`;
+}
+$('#v-ops').addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab],[data-date],[data-paid],[data-deliver]');if(!t)return;
+  if(t.dataset.tab){S.opsTab=t.dataset.tab;if(S.opsTab!=='pedidos'&&S.opsDate==='all')S.opsDate=null}
+  if(t.dataset.date)S.opsDate=t.dataset.date;
+  if(t.dataset.paid){const o=ORDERS.find(o=>o.id==t.dataset.paid);o.paid=true;if(o.status==='nuevo')o.status='confirmado'}
+  if(t.dataset.deliver){const o=ORDERS.find(o=>o.id==t.dataset.deliver);o.status='entregado';o.paid=true}
+  rOps();
+});
+$('#v-ops').addEventListener('change',e=>{
+  if(e.target.dataset.st){const o=ORDERS.find(o=>o.id==e.target.dataset.st);o.status=e.target.value;if(o.status==='entregado')o.paid=true;rOps()}
+  if(e.target.dataset.done!==undefined){const k=S.opsDate+'|'+e.target.dataset.done;e.target.checked?S.done.add(k):S.done.delete(k);rOps()}
+});
+
+/* ================= 4 · Datos ================= */
+function rData(){
+  const from=addD(NOW,-28);
+  const H=ORDERS.filter(o=>o.date<NOW&&o.date>=from&&o.status==='entregado');
+  const sales=H.reduce((s,o)=>s+sub(o),0), costs=H.reduce((s,o)=>s+cost(o),0), margin=sales-costs;
+  const custs={};H.forEach(o=>custs[o.cust.name]=(custs[o.cust.name]||0)+1);
+  const nC=Object.keys(custs).length, rec=Object.values(custs).filter(v=>v>1).length;
+  const weeks=[0,1,2,3].map(i=>{const a=addD(from,i*7),b=addD(from,i*7+7);const os=H.filter(o=>o.date>=a&&o.date<b);return{label:'Sem. '+dm(a),s:os.reduce((x,o)=>x+sub(o),0),c:os.reduce((x,o)=>x+cost(o),0),n:os.length}});
+  const growth=weeks[0].s?weeks[3].s/weeks[0].s-1:0;
+  const P={};H.forEach(o=>o.lines.forEach(l=>{const p=P[l.k]||(P[l.k]={k:l.k,q:0,s:0,c:0});p.q+=l.qty;p.s+=l.qty*l.price;p.c+=l.qty*l.cost}));
+  const rows=Object.values(P).map(p=>({...p,m:p.s-p.c,mk:(p.s-p.c)/p.c}));
+  const sorters={contrib:(a,b)=>b.m-a.m,q:(a,b)=>b.q-a.q,s:(a,b)=>b.s-a.s,mk:(a,b)=>b.mk-a.mk};
+  rows.sort(sorters[S.sortBy]);
+  const C=CATS.map(c=>{const rs=rows.filter(r=>PROD[r.k].cat.id===c.id);return{name:c.name,s:rs.reduce((x,r)=>x+r.s,0)}}).sort((a,b)=>b.s-a.s);
+  const maxC=Math.max(...C.map(c=>c.s));
+  const Z=ZONES.map(z=>{const os=H.filter(o=>o.zone===z.id);return{z,n:os.length,s:os.reduce((x,o)=>x+sub(o),0),t:os.length?os.reduce((x,o)=>x+tot(o),0)/os.length:0,ship:os.reduce((x,o)=>x+o.ship,0)}}).sort((a,b)=>b.s-a.s);
+  const PM=['transferencia','mp','efectivo'].map(p=>({p,n:H.filter(o=>o.pay===p).length}));
+  const mayM=costs*0.7;
+  const W=640,Hh=250,pl=58,pr=10,pt=18,pb=34;const mx=Math.max(...weeks.map(w=>w.s),1);
+  const pow=Math.pow(10,Math.floor(Math.log10(mx)));const nice=[1,2,2.5,5,10].map(m=>m*pow).find(v=>v>=mx);
+  const y=v=>pt+(Hh-pt-pb)*(1-v/nice);const bw=(W-pl-pr)/4;
+  let svg=`<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Ventas semanales divididas en costo y margen">`;
+  for(let i=0;i<=4;i++){const v=nice*i/4;svg+=`<line class="gl" x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end">${v?short(v):'$ 0'}</text>`}
+  weeks.forEach((w,i)=>{const x=pl+i*bw+bw*.22,wd=bw*.56;svg+=`<rect class="b-cost" x="${x}" y="${y(w.c)}" width="${wd}" height="${y(0)-y(w.c)}" rx="2"/><rect class="b-mar" x="${x}" y="${y(w.s)}" width="${wd}" height="${y(w.c)-y(w.s)}" rx="2"/><text class="v" x="${x+wd/2}" y="${y(w.s)-6}" text-anchor="middle">${short(w.s)}</text><text x="${x+wd/2}" y="${Hh-12}" text-anchor="middle">${w.label} · ${w.n} ped.</text>`});
+  svg+='</svg>';
+  const th=(id,l)=>`<th class="r"><button data-sort="${id}" data-on="${S.sortBy===id?1:0}">${l}${S.sortBy===id?' ↓':''}</button></th>`;
+  const mkCls=v=>v>=2?'hi':v<1.8?'lo':'';
+  $('#v-data').innerHTML=`
+  <div class="view-head"><div><span class="kick">Paso 4 · Por dentro</span><h3>Qué se vende y cuánto deja</h3>
+  <p>Últimas 4 semanas de pedidos minoristas entregados (${dm(from)} al ${dm(addD(NOW,-1))}). La rentabilidad se mide como margen sobre costo, para compararla con el 60 a 80% que deja el canal mayorista.</p></div></div>
+  <div class="kpis">
+    <div class="kpi dark"><small>Ventas</small><b>${short(sales)}</b><span class="d up">+${pct(growth)} sem. 1 a 4</span></div>
+    <div class="kpi"><small>Margen bruto</small><b>${short(margin)}</b><span class="sub">${pct(margin/sales)} de las ventas</span></div>
+    <div class="kpi"><small>Margen sobre costo</small><b>${pct(margin/costs)}</b><span class="sub">Mayorista: 60 a 80%</span></div>
+    <div class="kpi"><small>Pedidos</small><b>${H.length}</b><span class="sub">${(H.length/4).toFixed(0)} por semana</span></div>
+    <div class="kpi"><small>Ticket promedio</small><b>${short(H.reduce((s,o)=>s+tot(o),0)/H.length)}</b><span class="sub">Con envío</span></div>
+    <div class="kpi"><small>Clientes que repiten</small><b>${pct(rec/nC)}</b><span class="sub">${rec} de ${nC} clientes</span></div>
+  </div>
+  <div class="dgrid">
+    <div class="pn"><div class="pn-h"><h4>Ventas por semana</h4><small>Abajo el costo, arriba lo que queda</small></div>
+      <div class="chart">${svg}</div>
+      <div class="legend"><span><i style="background:var(--teal-100)"></i>Costo de mercadería</span><span><i style="background:var(--teal)"></i>Margen bruto</span></div></div>
+    <div class="pn"><div class="pn-h"><h4>Mismo costo, dos canales</h4></div>
+      <div class="channel">
+        <p class="muted" style="margin:0;font-size:13.5px">Lo producido en el período costó ${short(costs)}. Así queda el margen según a quién se venda:</p>
+        <div class="chrow"><span>Minorista</span><div class="track"><i class="c" style="width:${costs/(costs+margin)*100}%"></i><i class="m" style="width:${margin/(costs+margin)*100}%"></i></div><span class="r">${short(margin)}</span></div>
+        <div class="chrow"><span>Mayorista</span><div class="track"><i class="c" style="width:${costs/(costs+margin)*100}%"></i><i class="m may" style="width:${mayM/(costs+margin)*100}%"></i></div><span class="r">${short(mayM)}</span></div>
+        <p style="margin:0;font-size:14px"><b>${short(margin-mayM)} más</b> de margen vendiendo lo mismo al público (estimando mayorista al 70% sobre costo).</p>
+      </div>
+      <div class="pn-h" style="border-top:1px solid var(--line)"><h4>Cómo pagan</h4></div>
+      <div class="hbars">${PM.map(p=>`<div class="hb"><span>${PAYL[p.p].replace(' al recibir','')}</span><div class="track"><i style="width:${p.n/H.length*100}%"></i></div><span class="r">${pct(p.n/H.length)}</span></div>`).join('')}</div>
+    </div>
+  </div>
+  <div class="dgrid">
+    <div class="pn"><div class="pn-h"><h4>Rentabilidad por producto</h4><small>Tocá una columna para ordenar</small></div>
+      <div style="overflow-x:auto"><table style="min-width:680px"><thead><tr><th>Producto</th>${th('q','Unid.')}<th class="r">Precio</th><th class="r">Costo</th>${th('mk','Margen s/costo')}${th('s','Ventas')}${th('contrib','Margen $')}</tr></thead><tbody>
+      ${rows.map(r=>{const p=PROD[r.k];return`<tr><td><b>${p.label}</b><div class="muted" style="font-size:12px">${p.cat.unit}</div></td><td class="r">${r.q}</td><td class="r">${money(p.price)}</td><td class="r">${money(p.cost)}</td><td class="r"><span class="markup ${mkCls(r.mk)}">${pct(r.mk)}</span></td><td class="r">${money(r.s)}</td><td class="r"><b>${money(r.m)}</b></td></tr>`}).join('')}
+      </tbody></table></div></div>
+    <div style="display:grid;gap:18px">
+      <div class="pn"><div class="pn-h"><h4>Ventas por categoría</h4></div>
+        <div class="hbars">${C.map(c=>`<div class="hb"><span>${c.name}</span><div class="track"><i style="width:${c.s/maxC*100}%"></i></div><span class="r">${short(c.s)}</span></div>`).join('')}</div></div>
+      <div class="pn"><div class="pn-h"><h4>Por zona</h4></div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Zona</th><th class="r">Ped.</th><th class="r">Ventas</th><th class="r">Ticket</th><th class="r">Envíos</th></tr></thead><tbody>
+        ${Z.map(r=>`<tr><td>${r.z.name}</td><td class="r">${r.n}</td><td class="r">${short(r.s)}</td><td class="r">${money(r.t)}</td><td class="r">${money(r.ship)}</td></tr>`).join('')}</tbody></table></div></div>
+    </div>
+  </div>
+  <p class="fnote">Precios y costos son supuestos para la maqueta. Con los costos reales de la fábrica, estos números se calculan solos con cada pedido. Margen sobre costo = (precio − costo) ÷ costo. En verde, productos que dejan 200% o más; en ámbar, menos de 180%.</p>`;
+}
+$('#v-data').addEventListener('click',e=>{const b=e.target.closest('[data-sort]');if(b){S.sortBy=b.dataset.sort;rData()}});
+
+go('wa',false);
+})();
+</script>
+</body>
+</html>
