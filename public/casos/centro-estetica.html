@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnos y clientas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+/* Vitrina: demo en formato video arriba, capítulos clicables, resumen corto abajo. Misma apariencia clara de la marca que el caso de costeo. */
+:root{
+  --crema:#F4F1EC; --papel:#FBFAF7; --blanco:#FFFFFF;
+  --noche:#1A1A2E; --noche-2:#23233A; --noche-tenue:#A3A3B8;
+  --teal:#1AABAA; --teal-300:#6FCFCE; --teal-700:#12817F; --teal-900:#0B5453; --teal-100:#D6F0EF;
+  --mango:#F4A259; --mango-100:#FDEBD9; --mango-ink:#B4601A;
+  --sep:#E7E2D9; --tinta:#5E5A50; --tenue:#8C887F; --hueco:#EDE9E1; --chat:#EFEBE4;
+  --f-disp:"Archivo",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,sans-serif;
+  --f-mono:"DM Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--crema);color:var(--noche);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--mango);outline-offset:3px}
+.mono{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.14em;font-weight:500;font-size:12px}
+.num{font-variant-numeric:tabular-nums}
+.page{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:28px 52px;display:flex;flex-direction:column;gap:22px}
+
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 28px}
+.head-txt{display:flex;flex-direction:column;gap:8px;min-width:0}
+.eyebrow{color:var(--teal-700)}
+h1{font-family:var(--f-disp);font-variation-settings:"wdth" 112,"wght" 800;font-weight:800;text-transform:uppercase;line-height:.95;margin:0;font-size:clamp(28px,4.6vw,46px);text-wrap:balance}
+mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inherit;padding:0 .05em}
+.lede{margin:0;color:var(--tinta);max-width:44ch;font-size:16px}
+
+.player{background:var(--noche);border-radius:16px;overflow:hidden;box-shadow:0 22px 50px rgba(26,26,46,.18)}
+.screen{position:relative;width:100%;max-width:100%;overflow:hidden;cursor:pointer;
+  background:radial-gradient(120% 90% at 85% 0%,rgba(26,171,170,.22),transparent 55%),var(--noche-2)}
+.bar{display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid #2E2E48}
+.pp{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:var(--teal);color:var(--noche);display:grid;place-items:center;cursor:pointer}
+.pp svg{width:14px;height:14px}
+.cap{flex:1;min-width:0;margin:0;color:var(--crema);font-size:15px;line-height:1.35;display:flex;gap:10px;align-items:baseline}
+.cap-n{color:var(--teal-300);flex:none}
+.time{color:var(--noche-tenue);flex:none}
+
+.chapters{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ch{width:100%;height:100%;text-align:left;background:var(--blanco);border:1px solid var(--sep);border-radius:12px;padding:12px 14px 14px;cursor:pointer;display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden;font:inherit;color:inherit;transition:border-color .2s,transform .2s}
+.ch:hover{transform:translateY(-2px)}
+.ch .mono{color:var(--tenue);font-size:11px}
+.ch b{font-size:14.5px;line-height:1.25}
+.ch .prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--hueco)}
+.ch .prog i{display:block;height:100%;width:0;background:var(--teal)}
+.ch.on{border-color:var(--teal)}
+.ch.on .mono{color:var(--teal-700)}
+
+.sum{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:28px;padding-top:14px}
+.sum h2{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-weight:800;text-transform:uppercase;font-size:20px;line-height:1;margin:0 0 10px}
+.sum p{margin:0;color:var(--tinta);max-width:42ch}
+.feats{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
+.feats li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start}
+.ico{width:34px;height:34px;border-radius:9px;background:var(--teal-100);color:var(--teal-900);display:grid;place-items:center}
+.ico svg{width:18px;height:18px}
+.feats b{display:block;font-size:15px;line-height:1.3}
+.feats span{display:block;color:var(--tinta);font-size:14px;line-height:1.4}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--sep);padding-top:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips .mono{color:var(--tenue);font-size:11px;margin-right:4px}
+.chip-r{background:var(--blanco);border:1px solid var(--sep);border-radius:999px;padding:5px 12px;font-size:13px}
+.cta-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.cta-meta{color:var(--tenue);font-size:11px}
+.cta{display:inline-flex;align-items:center;gap:8px;background:var(--noche);color:var(--crema);text-decoration:none;font-weight:700;font-size:14.5px;padding:12px 18px;border-radius:10px}
+.cta:hover{background:var(--teal-900)}
+.note{margin:0;color:var(--tenue);font-size:12.5px}
+
+@media (max-width:760px){.sum{grid-template-columns:1fr;gap:18px}.chapters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.feats{grid-template-columns:1fr}.time{display:none}.cap{font-size:14px}}
+
+
+/* ================= la app simulada: paleta propia de la app (rosa), dentro del marco de Tu Equipo IA ================= */
+.stage{
+  --p-bg:#FFFFFF; --p-surface:#FFF5F8; --p-line:#F2D5E0; --p-ink:#3A2230; --p-muted:#8C6676;
+  --p-acc:#D6457F; --p-strong:#B52F66; --p-soft:#FCE3ED; --p-side:#3A2230;
+  --good:#23855A; --good-soft:#E3F4EA; --warn:#B77400; --warn-soft:#FFF1D6; --bad:#C0392B; --bad-soft:#FDE6E3;
+  --a-pelu:#8B4FA8; --a-masa:#16917E; --a-depi:#C27A00; --a-pest:#4C63C9; --a-unas:#D6457F;
+  --f-app:"Manrope",system-ui,sans-serif; --f-serif:"Fraunces",Georgia,serif;
+  position:absolute;left:0;top:0;transform-origin:0 0;font-family:var(--f-app);font-size:14px;color:var(--p-ink);line-height:1.4}
+.app{position:absolute;inset:20px;background:var(--p-bg);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.app-top{flex:none;height:38px;display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--p-bg);border-bottom:1px solid var(--p-line);font-size:12px;color:var(--p-muted)}
+.app-top i{width:9px;height:9px;border-radius:50%;background:var(--p-line)}
+.app-title{margin-left:10px;font-weight:800;color:var(--p-strong);font-family:var(--f-serif);font-size:15px}
+.app-user{margin-left:auto}
+.app-body{flex:1;display:flex;min-height:0}
+.side{flex:none;width:176px;background:var(--p-side);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.side-grp{color:#C7A6B6;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:10px 10px 4px}
+.side-grp:first-child{padding-top:2px}
+.nav{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;color:#E9D3DD;font:700 13.5px var(--f-app);white-space:nowrap}
+.nav::before{content:"";width:6px;height:6px;border-radius:50%;background:#6B4A5A;flex:none}
+.nav.on{background:rgba(214,69,127,.28);color:#fff}
+.nav.on::before{background:#F27FAE}
+.views{flex:1;position:relative;min-width:0;background:var(--p-surface)}
+.view{position:absolute;inset:0;padding:18px 22px;display:flex;flex-direction:column;gap:12px;opacity:0;visibility:hidden;transition:opacity .25s}
+.view.on{opacity:1;visibility:visible}
+.vh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.vk{font-family:var(--f-app);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--p-acc)}
+.vh h4{margin:2px 0 0;font-family:var(--f-serif);font-size:20px;font-weight:600;letter-spacing:-.01em}
+.btn{background:var(--p-acc);color:#fff;border:0;border-radius:10px;padding:9px 14px;font:800 13px var(--f-app);transition:transform .12s,background .12s;white-space:nowrap}
+.btn.press{transform:scale(.95);background:var(--p-strong)}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.btn.ghost{background:var(--p-bg);color:var(--p-strong);border:1px solid var(--p-line)}
+.btn.done{background:var(--good-soft);color:var(--good)}
+.pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.acc{background:var(--p-soft);color:var(--p-strong)}
+.toast{position:absolute;right:38px;top:70px;background:var(--p-ink);color:#fff;padding:10px 14px;border-radius:10px;font:700 13px var(--f-app);display:flex;gap:8px;align-items:center;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:5}
+.toast.on{opacity:1;transform:none}
+.toast::before{content:"✓";color:#6FD39B;font-weight:800}
+
+/* 1 · reserva en el teléfono */
+.client{flex-direction:row;align-items:center;justify-content:center;gap:34px;padding-block:14px}
+.phone{flex:none;width:282px;height:100%;max-height:452px;border:7px solid var(--p-ink);border-radius:30px;background:var(--p-surface);overflow:hidden;position:relative}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;padding:14px;opacity:0;visibility:hidden;transition:opacity .25s}
+.scr.on{opacity:1;visibility:visible}
+.ph-hero{margin:-14px -14px 0;padding:16px 14px 12px;text-align:center;background:linear-gradient(170deg,var(--p-soft),var(--p-surface))}
+.ph-hero b{display:block;font-family:var(--f-serif);font-size:22px;color:var(--p-strong);line-height:1.1}
+.ph-hero small{font-size:11.5px;color:var(--p-muted)}
+.ph-t{font-weight:800;font-size:13.5px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{border:1px solid var(--p-line);background:var(--p-bg);border-radius:13px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.tile i{width:26px;height:26px;border-radius:8px;background:var(--ac);opacity:.9}
+.tile b{font-size:12.5px;line-height:1.2}
+.tile.wide{grid-column:1/-1;flex-direction:row;align-items:center}
+.tile.press,.svc.press,.slot.press{transform:scale(.96);border-color:var(--p-acc)}
+.back{font-size:12px;font-weight:800;color:var(--p-strong)}
+.svc{display:flex;align-items:center;gap:10px;border:1px solid var(--p-line);background:var(--p-bg);border-radius:13px;padding:9px 10px}
+.svc i{flex:none;width:26px;height:26px;border-radius:8px;background:var(--a-unas)}
+.svc span{flex:1;min-width:0}
+.svc b{display:block;font-size:12.5px;line-height:1.2}
+.svc small{font-size:11px;color:var(--p-muted)}
+.svc em{font-style:normal;font-weight:800;font-size:12.5px;font-variant-numeric:tabular-nums}
+.sumc{background:var(--p-bg);border:1px solid var(--p-line);border-radius:12px;padding:9px 11px;font-size:12px;display:flex;flex-direction:column;gap:3px}
+.sumc div{display:flex;justify-content:space-between;gap:8px}
+.sumc .m{color:var(--p-muted)}
+.pros{display:flex;gap:6px}
+.pro{flex:1;border:1px solid var(--p-line);background:var(--p-bg);border-radius:12px;padding:7px 4px;text-align:center;font-size:11.5px;font-weight:800}
+.pro small{display:block;font-weight:600;color:var(--p-muted);font-size:10px}
+.pro.on{background:var(--p-acc);border-color:var(--p-acc);color:#fff}
+.pro.on small{color:#fff}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.slot{border:1px solid var(--p-line);background:var(--p-bg);border-radius:9px;padding:7px 0;text-align:center;font-weight:800;font-size:12px;font-variant-numeric:tabular-nums}
+.slot.on{background:var(--p-acc);border-color:var(--p-acc);color:#fff}
+.opt{display:flex;align-items:center;gap:9px;border:1.5px solid var(--p-acc);background:var(--p-bg);border-radius:12px;padding:10px}
+.opt .rd{width:16px;height:16px;border-radius:50%;border:5px solid var(--p-acc);flex:none}
+.opt span{flex:1;font-size:12px}
+.opt b{display:block;font-size:12.5px}
+.opt em{font-style:normal;font-weight:800;font-size:13px}
+.policy{font-size:11px;color:var(--p-muted);border:1px dashed var(--p-line);border-radius:10px;padding:8px;background:var(--p-bg)}
+.pay{background:#009EE3;color:#fff;border:0;border-radius:11px;padding:12px;font:800 13px var(--f-app);margin-top:auto;transition:transform .12s}
+.pay.press{transform:scale(.97)}
+.ok{width:50px;height:50px;border-radius:50%;background:var(--good-soft);color:var(--good);display:grid;place-items:center;font-size:24px;font-weight:800;margin:6px auto 0}
+.ok-t{text-align:center;font-family:var(--f-serif);font-size:19px;font-weight:600}
+.wa-l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--p-muted)}
+.wa{background:#E7F8DF;color:#1F2B1C;border-radius:4px 13px 13px 13px;padding:9px 11px;font-size:12px;line-height:1.4;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+.wa.on{opacity:1;transform:none}
+.notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;max-width:260px}
+.notes li{display:grid;grid-template-columns:26px 1fr;gap:10px;opacity:.45;transition:opacity .3s}
+.notes li.on{opacity:1}
+.notes .n{width:26px;height:26px;border-radius:50%;background:var(--p-ink);color:#fff;display:grid;place-items:center;font:700 12px var(--f-mono)}
+.notes li.on .n{background:var(--p-acc)}
+.notes b{display:block;font-size:14px;line-height:1.25}
+.notes span{display:block;font-size:12.5px;color:var(--p-muted);line-height:1.35}
+
+/* 2 · agenda */
+.legend{display:flex;gap:6px;flex-wrap:wrap}
+.ag{flex:1;display:flex;gap:12px;min-height:0}
+.cal{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--p-bg);border:1px solid var(--p-line);border-radius:12px;overflow:hidden}
+.cal-h,.cal-b{display:grid;grid-template-columns:42px repeat(5,minmax(0,1fr))}
+.cal-h div{padding:7px 6px;border-left:1px solid var(--p-line);border-top:3px solid var(--ac,transparent);font-size:12px;font-weight:800;line-height:1.15;border-bottom:1px solid var(--p-line)}
+.cal-h div:first-child{border-left:0;border-top-color:transparent}
+.cal-h small{display:block;font-weight:600;font-size:10px;color:var(--p-muted)}
+.cal-b{flex:1;position:relative;min-height:0}
+.hrs{position:relative}
+.hrs span{position:absolute;left:6px;font-size:10px;color:var(--p-muted);transform:translateY(2px)}
+.col{position:relative;border-left:1px solid var(--p-line);background-image:linear-gradient(var(--p-line) 1px,transparent 1px);background-size:100% 20%}
+.ev{position:absolute;left:3px;right:3px;border-radius:7px;padding:3px 6px 3px 7px;border:1px solid var(--p-line);border-left:3px solid var(--ac);background:var(--p-bg);overflow:hidden;line-height:1.2}
+.ev b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev small{display:block;font-size:10px;color:var(--p-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.realizado{background:var(--good-soft)}
+.ev.sin_sena{background:var(--warn-soft)}
+.ev.ausente{background:repeating-linear-gradient(135deg,var(--bad-soft) 0 6px,var(--p-bg) 6px 12px)}
+.ev.ausente b{text-decoration:line-through}
+.ev.nuevo{box-shadow:0 0 0 2px var(--p-acc);opacity:0;transform:scale(.9);transition:opacity .35s,transform .35s}
+.ev.nuevo.on{opacity:1;transform:none}
+.ev.sel{outline:2px solid var(--p-ink);outline-offset:1px}
+.now{position:absolute;left:42px;right:0;border-top:2px solid var(--p-acc);z-index:2}
+.now::before{content:"";position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--p-acc)}
+.det{flex:none;width:214px;background:var(--p-bg);border:1px solid var(--p-line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;font-size:12.5px}
+.det .ph{color:var(--p-muted);margin:auto 0;text-align:center}
+.det-in{display:none;flex-direction:column;gap:8px}
+.det-in.on{display:flex}
+.det h5{margin:0;font-family:var(--f-serif);font-size:17px;font-weight:600}
+.kv{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--p-line);padding-bottom:5px}
+.kv span{color:var(--p-muted)}
+.kv b{font-variant-numeric:tabular-nums}
+
+/* 3 · clientas */
+.segs{display:flex;gap:7px;flex-wrap:wrap}
+.sg{border:1px solid var(--p-line);background:var(--p-bg);border-radius:11px;padding:6px 11px;text-align:left;transition:background .2s,border-color .2s}
+.sg b{display:block;font-family:var(--f-serif);font-size:18px;line-height:1.1}
+.sg small{font-size:11px;font-weight:800;color:var(--p-muted)}
+.sg.on{border-color:var(--p-acc);background:var(--p-soft)}
+.sg.press{transform:scale(.96)}
+.cl-l{flex:1;display:flex;gap:12px;min-height:0}
+.list{flex:1;min-width:0;display:none;flex-direction:column;gap:7px}
+.list.on{display:flex}
+.cl{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--p-line);background:var(--p-bg);border-radius:12px;padding:8px 10px}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11.5px;background:var(--p-soft);color:var(--p-strong)}
+.cl b{display:block;font-size:13px;line-height:1.2}
+.cl small{display:block;font-size:11px;color:var(--p-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl .r{display:flex;align-items:center;gap:6px}
+.msgc{flex:none;width:230px;background:var(--p-bg);border:1px solid var(--p-line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;font-size:12.5px;opacity:.35;transition:opacity .3s}
+.msgc.on{opacity:1}
+.msgc .wa{opacity:1;transform:none}
+.msgc .wa.hide{opacity:0}
+.msgc .btn{margin-top:auto}
+
+/* 4 · panel */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:var(--p-bg);border:1px solid var(--p-line);border-radius:12px;padding:10px 12px}
+.kpi.hero{background:var(--p-acc);border-color:var(--p-acc);color:#fff}
+.kpi span{display:block;font-size:11.5px;font-weight:800;opacity:.75}
+.kpi b{display:block;font-family:var(--f-serif);font-size:24px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}
+.pn{flex:1;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;min-height:0}
+.box{background:var(--p-bg);border:1px solid var(--p-line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.box .t{font-size:12px;font-weight:800;color:var(--p-muted)}
+.hb{display:grid;grid-template-columns:96px minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:12.5px;font-weight:700}
+.hb .trk{height:12px;border-radius:4px;background:var(--p-surface);overflow:hidden}
+.hb .trk i{display:block;height:100%;width:0;background:var(--ac);border-radius:0 4px 4px 0}
+.hb em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.stk{display:flex;flex-direction:column;gap:6px}
+.stk div{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding-bottom:5px;border-bottom:1px solid var(--p-line);opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s}
+.stk div.on{opacity:1;transform:none}
+.stk small{color:var(--warn);font-weight:800;white-space:nowrap}
+.box .btn{margin-top:auto}
+
+.cursor{position:absolute;left:0;top:0;width:22px;height:22px;z-index:10;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.cursor svg{width:22px;height:22px;display:block}
+.ring{position:absolute;left:-14px;top:-14px;width:28px;height:28px;border-radius:50%;border:2px solid var(--mango);opacity:0}
+.ring.go{animation:ring .5s ease-out}
+@keyframes ring{from{opacity:1;transform:scale(.3)}to{opacity:0;transform:scale(1.5)}}
+
+/* layout angosto del simulador (celulares) */
+.stage.narrow .app{inset:10px}
+.stage.narrow .app-body{flex-direction:column}
+.stage.narrow .side{width:auto;flex-direction:row;padding:8px;gap:2px}
+.stage.narrow .side-grp,.stage.narrow .app-user,.stage.narrow .notes,.stage.narrow .legend{display:none}
+.stage.narrow .nav{padding:8px 9px;font-size:12.5px;gap:6px}
+.stage.narrow .view{padding:14px 14px}
+.stage.narrow .client{padding-block:10px}
+.stage.narrow .c2{display:none}
+.stage.narrow .cal-h,.stage.narrow .cal-b{grid-template-columns:38px repeat(3,minmax(0,1fr))}
+.stage.narrow .now{left:38px}
+.stage.narrow .ag,.stage.narrow .cl-l{flex-direction:column}
+.stage.narrow .det{width:auto;flex:none;min-height:92px}
+.stage.narrow .det .kv.c3{display:none}
+.stage.narrow .msgc{width:auto}
+.stage.narrow .kpis{grid-template-columns:1fr 1fr}
+.stage.narrow .pn{grid-template-columns:1fr}
+.stage.narrow .hb{grid-template-columns:86px minmax(0,1fr) 50px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<main class="page">
+  <header class="head">
+    <div class="head-txt">
+      <span class="mono eyebrow">Caso de uso · Centros de estética</span>
+      <h1>Turnos y <mark>clientas</mark></h1>
+    </div>
+    <p class="lede">Mirá cómo una clienta reserva y paga la seña desde el celular, y todo lo que ve el centro del otro lado.</p>
+  </header>
+
+  <section class="player" aria-label="Demo del sistema">
+    <div class="screen" id="screen" title="Pausar o reproducir">
+      <div class="stage" id="stage">
+        <div class="app">
+          <div class="app-top"><i></i><i></i><i></i><span class="app-title">Centro de estética</span><span class="app-user">6 profesionales</span></div>
+          <div class="app-body">
+            <nav class="side">
+              <span class="side-grp">Clienta</span>
+              <span class="nav on" data-nav="0">Reservar</span>
+              <span class="side-grp">Centro</span>
+              <span class="nav" data-nav="1">Agenda</span>
+              <span class="nav" data-nav="2">Clientas</span>
+              <span class="nav" data-nav="3">Panel</span>
+            </nav>
+            <div class="views">
+
+              <!-- 1 · Reserva -->
+              <section class="view client on" data-view="0">
+                <div class="phone">
+                  <div class="scr on" id="s0">
+                    <div class="ph-hero"><b>Centro de estética</b><small>Reservá tu turno online</small></div>
+                    <span class="ph-t">¿Qué te querés hacer?</span>
+                    <div class="tiles">
+                      <div class="tile" style="--ac:var(--a-pelu)"><i></i><b>Peluquería</b></div>
+                      <div class="tile" style="--ac:var(--a-masa)"><i></i><b>Masajes</b></div>
+                      <div class="tile" style="--ac:var(--a-depi)"><i></i><b>Depilación</b></div>
+                      <div class="tile" style="--ac:var(--a-pest)"><i></i><b>Pestañas y cejas</b></div>
+                      <div class="tile wide" id="tUnas" style="--ac:var(--a-unas)"><i></i><b>Uñas · manos y pies</b></div>
+                    </div>
+                    <div class="policy">Lunes a sábado de 9 a 20 h. Reservás con una seña del 30%.</div>
+                  </div>
+                  <div class="scr" id="s1">
+                    <span class="back">← Todas las áreas</span>
+                    <span class="ph-t" style="font-family:var(--f-serif);font-size:19px;font-weight:600">Uñas</span>
+                    <div class="svc" id="svSemi"><i></i><span><b>Esmaltado semipermanente</b><small>Manos · 60 min</small></span><em>$18.000</em></div>
+                    <div class="svc"><i></i><span><b>Uñas esculpidas</b><small>Polygel · 120 min</small></span><em>$32.000</em></div>
+                    <div class="svc"><i></i><span><b>Kapping gel</b><small>Uña natural · 90 min</small></span><em>$24.000</em></div>
+                    <div class="svc"><i></i><span><b>Pedicura semipermanente</b><small>Pies · 75 min</small></span><em>$20.000</em></div>
+                  </div>
+                  <div class="scr" id="s2">
+                    <span class="back">← Uñas</span>
+                    <div class="sumc"><div><b>Esmaltado semipermanente</b><b>$18.000</b></div><div class="m"><span>60 minutos</span><span>Seña $5.400</span></div></div>
+                    <span class="ph-t">¿Con quién?</span>
+                    <div class="pros"><div class="pro">Cualquiera<small>Primer lugar</small></div><div class="pro on">Vale<small>Mesa 1</small></div><div class="pro">Carla<small>Mesa 2</small></div></div>
+                    <span class="ph-t">Hoy · horarios libres</span>
+                    <div class="slots">
+                      <div class="slot">16:00</div><div class="slot" id="slot17">17:00</div><div class="slot">18:30</div><div class="slot">19:00</div>
+                    </div>
+                    <button class="btn" id="bCont" tabindex="-1" style="margin-top:auto;padding:11px">Continuar</button>
+                  </div>
+                  <div class="scr" id="s3">
+                    <span class="back">← Cambiar horario</span>
+                    <div class="sumc"><div><b>Esmaltado semipermanente</b><b>$18.000</b></div><div class="m"><span>Hoy · 17:00 h</span><span>con Vale</span></div></div>
+                    <span class="ph-t">¿Cuánto pagás ahora?</span>
+                    <div class="opt"><span class="rd"></span><span><b>Seña del 30%</b>El resto, en el centro</span><em>$5.400</em></div>
+                    <div class="policy">Reprogramás sin costo hasta 24 h antes. Si no venís, la seña no se devuelve.</div>
+                    <button class="pay" id="bPay" tabindex="-1">Pagar $5.400 con Mercado Pago</button>
+                  </div>
+                  <div class="scr" id="s4">
+                    <div class="ok">✓</div>
+                    <span class="ok-t">¡Turno confirmado!</span>
+                    <div class="sumc"><div><span class="m">Pagado</span><b>$5.400</b></div><div><span class="m">A pagar en el centro</span><b>$12.600</b></div></div>
+                    <span class="wa-l">WhatsApp · mensaje automático</span>
+                    <div class="wa" id="waOk">Hola Sofía! Tu turno de semipermanente es hoy a las 17:00 con Vale. Seña recibida. Te esperamos en el centro.</div>
+                  </div>
+                </div>
+                <ol class="notes">
+                  <li id="nt0"><span class="n">1</span><div><b>Elige servicio y horario</b><span>Ve solo los horarios libres de cada profesional.</span></div></li>
+                  <li id="nt1"><span class="n">2</span><div><b>Paga la seña</b><span>Con Mercado Pago. Se acabaron los turnos que no vienen.</span></div></li>
+                  <li id="nt2"><span class="n">3</span><div><b>Recibe la confirmación</b><span>Por WhatsApp, sin que nadie del centro escriba.</span></div></li>
+                </ol>
+              </section>
+
+              <!-- 2 · Agenda -->
+              <section class="view" data-view="1">
+                <div class="vh"><div><span class="vk">Agenda · hoy</span><h4>Todo el centro en una vista</h4></div>
+                  <div class="legend"><span class="pill good">Realizado</span><span class="pill warn">Sin seña</span><span class="pill bad">Ausente</span></div></div>
+                <div class="ag">
+                  <div class="cal">
+                    <div class="cal-h">
+                      <div></div>
+                      <div class="c2" style="--ac:var(--a-pelu)">Romina<small>Peluquería</small></div>
+                      <div class="c2" style="--ac:var(--a-masa)">Inés<small>Masajes</small></div>
+                      <div style="--ac:var(--a-depi)">Ana<small>Depilación</small></div>
+                      <div style="--ac:var(--a-pest)">Mica<small>Pestañas</small></div>
+                      <div style="--ac:var(--a-unas)">Vale<small>Uñas</small></div>
+                    </div>
+                    <div class="cal-b" id="calB">
+                      <div class="hrs"><span style="top:0">14 h</span><span style="top:20%">15 h</span><span style="top:40%">16 h</span><span style="top:60%">17 h</span><span style="top:80%">18 h</span></div>
+                      <div class="col c2" style="--ac:var(--a-pelu)" data-c="pelu"></div>
+                      <div class="col c2" style="--ac:var(--a-masa)" data-c="masa"></div>
+                      <div class="col" style="--ac:var(--a-depi)" data-c="depi"></div>
+                      <div class="col" style="--ac:var(--a-pest)" data-c="pest"></div>
+                      <div class="col" style="--ac:var(--a-unas)" data-c="unas"></div>
+                      <div class="now" style="top:26.7%"></div>
+                    </div>
+                  </div>
+                  <div class="det">
+                    <span class="ph" id="detPh">Tocá un turno para ver el detalle.</span>
+                    <div class="det-in" id="detIn">
+                      <span class="pill acc" style="align-self:flex-start">Reserva online</span>
+                      <h5>Sofía Gómez</h5>
+                      <div class="kv"><span>Servicio</span><b>Semipermanente</b></div>
+                      <div class="kv"><span>Horario</span><b>17:00 · Vale</b></div>
+                      <div class="kv"><span>Seña pagada</span><b>$5.400</b></div>
+                      <div class="kv c3"><span>Resta cobrar</span><b>$12.600</b></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 3 · Clientas -->
+              <section class="view" data-view="2">
+                <div class="vh"><div><span class="vk">Clientas</span><h4>Quién viene, quién dejó de venir</h4></div></div>
+                <div class="segs">
+                  <div class="sg on" id="sgT"><b>18</b><small>Todas</small></div>
+                  <div class="sg"><b>6</b><small>Activas</small></div>
+                  <div class="sg"><b>2</b><small>VIP</small></div>
+                  <div class="sg c2"><b>2</b><small>Nuevas</small></div>
+                  <div class="sg" id="sgR"><b>5</b><small>En riesgo</small></div>
+                  <div class="sg c2"><b>3</b><small>Perdidas</small></div>
+                </div>
+                <div class="cl-l">
+                  <div class="list on" id="lT">
+                    <div class="cl"><span class="av">MR</span><div><b>Martina Ruiz</b><small>Uñas y pestañas · 14 visitas</small></div><span class="pill acc">VIP</span></div>
+                    <div class="cl"><span class="av">PD</span><div><b>Paula Díaz</b><small>Peluquería · vino hoy</small></div><span class="pill good">Activa</span></div>
+                    <div class="cl"><span class="av">FM</span><div><b>Florencia Medina</b><small>Pestañas · primera visita</small></div><span class="pill acc">Nueva</span></div>
+                    <div class="cl c2"><span class="av">SO</span><div><b>Sabrina Olmos</b><small>Depilación · hace 71 días</small></div><span class="pill bad">Perdida</span></div>
+                  </div>
+                  <div class="list" id="lR">
+                    <div class="cl"><span class="av">AQ</span><div><b>Antonella Quiroga</b><small>Uñas · viene cada 21 días · hace 30</small></div><span class="r"><button class="btn sm" id="bWa" tabindex="-1">Escribirle</button></span></div>
+                    <div class="cl"><span class="av">BP</span><div><b>Belén Páez</b><small>Depilación · cada 28 días · hace 40</small></div><span class="r"><button class="btn sm ghost" tabindex="-1">Escribirle</button></span></div>
+                    <div class="cl"><span class="av">ML</span><div><b>Mariana López</b><small>Peluquería · cada 30 días · hace 48</small></div><span class="r"><button class="btn sm ghost" tabindex="-1">Escribirle</button></span></div>
+                    <div class="cl c2"><span class="av">RL</span><div><b>Rocío Luna</b><small>Pestañas · cada 21 días · hace 55</small></div><span class="r"><button class="btn sm ghost" tabindex="-1">Escribirle</button></span></div>
+                  </div>
+                  <div class="msgc" id="msgc">
+                    <span class="wa-l">Mensaje sugerido</span>
+                    <div class="wa hide" id="waR">Hola Antonella! Hace un mes que no te vemos. ¿Te reservo tu semipermanente? Vale tiene lugar el jueves a las 17 h.</div>
+                    <button class="btn" id="bSend" tabindex="-1">Enviar por WhatsApp</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 4 · Panel -->
+              <section class="view" data-view="3">
+                <div class="vh"><div><span class="vk">Panel · septiembre</span><h4>Cómo rinde el centro</h4></div></div>
+                <div class="kpis">
+                  <div class="kpi hero"><span>Facturación del mes</span><b id="kF">$0</b></div>
+                  <div class="kpi"><span>Turnos</span><b id="kT">0</b></div>
+                  <div class="kpi"><span>Ocupación</span><b id="kO">0%</b></div>
+                  <div class="kpi"><span>Ticket promedio</span><b id="kK">$0</b></div>
+                </div>
+                <div class="pn">
+                  <div class="box"><span class="t">Facturación por área</span>
+                    <div class="hb" style="--ac:var(--a-pelu)"><span>Peluquería</span><span class="trk"><i data-w="100"></i></span><em>$5,2 M</em></div>
+                    <div class="hb" style="--ac:var(--a-masa)"><span>Masajes</span><span class="trk"><i data-w="64"></i></span><em>$3,3 M</em></div>
+                    <div class="hb" style="--ac:var(--a-depi)"><span>Depilación</span><span class="trk"><i data-w="61"></i></span><em>$3,2 M</em></div>
+                    <div class="hb c2" style="--ac:var(--a-pest)"><span>Pestañas</span><span class="trk"><i data-w="47"></i></span><em>$2,4 M</em></div>
+                    <div class="hb c2" style="--ac:var(--a-unas)"><span>Uñas</span><span class="trk"><i data-w="34"></i></span><em>$1,7 M</em></div>
+                  </div>
+                  <div class="box c2-box"><span class="t">Insumos para reponer</span>
+                    <div class="stk" id="stk">
+                      <div><span>Decolorante</span><small>420 / 500 g</small></div>
+                      <div><span>Pegamento de pestañas</span><small>9 / 10 ml</small></div>
+                      <div><span>Top coat</span><small>22 / 30 ml</small></div>
+                      <div class="c2"><span>Aceite post depilación</span><small>350 / 500 ml</small></div>
+                    </div>
+                    <button class="btn" id="bBuy" tabindex="-1">Armar pedido al proveedor</button>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+          </div>
+        </div>
+        <div class="toast" id="toast">Turno de Sofía en la agenda</div>
+        <div class="cursor" id="cursor"><span class="ring" id="ring"></span><svg viewBox="0 0 22 22"><path d="M3 2l14 8.2-6.3 1.4L7.4 18z" fill="#FFFFFF" stroke="#1A1A2E" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+    <div class="bar">
+      <button class="pp" id="pp" aria-label="Pausar"><svg id="ppIco" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg></button>
+      <p class="cap" aria-live="polite"><span class="cap-n mono" id="capN">01</span><span id="capT">La clienta elige servicio y horario, y paga la seña desde el celular.</span></p>
+      <span class="time mono num" id="time">0:00 / 0:44</span>
+    </div>
+  </section>
+
+  <ol class="chapters">
+    <li><button class="ch on" data-ch="0"><span class="mono">01</span><b>Reserva con seña</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="1"><span class="mono">02</span><b>Agenda al día</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="2"><span class="mono">03</span><b>Clientas en riesgo</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="3"><span class="mono">04</span><b>Panel del mes</b><span class="prog"><i></i></span></button></li>
+  </ol>
+
+  <section class="sum">
+    <div>
+      <h2>Qué resuelve</h2>
+      <p>En muchos centros los turnos se dan por WhatsApp, las señas se persiguen y nadie sabe qué clienta dejó de venir. Esta app junta turnos, cobros, clientas e insumos en un solo lugar.</p>
+    </div>
+    <ul class="feats">
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4.5" width="14" height="12" rx="2"/><path d="M3 8.5h14M7 3v3M13 3v3"/></svg></span><div><b>Reservas online con seña</b><span>La clienta elige horario libre y paga el 30% para confirmar.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4v12M10 4v12M16 4v12M2.5 8h15"/></svg></span><div><b>Agenda por profesional</b><span>Cada cabina con sus turnos, señas y ausencias del día.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="7" r="3"/><path d="M4 17c.8-3 3.2-4.5 6-4.5s5.2 1.5 6 4.5"/></svg></span><div><b>Clientas que vuelven</b><span>Avisa quién dejó de venir y le escribe por WhatsApp.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 16V9M10 16V4M16 16v-5"/></svg></span><div><b>Números del centro</b><span>Facturación por área, ocupación, comisiones e insumos.</span></div></li>
+    </ul>
+  </section>
+
+  <div class="foot">
+    <div class="chips"><span class="mono">Sirve para</span><span class="chip-r">Centros de estética</span><span class="chip-r">Peluquerías</span><span class="chip-r">Uñas</span><span class="chip-r">Spa y masajes</span><span class="chip-r">Cosmetología</span></div>
+    <div class="cta-wrap">
+      <span class="mono cta-meta">Primera versión en 1 semana</span>
+      <a class="cta" href="https://wa.me/5492617268115" target="_blank" rel="noopener noreferrer">Quiero uno así para mi centro</a>
+    </div>
+  </div>
+  <p class="note">Maqueta de ejemplo. Nombres, servicios y números son ilustrativos.</p>
+</main>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var screen=$('screen'), stage=$('stage'), cursor=$('cursor'), ring=$('ring');
+  var CAPS=[
+    'La clienta elige servicio y horario, y paga la seña desde el celular.',
+    'El turno entra solo a la agenda del centro, con la seña ya cobrada.',
+    'La app avisa qué clientas dejaron de venir y te deja el mensaje listo.',
+    'La dueña ve cuánto factura cada área, la ocupación y qué insumos reponer.'
+  ];
+  var DUR=[13000,9000,10000,9500], TOTAL=DUR.reduce(function(a,b){return a+b},0);
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* turnos de hoy en la agenda: [columna, inicio en minutos, duración, clienta, servicio, estado] */
+  var H0=840, SPAN=300;
+  var EV=[
+    ['pelu',840,90,'Paula Díaz','Color de raíz','realizado'],['pelu',930,60,'Lara Giménez','Corte y brushing',''],['pelu',1020,45,'Lucía Herrera','Brushing','sin_sena'],
+    ['masa',840,60,'Agustina Vera','Descontracturante','realizado'],['masa',930,50,'Valentina Rossi','Relajante',''],['masa',1020,75,'Natalia Correa','Piedras calientes',''],
+    ['depi',840,30,'Ailén Rojas','Cavado','realizado'],['depi',870,45,'Sabrina Olmos','Piernas','ausente'],['depi',960,30,'Sofía Benítez','Láser',''],['depi',1050,45,'Daniela Funes','Piernas','sin_sena'],
+    ['pest',840,120,'Julieta Ferro','Extensiones','realizado'],['pest',990,60,'Florencia Medina','Lifting y tinte',''],
+    ['unas',840,60,'Martina Ruiz','Semipermanente','realizado'],['unas',900,120,'Camila Sosa','Esculpidas',''],['unas',1080,60,'Micaela Torres','Pedicura','sin_sena']
+  ];
+  function pos(st,d){return 'top:'+((st-H0)/SPAN*100)+'%;height:calc('+(d/SPAN*100)+'% - 2px)'}
+  EV.forEach(function(e){
+    var col=document.querySelector('.col[data-c="'+e[0]+'"]');
+    col.insertAdjacentHTML('beforeend','<div class="ev '+e[5]+'" style="'+pos(e[1],e[2])+'"><b>'+e[3]+'</b><small>'+e[4]+'</small></div>');
+  });
+  document.querySelector('.col[data-c="unas"]').insertAdjacentHTML('beforeend','<div class="ev nuevo" id="evNew" style="'+pos(1020,60)+'"><b>Sofía Gómez</b><small>Semipermanente</small></div>');
+
+  var W=960,H=560,scale=1;
+  function fit(){
+    var w=screen.clientWidth, narrow=w<620;
+    W=narrow?460:960; H=narrow?600:560;
+    stage.classList.toggle('narrow',narrow);
+    stage.style.width=W+'px'; stage.style.height=H+'px';
+    scale=w/W; stage.style.transform='scale('+scale+')';
+    screen.style.height=(H*scale)+'px';
+  }
+  fit();
+  if(window.ResizeObserver) new ResizeObserver(fit).observe(screen); else window.addEventListener('resize',fit);
+
+  var playing=!reduce, now=0, last=performance.now(), frameCbs=[];
+  function loop(t){
+    var dt=Math.min(t-last,100); last=t; if(playing) now+=dt;
+    var cbs=frameCbs; frameCbs=[]; cbs.forEach(function(f){f()});
+    tickUI(); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  var runId=0, ff=false, ABORT={};
+  function frame(id){return new Promise(function(res,rej){frameCbs.push(function(){id===runId?res():rej(ABORT)})})}
+  function chk(id){if(id!==runId) throw ABORT}
+  async function wait(id,ms){chk(id); if(ff) return; var s=now; while(now-s<ms) await frame(id);}
+  async function tween(id,ms,fn){chk(id); if(ff){fn(1);return} var s=now; while(now-s<ms){var p=(now-s)/ms; fn(1-Math.pow(1-p,3)); await frame(id);} fn(1);}
+
+  var cx=W*0.62, cy=H*0.55;
+  function place(){cursor.style.transform='translate('+cx+'px,'+cy+'px)'}
+  place();
+  async function moveTo(id,el,ms){
+    var r=el.getBoundingClientRect(), s=stage.getBoundingClientRect();
+    var tx=(r.left+r.width*0.55-s.left)/scale, ty=(r.top+r.height*0.6-s.top)/scale;
+    var x0=cx,y0=cy;
+    await tween(id,ms||750,function(p){cx=x0+(tx-x0)*p; cy=y0+(ty-y0)*p; place();});
+  }
+  async function click(id,el){
+    chk(id); ring.classList.remove('go'); void ring.offsetWidth; if(!ff) ring.classList.add('go');
+    if(el){el.classList.add('press'); await wait(id,160); el.classList.remove('press');} else await wait(id,160);
+  }
+  function count(id,el,from,to,ms,fmt){return tween(id,ms,function(p){el.textContent=fmt(from+(to-from)*p)})}
+  function setView(i){
+    document.querySelectorAll('.view').forEach(function(x){x.classList.toggle('on',+x.dataset.view===i)});
+    document.querySelectorAll('.nav').forEach(function(n){n.classList.toggle('on',+n.dataset.nav===i)});
+  }
+  function nav(i){return document.querySelector('.nav[data-nav="'+i+'"]')}
+  function scr(k){for(var j=0;j<5;j++) $('s'+j).classList.toggle('on',j===k)}
+  function note(k){for(var j=0;j<3;j++) $('nt'+j).classList.toggle('on',j===k)}
+
+  var RESET=[
+    function(){ scr(0); note(-1); $('slot17').classList.remove('on'); $('waOk').classList.remove('on'); $('bPay').textContent='Pagar $5.400 con Mercado Pago'; $('toast').classList.remove('on'); },
+    function(){ $('evNew').classList.remove('on','sel'); $('detIn').classList.remove('on'); $('detPh').hidden=false; },
+    function(){ $('sgT').classList.add('on'); $('sgR').classList.remove('on'); $('lT').classList.add('on'); $('lR').classList.remove('on');
+      $('msgc').classList.remove('on'); $('waR').classList.add('hide'); var b=$('bWa'); b.textContent='Escribirle'; b.classList.remove('done');
+      $('bSend').textContent='Enviar por WhatsApp'; $('bSend').classList.remove('done'); $('toast').classList.remove('on'); },
+    function(){ $('kF').textContent='$0'; $('kT').textContent='0'; $('kO').textContent='0%'; $('kK').textContent='$0';
+      document.querySelectorAll('.hb i').forEach(function(b){b.style.width='0'});
+      document.querySelectorAll('#stk div').forEach(function(b){b.classList.remove('on')});
+      $('bBuy').textContent='Armar pedido al proveedor'; $('bBuy').classList.remove('done'); $('toast').classList.remove('on'); }
+  ];
+  function toast(t){$('toast').textContent=t; $('toast').classList.add('on');}
+
+  var SCRIPT=[
+    async function(id){
+      setView(0); note(0);
+      await wait(id,700);
+      await moveTo(id,$('tUnas'),800); await click(id,$('tUnas')); scr(1);
+      await wait(id,600);
+      await moveTo(id,$('svSemi'),650); await click(id,$('svSemi')); scr(2);
+      await wait(id,700);
+      await moveTo(id,$('slot17'),650); await click(id,$('slot17')); $('slot17').classList.add('on');
+      await wait(id,350);
+      await moveTo(id,$('bCont'),550); await click(id,$('bCont')); scr(3); note(1);
+      await wait(id,900);
+      await moveTo(id,$('bPay'),650); await click(id,$('bPay')); $('bPay').textContent='Procesando pago…';
+      await wait(id,1100); scr(4); note(2);
+      await wait(id,600); $('waOk').classList.add('on');
+      await wait(id,2400);
+    },
+    async function(id){
+      await moveTo(id,nav(1)); await click(id); setView(1);
+      await wait(id,700);
+      $('evNew').classList.add('on'); toast('Turno de Sofía en la agenda');
+      await wait(id,1400); $('toast').classList.remove('on');
+      await moveTo(id,$('evNew'),750); await click(id); $('evNew').classList.add('sel');
+      $('detPh').hidden=true; $('detIn').classList.add('on');
+      await wait(id,2800);
+    },
+    async function(id){
+      await moveTo(id,nav(2)); await click(id); setView(2);
+      await wait(id,900);
+      await moveTo(id,$('sgR'),700); await click(id,$('sgR'));
+      $('sgT').classList.remove('on'); $('sgR').classList.add('on'); $('lT').classList.remove('on'); $('lR').classList.add('on');
+      await wait(id,1000);
+      await moveTo(id,$('bWa'),700); await click(id,$('bWa'));
+      $('msgc').classList.add('on'); $('waR').classList.remove('hide');
+      await wait(id,1600);
+      await moveTo(id,$('bSend'),650); await click(id,$('bSend'));
+      $('bSend').textContent='Enviado ✓'; $('bSend').classList.add('done'); $('bWa').textContent='Escrita ✓'; $('bWa').classList.add('done');
+      await wait(id,2000);
+    },
+    async function(id){
+      await moveTo(id,nav(3)); await click(id); setView(3);
+      await wait(id,400);
+      await Promise.all([
+        count(id,$('kF'),0,15.8,900,function(n){return '$'+n.toFixed(1).replace('.',',')+' M'}),
+        count(id,$('kT'),0,683,900,function(n){return Math.round(n)}),
+        count(id,$('kO'),0,69,900,function(n){return Math.round(n)+'%'}),
+        count(id,$('kK'),0,23,900,function(n){return '$'+Math.round(n)+' mil'})
+      ]);
+      var bars=document.querySelectorAll('.hb i');
+      await tween(id,900,function(p){bars.forEach(function(b){b.style.width=(b.dataset.w*p)+'%'})});
+      var it=document.querySelectorAll('#stk div');
+      for(var i=0;i<it.length;i++){ await wait(id,220); it[i].classList.add('on'); }
+      await wait(id,500);
+      await moveTo(id,$('bBuy'),750); await click(id,$('bBuy'));
+      $('bBuy').textContent='Pedido armado ✓'; $('bBuy').classList.add('done'); toast('Lista de compra lista para el proveedor');
+      await wait(id,2200); $('toast').classList.remove('on');
+    }
+  ];
+
+  var cur=0, chStart=0, ended=false;
+  var chBtns=document.querySelectorAll('.ch');
+  async function run(i){
+    var id=++runId; cur=i; chStart=now; ended=false;
+    RESET[i](); $('capN').textContent='0'+(i+1); $('capT').textContent=CAPS[i];
+    chBtns.forEach(function(b,k){b.classList.toggle('on',k===i)});
+    try{
+      await SCRIPT[i](id);
+      ended=true;
+      var nx=(i+1)%4;
+      if(nx===0){ await wait(id,1200); }
+      run(nx);
+    }catch(e){ if(e!==ABORT) throw e; }
+  }
+  function tickUI(){
+    var el=Math.min(now-chStart,DUR[cur]);
+    chBtns.forEach(function(b,k){
+      var w=k<cur?100:(k>cur?0:(ended?100:Math.min(98,el/DUR[cur]*100)));
+      b.querySelector('.prog i').style.width=w+'%';
+    });
+    var before=DUR.slice(0,cur).reduce(function(a,b){return a+b},0);
+    $('time').textContent=mmss(before+el)+' / '+mmss(TOTAL);
+  }
+  function mmss(ms){var s=Math.round(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+  function setPlaying(p){
+    playing=p;
+    $('pp').setAttribute('aria-label',p?'Pausar':'Reproducir');
+    $('ppIco').innerHTML=p?'<rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/>':'<path d="M3 1.5v11l9.5-5.5z"/>';
+  }
+  $('pp').addEventListener('click',function(){setPlaying(!playing)});
+  screen.addEventListener('click',function(){setPlaying(!playing)});
+  chBtns.forEach(function(b){b.addEventListener('click',function(){ setPlaying(true); run(+b.dataset.ch); })});
+
+  if(reduce){
+    setPlaying(false);
+    ff=true; var id=++runId; RESET[0](); SCRIPT[0](id).then(function(){ff=false; ended=true;});
+  } else {
+    setPlaying(true); run(0);
+  }
+})();
+</script>
+
+</body>
+</html>

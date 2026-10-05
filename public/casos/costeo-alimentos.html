@@ -3,526 +3,542 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>El peso que ya pagaste — Tu Equipo IA</title>
+<title>Costeo y trazabilidad</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=DM+Mono:wght@400;500&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* Vitrina: demo en formato video arriba (lo central), capítulos clicables, y un resumen corto abajo. Una sola apariencia clara, la de la marca. */
 :root{
-  --teal:#1AABAA;
-  --teal-900:#0B5453;
-  --teal-700:#12817F;
-  --teal-600:#158F8E;
-  --teal-300:#6FCFCE;
-  --teal-100:#D6F0EF;
-  --noche:#1A1A2E;
-  --crema:#F4F1EC;
-  --blanco:#FFFFFF;
-  --mango:#F4A259;
-  --sep:#E7E2D9;
-  --sombra:0 12px 32px rgba(26,26,46,.10);
-  --ease:cubic-bezier(.22,.8,.28,1);
+  --crema:#F4F1EC; --papel:#FBFAF7; --blanco:#FFFFFF;
+  --noche:#1A1A2E; --noche-2:#23233A; --noche-tenue:#A3A3B8;
+  --teal:#1AABAA; --teal-300:#6FCFCE; --teal-700:#12817F; --teal-900:#0B5453; --teal-100:#D6F0EF;
+  --mango:#F4A259; --mango-100:#FDEBD9; --mango-ink:#B4601A;
+  --sep:#E7E2D9; --tinta:#5E5A50; --tenue:#8C887F; --hueco:#EDE9E1;
+  --f-disp:"Archivo",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,sans-serif;
+  --f-mono:"DM Mono",ui-monospace,monospace;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
-
-body{
-  margin:0;background:var(--crema);color:var(--noche);
-  font-family:"Figtree",system-ui,sans-serif;
-  font-size:18px;line-height:1.5;font-weight:400;
-  -webkit-font-smoothing:antialiased;
-}
-h1,h2,h3,.display{
-  font-family:"Archivo",system-ui,sans-serif;
-  font-variation-settings:"wdth" 112,"wght" 800;
-  font-weight:800;text-transform:uppercase;
-  line-height:.95;letter-spacing:.005em;margin:0;
-}
-.mono{
-  font-family:"DM Mono",ui-monospace,monospace;
-  text-transform:uppercase;letter-spacing:.14em;
-  font-weight:500;font-size:13px;
-}
-.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+body{margin:0;background:var(--crema);color:var(--noche);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
 :focus-visible{outline:3px solid var(--mango);outline-offset:3px}
+.mono{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.14em;font-weight:500;font-size:12px}
+.num{font-variant-numeric:tabular-nums}
+.page{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:28px 52px;display:flex;flex-direction:column;gap:22px}
 
-.wrap{max-width:1060px;margin:0 auto;padding:0 30px}
-p{max-width:60ch}
+/* ---------- encabezado ---------- */
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 28px}
+.head-txt{display:flex;flex-direction:column;gap:8px;min-width:0}
+.eyebrow{color:var(--teal-700)}
+h1{font-family:var(--f-disp);font-variation-settings:"wdth" 112,"wght" 800;font-weight:800;text-transform:uppercase;line-height:.95;margin:0;font-size:clamp(28px,4.6vw,46px);text-wrap:balance}
+mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inherit;padding:0 .05em}
+.lede{margin:0;color:var(--tinta);max-width:44ch;font-size:16px}
 
-/* ---------- header ---------- */
-header.top{
-  position:sticky;top:0;z-index:40;background:rgba(244,241,236,.95);
-  backdrop-filter:blur(8px);border-bottom:1px solid var(--sep);padding:16px 0;
+/* ---------- reproductor ---------- */
+.player{background:var(--noche);border-radius:16px;overflow:hidden;box-shadow:0 22px 50px rgba(26,26,46,.18)}
+.screen{position:relative;width:100%;max-width:100%;overflow:hidden;cursor:pointer;
+  background:radial-gradient(120% 90% at 85% 0%,rgba(26,171,170,.22),transparent 55%),var(--noche-2)}
+.bar{display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid #2E2E48}
+.pp{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:var(--teal);color:var(--noche);display:grid;place-items:center;cursor:pointer}
+.pp svg{width:14px;height:14px}
+.cap{flex:1;min-width:0;margin:0;color:var(--crema);font-size:15px;line-height:1.35;display:flex;gap:10px;align-items:baseline}
+.cap-n{color:var(--teal-300);flex:none}
+.time{color:var(--noche-tenue);flex:none}
+
+.chapters{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ch{width:100%;height:100%;text-align:left;background:var(--blanco);border:1px solid var(--sep);border-radius:12px;padding:12px 14px 14px;cursor:pointer;display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden;font:inherit;color:inherit;transition:border-color .2s,transform .2s}
+.ch:hover{transform:translateY(-2px)}
+.ch .mono{color:var(--tenue);font-size:11px}
+.ch b{font-size:14.5px;line-height:1.25}
+.ch .prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--hueco)}
+.ch .prog i{display:block;height:100%;width:0;background:var(--teal)}
+.ch.on{border-color:var(--teal)}
+.ch.on .mono{color:var(--teal-700)}
+
+/* ---------- resumen ---------- */
+.sum{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:28px;padding-top:14px}
+.sum h2{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-weight:800;text-transform:uppercase;font-size:20px;line-height:1;margin:0 0 10px}
+.sum p{margin:0;color:var(--tinta);max-width:42ch}
+.feats{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
+.feats li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start}
+.ico{width:34px;height:34px;border-radius:9px;background:var(--teal-100);color:var(--teal-900);display:grid;place-items:center}
+.ico svg{width:18px;height:18px}
+.feats b{display:block;font-size:15px;line-height:1.3}
+.feats span{display:block;color:var(--tinta);font-size:14px;line-height:1.4}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--sep);padding-top:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips .mono{color:var(--tenue);font-size:11px;margin-right:4px}
+.chip-r{background:var(--blanco);border:1px solid var(--sep);border-radius:999px;padding:5px 12px;font-size:13px}
+.cta-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.cta-meta{color:var(--tenue);font-size:11px}
+.cta{display:inline-flex;align-items:center;gap:8px;background:var(--noche);color:var(--crema);text-decoration:none;font-weight:700;font-size:14.5px;padding:12px 18px;border-radius:10px}
+.cta:hover{background:var(--teal-900)}
+.note{margin:0;color:var(--tenue);font-size:12.5px}
+
+@media (max-width:760px){
+  .sum{grid-template-columns:1fr;gap:18px}
+  .chapters{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-.top-in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
-.lockup{display:flex;align-items:center;gap:11px}
-.mark{
-  width:38px;height:38px;border-radius:10px;background:var(--teal);
-  display:grid;place-items:center;color:var(--blanco);
-  font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
-  font-size:14px;letter-spacing:.02em;flex:none;
+@media (max-width:520px){
+  .feats{grid-template-columns:1fr}
+  .time{display:none}
+  .cap{font-size:14px}
 }
-.wordmark{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
-  text-transform:uppercase;font-size:15px;line-height:.9;letter-spacing:.01em;color:var(--noche)}
-.wordmark small{display:block;font-size:15px}
-nav a{
-  font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
-  font-size:11.5px;color:var(--teal-700);text-decoration:none;margin-left:22px;
-  padding-bottom:3px;border-bottom:2px solid transparent;transition:border-color 140ms var(--ease);
-}
-nav a:hover{border-color:var(--teal)}
-@media(max-width:820px){nav{display:none}}
 
-/* ---------- hero ---------- */
-.hero{padding:90px 0 34px}
-.eyebrow{color:var(--teal-700);margin-bottom:22px;display:block}
-h1{font-size:clamp(42px,8.4vw,96px);max-width:13ch;margin-bottom:28px}
-h1 mark{background:none;color:var(--teal-700)}
-.lede{font-size:21px;max-width:52ch;margin:0 0 14px}
-.foot-note{font-size:15px;color:var(--teal-900);opacity:.75;max-width:56ch;margin-top:26px}
+/* ================= la app simulada (coordenadas lógicas) ================= */
+.stage{position:absolute;left:0;top:0;transform-origin:0 0;font-family:var(--f-body);font-size:14px;color:var(--noche);line-height:1.4}
+.app{position:absolute;inset:20px;background:var(--papel);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.app-top{flex:none;height:38px;display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--blanco);border-bottom:1px solid var(--sep);font-size:12px;color:var(--tenue)}
+.app-top i{width:9px;height:9px;border-radius:50%;background:var(--sep)}
+.app-title{margin-left:10px;font-weight:600;color:var(--noche)}
+.app-user{margin-left:auto}
+.app-body{flex:1;display:flex;min-height:0}
+.side{flex:none;width:180px;background:var(--noche);padding:16px 10px;display:flex;flex-direction:column;gap:4px}
+.side-brand{color:var(--noche-tenue);font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:2px 10px 14px}
+.nav{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:#C9C9D6;font:600 13.5px var(--f-body);background:transparent;border:0;text-align:left;white-space:nowrap}
+.nav::before{content:"";width:6px;height:6px;border-radius:50%;background:#4A4A66;flex:none}
+.nav.on{background:rgba(26,171,170,.2);color:#fff}
+.nav.on::before{background:var(--teal)}
+.views{flex:1;position:relative;min-width:0}
+.view{position:absolute;inset:0;padding:22px 26px;display:flex;flex-direction:column;gap:16px;opacity:0;visibility:hidden;transition:opacity .25s}
+.view.on{opacity:1;visibility:visible}
+.vk{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-700)}
+.vh h4{margin:2px 0 0;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.form label{font-size:11.5px;font-weight:600;color:var(--tenue)}
+.inp{display:block;margin-top:5px;height:38px;border:1px solid var(--sep);border-radius:8px;background:var(--blanco);padding:0 12px;line-height:36px;font-size:15px;color:var(--noche);font-weight:500;white-space:nowrap;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.inp.focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-100)}
+.ph{color:#BDB8AE;font-style:normal;font-weight:400}
+.typing::after{content:"";display:inline-block;width:1.5px;height:17px;background:var(--noche);margin-left:2px;vertical-align:-3px;animation:blink .9s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.form-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.form-foot span{font-size:13px;color:var(--tenue)}
+.form-foot b{font-size:19px;color:var(--noche);margin-left:6px}
+.btn{background:var(--teal);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:700 13.5px var(--f-body);transition:transform .12s,background .12s}
+.btn.press{transform:scale(.95);background:var(--teal-700)}
+.btn.ghost{background:var(--blanco);color:var(--noche);border:1px solid var(--sep)}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);font-weight:500;text-align:left;padding:7px 10px;border-bottom:1px solid var(--sep)}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--sep)}
+.tbl .r{text-align:right}
+.lote{font-family:var(--f-mono);font-size:12px;color:var(--teal-700);font-weight:500}
+.tbl tr.new td{background:var(--mango-100);animation:flash 1.4s ease-out}
+@keyframes flash{from{background:var(--mango)}}
+.toast{position:absolute;right:38px;top:70px;background:var(--noche);color:var(--crema);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:5}
+.toast.on{opacity:1;transform:none}
+.toast::before{content:"✓";color:var(--teal-300);font-weight:700}
 
-/* ---------- recorrido ---------- */
-.panel{
-  background:var(--blanco);border-radius:28px;box-shadow:var(--sombra);
-  padding:40px 38px;margin-top:20px;
-}
-@media(max-width:640px){.panel{padding:28px 22px;border-radius:18px}}
-.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:30px}
-.panel-head h3{font-size:19px;max-width:22ch}
-.panel-head p{font-size:16px;max-width:44ch;margin:0;color:var(--teal-900)}
+.picks{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.picks .lbl{font-size:12px;color:var(--tenue);font-weight:600;margin-right:2px}
+.chip{border:1px solid var(--sep);background:var(--blanco);border-radius:999px;padding:6px 12px;font:600 12.5px var(--f-body);color:var(--noche);transition:background .2s,border-color .2s}
+.chip.on{background:var(--teal-100);border-color:var(--teal);color:var(--teal-900)}
+.chip.press{transform:scale(.95)}
+.stgs{display:flex;flex-direction:column;gap:11px}
+.stg{display:grid;grid-template-columns:160px minmax(0,1fr) 92px;gap:14px;align-items:center}
+.stg-n{font-size:13.5px;font-weight:600;line-height:1.2}
+.stg-n em{display:block;font-style:normal;font-weight:400;font-size:11.5px;color:var(--tenue)}
+.track{height:12px;border-radius:6px;background:var(--hueco);overflow:hidden}
+.track i{display:block;height:100%;border-radius:6px;background:var(--teal);width:0}
+.stg.loss .track i{background:var(--teal-700)}
+.kg{text-align:right;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+.kg small{display:block;font-size:11.5px;color:var(--mango-ink);font-weight:600;min-height:15px}
+.res{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--sep);padding-top:12px;margin-top:auto}
+.res-n{font-size:12px;color:var(--tenue);font-weight:600}
+.res-n b{display:block;font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:28px;color:var(--noche);line-height:1}
 
-.stage{display:grid;grid-template-columns:186px 1fr 116px;gap:20px;align-items:center;
-  padding:14px 0;border-bottom:1px solid var(--sep)}
-.stage-name{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
-  text-transform:uppercase;font-size:13px;line-height:1.15;letter-spacing:.01em}
-.stage-name em{display:block;font-family:"Figtree";font-style:normal;font-weight:400;
-  text-transform:none;font-size:14px;color:var(--teal-900);opacity:.7;margin-top:4px;letter-spacing:0}
-.bar{height:24px;background:var(--sep);border-radius:10px;overflow:hidden;position:relative}
-.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--teal);border-radius:10px;
-  transform-origin:left;transform:scaleX(0);animation:grow 240ms var(--ease) forwards}
-@keyframes grow{to{transform:scaleX(1)}}
-@media (prefers-reduced-motion:reduce){.bar i{transform:scaleX(1)}}
-.kg{text-align:right;font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
-  font-size:19px;letter-spacing:.005em}
-.kg small{display:block;font-family:"DM Mono",monospace;font-weight:400;font-size:11px;
-  letter-spacing:.1em;color:var(--teal-700);margin-top:4px}
-.stage.final{border-bottom:none}
-.stage.final .bar i{background:var(--noche)}
-.stage.final .kg{font-size:25px}
-@media(max-width:720px){.stage{grid-template-columns:1fr 96px;gap:6px 14px}.bar{grid-column:1/-1;order:3;margin-top:6px}}
+.cost-top{display:flex;gap:14px}
+.card{background:var(--blanco);border:1px solid var(--sep);border-radius:10px;padding:14px 16px}
+.big-card{flex:1.1}
+.big-card .l,.tile .l{font-size:12px;color:var(--tenue);font-weight:600}
+.big{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:46px;line-height:1;margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.big-card small{color:var(--tenue);font-size:12px}
+.tiles{flex:1;display:flex;flex-direction:column;gap:10px}
+.tile{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;transition:border-color .25s,background .25s}
+.tile .v{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.tile.plan .v{color:var(--tenue)}
+.tile.real .v{color:var(--mango-ink)}
+.tile.hl{border-color:var(--mango);background:var(--mango-100)}
+.stack-wrap{position:relative}
+.stack{display:flex;height:26px;border-radius:7px;overflow:hidden;background:var(--hueco)}
+.stack i{display:block;height:100%;width:0}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 14px;margin-top:10px;font-size:12.5px}
+.legend div{display:flex;align-items:center;gap:7px;min-width:0}
+.legend i{width:9px;height:9px;border-radius:2px;flex:none}
+.legend span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tinta)}
+.legend b{font-variant-numeric:tabular-nums}
+.tip{position:absolute;left:12px;top:-50px;background:var(--noche);color:var(--crema);font-size:12.5px;padding:8px 11px;border-radius:8px;white-space:nowrap;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;pointer-events:none}
+.tip.on{opacity:1;transform:none}
+.tip::after{content:"";position:absolute;left:24px;bottom:-5px;width:10px;height:10px;background:var(--noche);transform:rotate(45deg)}
 
-.verdict{margin-top:26px;background:var(--noche);color:var(--blanco);
-  border-radius:28px;padding:30px 32px;font-size:19px;max-width:none}
-.verdict p{max-width:56ch;margin:0;color:rgba(255,255,255,.9)}
-.verdict b{color:var(--teal-300);font-weight:600}
+.search{display:flex;align-items:center;gap:8px;margin-top:0}
+.search .inp{flex:1;margin:0;display:flex;align-items:center;gap:8px}
+.search svg{width:15px;height:15px;color:var(--tenue);flex:none}
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.node{position:relative;background:var(--blanco);border:1px solid var(--sep);border-radius:10px;padding:12px;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s,border-color .2s,box-shadow .2s}
+.node.on{opacity:1;transform:none}
+.node.sel{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-100)}
+.node .vk{display:block;margin-bottom:4px}
+.node b{display:block;font-size:14px;line-height:1.25}
+.node span{display:block;font-size:12px;color:var(--tenue);margin-top:3px}
+.node:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:50%;transform:translate(50%,-50%);color:var(--teal-700);font-weight:700;font-size:14px}
+.detail{background:var(--teal-100);color:var(--teal-900);border-radius:10px;padding:12px 14px;font-size:13px;opacity:0;transition:opacity .3s}
+.detail.on{opacity:1}
+.detail b{display:block;font-size:13.5px;margin-bottom:2px}
 
-/* ---------- sections ---------- */
-section{padding:86px 0}
-section.dark{background:var(--noche);color:var(--blanco)}
-section.dark h2{color:var(--blanco)}
-section.dark h2 mark{background:none;color:var(--teal-300)}
-section.dark p{color:rgba(255,255,255,.9)}
-section.dark .eyebrow{color:var(--teal-300)}
-h2{font-size:clamp(30px,4.6vw,50px);max-width:17ch;margin-bottom:20px}
-h2 mark{background:none;color:var(--teal-700)}
-.sec-lede{font-size:19px;margin-bottom:44px}
+.cursor{position:absolute;left:0;top:0;width:22px;height:22px;z-index:10;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.cursor svg{width:22px;height:22px;display:block}
+.ring{position:absolute;left:-14px;top:-14px;width:28px;height:28px;border-radius:50%;border:2px solid var(--mango);opacity:0}
+.ring.go{animation:ring .5s ease-out}
+@keyframes ring{from{opacity:1;transform:scale(.3)}to{opacity:0;transform:scale(1.5)}}
 
-/* fuentes dispersas */
-.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:16px}
-.src{background:var(--blanco);border-radius:18px;padding:24px 24px;box-shadow:var(--sombra)}
-.src .who{color:var(--teal-700);margin-bottom:10px;display:block}
-.src p{margin:0;font-size:16px}
-.gap-line{margin-top:36px;padding-top:26px;border-top:3px solid var(--noche);
-  font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;
-  font-size:clamp(20px,2.6vw,27px);line-height:1.1;max-width:26ch}
+/* layout angosto del simulador (celulares) */
+.stage.narrow .app{inset:10px}
+.stage.narrow .app-body{flex-direction:column}
+.stage.narrow .side{width:auto;flex-direction:row;padding:8px;gap:2px}
+.stage.narrow .side-brand,.stage.narrow .app-user{display:none}
+.stage.narrow .nav{padding:8px 9px;font-size:12.5px;gap:6px}
+.stage.narrow .view{padding:16px}
+.stage.narrow .c2{display:none}
+.stage.narrow .stg{grid-template-columns:118px minmax(0,1fr) 72px;gap:10px}
+.stage.narrow .cost-top{flex-direction:column}
+.stage.narrow .tiles{flex-direction:row}
+.stage.narrow .tile{flex:1;flex-direction:column;align-items:flex-start}
+.stage.narrow .legend{grid-template-columns:repeat(2,minmax(0,1fr))}
+.stage.narrow .chain{grid-template-columns:1fr 1fr}
+.stage.narrow .node:nth-child(2)::after{display:none}
+.stage.narrow .big{font-size:40px}
 
-/* preguntas */
-.q{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:start;
-  padding:20px 0;border-bottom:1px solid rgba(255,255,255,.16)}
-.q:first-of-type{border-top:3px solid var(--teal-300)}
-.q p{margin:0;font-size:19.5px;max-width:50ch}
-.q span{color:var(--teal-300);padding-top:6px;white-space:nowrap}
-
-/* cadena */
-.chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:16px}
-.link{background:var(--blanco);border-radius:18px;padding:22px 20px;box-shadow:var(--sombra)}
-.link .step-n{color:var(--teal-700);display:block;margin-bottom:12px}
-.link b{display:block;font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
-  text-transform:uppercase;font-size:14px;margin-bottom:7px;letter-spacing:.01em}
-.link p{margin:0;font-size:15.5px;color:var(--teal-900)}
-
-/* antes / después */
-.ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:54px}
-.ba>div{border-radius:28px;padding:30px 28px}
-.ba .antes{background:var(--sep)}
-.ba .despues{background:var(--teal);color:var(--blanco)}
-.ba h3{font-size:17px;margin-bottom:16px}
-.ba .despues h3{color:var(--blanco)}
-.ba ul{margin:0;padding-left:20px}
-.ba li{font-size:16.5px;margin-bottom:12px}
-.ba .antes li{color:var(--noche)}
-.ba .despues li{color:rgba(255,255,255,.92)}
-@media(max-width:720px){.ba{grid-template-columns:1fr}}
-
-/* simulador */
-.sim{display:grid;grid-template-columns:1fr 1.05fr;gap:16px;margin-top:12px}
-@media(max-width:860px){.sim{grid-template-columns:1fr}}
-.controls{background:var(--blanco);border-radius:28px;padding:32px 30px;box-shadow:var(--sombra)}
-.readout{background:var(--noche);border-radius:28px;padding:32px 30px;color:var(--blanco)}
-.ctrl{margin-bottom:22px}
-.ctrl label{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:9px}
-.ctrl .lbl{font-size:15px;color:var(--noche);max-width:30ch}
-.ctrl .val{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;font-size:17px;
-  color:var(--teal-700);letter-spacing:.005em}
-input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:4px;
-  background:var(--sep);border-radius:999px;outline:none;margin:0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
-  border-radius:999px;background:var(--teal);cursor:grab;border:none}
-input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:999px;
-  background:var(--teal);cursor:grab;border:none}
-.reset{background:none;border:none;padding:0;cursor:pointer;color:var(--teal-700);
-  font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;
-  border-bottom:2px solid var(--sep);padding-bottom:3px;transition:border-color 140ms var(--ease)}
-.reset:hover{border-color:var(--teal)}
-.readout .cap{color:var(--teal-300);display:block}
-.big{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
-  font-size:clamp(40px,6.4vw,58px);line-height:1;letter-spacing:.005em;margin:8px 0 8px}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px;padding-top:24px;
-  border-top:1px solid rgba(255,255,255,.18)}
-.split .big{font-size:clamp(28px,4.4vw,36px)}
-.mini{margin-top:26px;padding-top:22px;border-top:1px solid rgba(255,255,255,.18);
-  font-size:16px;color:rgba(255,255,255,.9);max-width:48ch}
-.mini b{color:var(--teal-300);font-weight:600}
-.alerta b{color:var(--mango)}
-
-/* tabla */
-.tabla-wrap{overflow-x:auto;margin-top:14px}
-table{width:100%;border-collapse:collapse;min-width:520px}
-th{font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
-  font-size:11px;font-weight:500;color:var(--teal-700);text-align:left;
-  padding:0 14px 12px 0;border-bottom:3px solid var(--noche)}
-td{padding:14px 14px 14px 0;border-bottom:1px solid var(--sep);font-size:16.5px}
-td.n,th.n{text-align:right;padding-right:0}
-td.n{font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;font-size:16px}
-tr.sum td{border-bottom:none;border-top:3px solid var(--noche);
-  font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;font-size:15px}
-tr.sum td.n{font-size:19px;text-transform:none}
-
-/* cierre */
-.pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:16px;margin-bottom:46px}
-.paso{background:rgba(255,255,255,.06);border-radius:18px;padding:24px 22px}
-.paso .step-n{color:var(--teal-300);display:block;margin-bottom:12px}
-.paso b{display:block;font-family:"Archivo";font-variation-settings:"wdth" 112,"wght" 800;
-  text-transform:uppercase;font-size:14px;margin-bottom:7px;color:var(--blanco);letter-spacing:.01em}
-.paso p{margin:0;font-size:15.5px;color:rgba(255,255,255,.82)}
-.cta{
-  display:inline-block;background:var(--mango);color:var(--noche);text-decoration:none;
-  border-radius:999px;padding:17px 34px;font-family:"Archivo";
-  font-variation-settings:"wdth" 112,"wght" 800;text-transform:uppercase;font-size:16px;
-  letter-spacing:.01em;transition:transform 140ms var(--ease)
-}
-.cta:hover{transform:translateY(-2px)}
-footer{padding:34px 0 58px;font-size:14.5px;color:var(--teal-900);opacity:.7}
-footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<header class="top">
-  <div class="wrap top-in">
-    <div class="lockup">
-      <div class="mark">AI</div>
-      <div class="wordmark">Tu<small>Equipo</small></div>
+
+<main class="page">
+  <header class="head">
+    <div class="head-txt">
+      <span class="mono eyebrow">Caso de uso · Fábricas de alimentos</span>
+      <h1>Costeo y <mark>trazabilidad</mark></h1>
     </div>
-    <nav>
-      <a href="#recorrido">Recorrido</a>
-      <a href="#hoy">Hoy</a>
-      <a href="#preguntas">Preguntas</a>
-      <a href="#simulador">Simulador</a>
-      <a href="#despues">Después</a>
-    </nav>
-  </div>
-</header>
+    <p class="lede">Mirá cómo una fábrica de mermeladas pasa de la factura del proveedor al costo real de cada frasco.</p>
+  </header>
 
-<div class="wrap hero">
-  <span class="mono eyebrow">Costeo para fábricas de alimentos</span>
-  <h1>El peso que ya <mark>pagaste</mark></h1>
-  <p class="lede">Entre la materia prima que entra a tu planta y el producto que sale, se pierde entre un cuarto y la mitad del peso.</p>
-  <p class="lede">Esa pérdida ya está pagada. Está en la factura del proveedor. Lo que casi nunca está es en tu planilla.</p>
-  <p class="foot-note">Ejemplo trabajado sobre una fábrica de mermeladas de seis personas. Los valores son ilustrativos. La mecánica es la misma para conservas, lácteos, panificados, snacks, molienda o fraccionamiento.</p>
-</div>
+  <section class="player" aria-label="Demo del sistema">
+    <div class="screen" id="screen" title="Pausar o reproducir">
+      <div class="stage" id="stage">
+        <div class="app">
+          <div class="app-top"><i></i><i></i><i></i><span class="app-title">Costeo de planta</span><span class="app-user">Dulces de la Quebrada · 6 personas</span></div>
+          <div class="app-body">
+            <nav class="side">
+              <span class="side-brand">Tu planta</span>
+              <span class="nav on" data-nav="0">Compras</span>
+              <span class="nav" data-nav="1">Producción</span>
+              <span class="nav" data-nav="2">Costos</span>
+              <span class="nav" data-nav="3">Trazabilidad</span>
+            </nav>
+            <div class="views">
 
-<div class="wrap" id="recorrido">
-  <div class="panel">
-    <div class="panel-head">
-      <h3>Qué le pasa a una compra de 100 kg</h3>
-      <p>Cada etapa se lleva una parte. Ninguna desaparece del costo: se reparte, en silencio, entre los frascos que sí vendés.</p>
-    </div>
+              <section class="view on" data-view="0">
+                <div class="vh"><span class="vk">Compras</span><h4>Nueva compra de materia prima</h4></div>
+                <div class="form">
+                  <label>Proveedor<span class="inp">Finca Los Álamos</span></label>
+                  <label>Materia prima<span class="inp">Durazno</span></label>
+                  <label>Kilos recibidos<span class="inp" id="fKg"></span></label>
+                  <label>Precio por kilo<span class="inp" id="fPx"></span></label>
+                </div>
+                <div class="form-foot">
+                  <span>Total de la factura<b class="num" id="fTot">$0</b></span>
+                  <button class="btn" id="bSave" tabindex="-1">Guardar compra</button>
+                </div>
+                <table class="tbl">
+                  <thead><tr><th>Lote</th><th class="c2">Proveedor</th><th>Materia prima</th><th class="r">Kilos</th><th class="r">Total</th></tr></thead>
+                  <tbody>
+                    <tr class="new" id="newRow" hidden><td class="lote">L-0412</td><td class="c2">Finca Los Álamos</td><td>Durazno</td><td class="r num">100</td><td class="r num">$180.000</td></tr>
+                    <tr><td class="lote">L-0411</td><td class="c2">Huerta San Martín</td><td>Frutilla</td><td class="r num">60</td><td class="r num">$138.000</td></tr>
+                    <tr><td class="lote">L-0410</td><td class="c2">Finca Los Álamos</td><td>Ciruela</td><td class="r num">80</td><td class="r num">$112.000</td></tr>
+                  </tbody>
+                </table>
+              </section>
 
-    <div class="stage">
-      <div class="stage-name">Llega la fruta<em>Factura del proveedor</em></div>
-      <div class="bar"><i style="width:100%;animation-delay:.04s"></i></div>
-      <div class="kg num">100,0 kg</div>
-    </div>
-    <div class="stage">
-      <div class="stage-name">Selección<em>Fruta golpeada o verde</em></div>
-      <div class="bar"><i style="width:91%;animation-delay:.1s"></i></div>
-      <div class="kg num">91,0 kg<small>−9,0</small></div>
-    </div>
-    <div class="stage">
-      <div class="stage-name">Pelado y carozo<em>Descarte de proceso</em></div>
-      <div class="bar"><i style="width:74%;animation-delay:.16s"></i></div>
-      <div class="kg num">74,0 kg<small>−17,0</small></div>
-    </div>
-    <div class="stage">
-      <div class="stage-name">Envasado<em>Residuo en la olla, derrame, ajuste de llenado</em></div>
-      <div class="bar"><i style="width:71.8%;animation-delay:.22s"></i></div>
-      <div class="kg num">71,8 kg<small>−2,2</small></div>
-    </div>
-    <div class="stage final">
-      <div class="stage-name">Producto vendible<em>Ya con el azúcar sumado, frascos de 420 g listos para facturar</em></div>
-      <div class="bar"><i style="width:71.8%;animation-delay:.28s"></i></div>
-      <div class="kg num">213 frascos</div>
-    </div>
-  </div>
+              <section class="view" data-view="1">
+                <div class="vh"><span class="vk">Producción</span><h4>Mermelada de durazno · frasco 420 g</h4></div>
+                <div class="picks"><span class="lbl">Lote usado</span><button class="chip" id="bLote" tabindex="-1">L-0412 · Durazno 100 kg</button><button class="chip" tabindex="-1">L-0410 · Ciruela</button></div>
+                <div class="stgs">
+                  <div class="stg"><div class="stg-n">Recibido<em>Factura del proveedor</em></div><div class="track"><i id="t0"></i></div><div class="kg"><span id="k0">—</span><small></small></div></div>
+                  <div class="stg loss"><div class="stg-n">Selección<em>Fruta golpeada o verde</em></div><div class="track"><i id="t1"></i></div><div class="kg"><span id="k1">—</span><small id="d1"></small></div></div>
+                  <div class="stg loss"><div class="stg-n">Pelado y carozo<em>Descarte de proceso</em></div><div class="track"><i id="t2"></i></div><div class="kg"><span id="k2">—</span><small id="d2"></small></div></div>
+                  <div class="stg loss"><div class="stg-n">Envasado<em>Residuo y ajuste de llenado</em></div><div class="track"><i id="t3"></i></div><div class="kg"><span id="k3">—</span><small id="d3"></small></div></div>
+                </div>
+                <div class="res">
+                  <div class="res-n">Frascos buenos<b class="num" id="pRes">—</b></div>
+                  <button class="btn" id="bClose" tabindex="-1">Cerrar producción</button>
+                </div>
+              </section>
 
-  <div class="verdict">
-    <p>De los 100 kg que compraste, <b>28 kg nunca llegaron a un frasco</b>. Los 213 que vendés pagan la fruta que se descartó, el carozo, la cáscara y el residuo que quedó en la olla. Todo eso ya está adentro del precio de cada uno.</p>
-  </div>
-</div>
+              <section class="view" data-view="2">
+                <div class="vh"><span class="vk">Costos</span><h4>Costo por frasco · lote L-0412</h4></div>
+                <div class="cost-top">
+                  <div class="card big-card"><span class="l">Costo real del frasco</span><div class="big" id="cBig">$0</div><small>Sobre 213 frascos de 420 g</small></div>
+                  <div class="tiles">
+                    <div class="card tile plan"><span class="l">Margen según la planilla</span><span class="v" id="mPlan">0%</span></div>
+                    <div class="card tile real" id="tileReal"><span class="l">Margen real</span><span class="v" id="mReal">0%</span></div>
+                  </div>
+                </div>
+                <div class="stack-wrap">
+                  <div class="tip" id="tip">Incluye los 28 kg que no llegaron al frasco</div>
+                  <div class="stack" id="stack">
+                    <i style="background:var(--teal-900)" data-w="51"></i><i style="background:var(--teal-700)" data-w="14"></i><i style="background:var(--teal)" data-w="19"></i><i style="background:var(--teal-300)" data-w="11"></i><i style="background:var(--mango)" data-w="5"></i>
+                  </div>
+                  <div class="legend">
+                    <div><i style="background:var(--teal-900)"></i><span>Fruta aprovechada</span><b>$845</b></div>
+                    <div><i style="background:var(--teal-700)"></i><span>Azúcar y aditivos</span><b>$223</b></div>
+                    <div><i style="background:var(--teal)"></i><span>Frasco y etiqueta</span><b>$310</b></div>
+                    <div><i style="background:var(--teal-300)"></i><span>Horas de planta</span><b>$180</b></div>
+                    <div><i style="background:var(--mango)"></i><span>Gas y energía</span><b>$85</b></div>
+                  </div>
+                </div>
+              </section>
 
-<section id="hoy">
-  <div class="wrap">
-    <span class="mono eyebrow">El problema</span>
-    <h2>Tu costo vive en <mark>seis lugares</mark></h2>
-    <p class="sec-lede">No falta información. Está toda. El problema es que ninguna parte habla con la otra, y cada una la escribió alguien distinto en un momento distinto.</p>
+              <section class="view" data-view="3">
+                <div class="vh"><span class="vk">Trazabilidad</span><h4>¿De dónde salió este frasco?</h4></div>
+                <div class="search"><span class="inp" id="tSearch"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg><span id="tTxt"><em class="ph">Buscá un lote o un frasco</em></span></span></div>
+                <div class="chain">
+                  <div class="node" id="n0"><span class="vk">Compra · 02/10</span><b>Finca Los Álamos</b><span>Durazno · 100 kg</span></div>
+                  <div class="node" id="n1"><span class="vk">Producción · 03/10</span><b>213 frascos</b><span>Merma 28,2%</span></div>
+                  <div class="node" id="n2"><span class="vk">Despacho · 06/10</span><b>Almacén Don Tito</b><span>48 frascos</span></div>
+                  <div class="node" id="n3"><span class="vk">Despacho · 07/10</span><b>Dietética Verde</b><span>60 frascos</span></div>
+                </div>
+                <div class="detail" id="detail"><b>Factura A 0003-00004521 · Finca Los Álamos</b>100 kg de durazno a $1.800 el kilo. Si un cliente reclama, sabés qué compra revisar y qué otros frascos salieron de ella.</div>
+              </section>
 
-    <div class="sources">
-      <div class="src"><span class="mono who">Cajón del escritorio</span><p>Los remitos del proveedor. Tienen el peso real que llegó, que casi nunca es el que se pidió.</p></div>
-      <div class="src"><span class="mono who">Planilla de compras</span><p>Lo que se pagó, cargado por mes. No distingue qué compra fue a qué producción.</p></div>
-      <div class="src"><span class="mono who">Cuaderno de planta</span><p>Cuántas ollas salieron y cuántos frascos se llenaron. A mano, sin fecha en la mitad de las hojas.</p></div>
-      <div class="src"><span class="mono who">Planilla de costos</span><p>Armada hace ocho meses. Nadie recuerda de dónde salió el porcentaje de merma que tiene cargado.</p></div>
-      <div class="src"><span class="mono who">Facturas de servicios</span><p>Gas y luz de toda la planta en un monto mensual que no se reparte entre productos.</p></div>
-      <div class="src"><span class="mono who">La cabeza del dueño</span><p>Qué proveedor manda mejor mercadería y cuál producto «no da». Nunca se escribió.</p></div>
-    </div>
-
-    <p class="gap-line">No tenés un costo. Tenés varios, y usás el más optimista.</p>
-  </div>
-</section>
-
-<section class="dark" id="preguntas">
-  <div class="wrap">
-    <span class="mono eyebrow">Lo que hoy no se puede responder</span>
-    <h2>Seis preguntas que la planilla <mark>no contesta</mark></h2>
-    <p class="sec-lede">No son preguntas de contador. Son las que aparecen cuando un cliente te pide lista de precios, cuando sube la fruta, o cuando la ganancia del mes no coincide con el Excel.</p>
-
-    <div class="q"><p>De los 100 kg que compré la semana pasada, ¿cuántos terminaron adentro de un frasco?</p><span class="mono">Rendimiento</span></div>
-    <div class="q"><p>¿Cuánto me costó el frasco este mes, con la fruta que compré este mes?</p><span class="mono">Costo real</span></div>
-    <div class="q"><p>Este proveedor me sale más barato por kilo, ¿pero me deja más descarte que el otro?</p><span class="mono">Proveedor</span></div>
-    <div class="q"><p>De mis nueve productos, ¿cuáles me dejan plata y cuáles subsidio con los demás?</p><span class="mono">Mezcla</span></div>
-    <div class="q"><p>Si la fruta sube 20%, ¿a cuánto tengo que vender para no perder margen?</p><span class="mono">Precio</span></div>
-    <div class="q"><p>Este lote que me devolvieron, ¿con qué compra se hizo y qué otros lotes salieron de ahí?</p><span class="mono">Trazabilidad</span></div>
-  </div>
-</section>
-
-<section id="simulador">
-  <div class="wrap">
-    <span class="mono eyebrow">Probalo con tus números</span>
-    <h2>El número que <mark>no estás viendo</mark></h2>
-    <p class="sec-lede">Movés una variable y el costo se recalcula con la misma lógica con la que trabaja el sistema. Sirve para ver cuánto mueve la aguja cada decisión que hoy tomás a ojo.</p>
-
-    <div class="sim">
-      <div class="controls">
-        <div class="ctrl">
-          <label for="s1"><span class="lbl">Precio de la fruta, por kilo</span><span class="val num" id="v1">$1.800</span></label>
-          <input type="range" id="s1" min="1200" max="2800" step="50" value="1800">
-        </div>
-        <div class="ctrl">
-          <label for="s2"><span class="lbl">Descarte de selección, pelado y carozo</span><span class="val num" id="v2">26%</span></label>
-          <input type="range" id="s2" min="14" max="42" step="1" value="26">
-        </div>
-        <div class="ctrl">
-          <label for="s3"><span class="lbl">Costo de la hora de planta</span><span class="val num" id="v3">$3.200</span></label>
-          <input type="range" id="s3" min="1800" max="6500" step="100" value="3200">
-        </div>
-        <div class="ctrl">
-          <label for="s4"><span class="lbl">Frasco, tapa y etiqueta, por unidad</span><span class="val num" id="v4">$310</span></label>
-          <input type="range" id="s4" min="160" max="620" step="10" value="310">
-        </div>
-        <div class="ctrl">
-          <label for="s5"><span class="lbl">Precio de venta mayorista por frasco</span><span class="val num" id="v5">$2.100</span></label>
-          <input type="range" id="s5" min="1400" max="3400" step="50" value="2100">
-        </div>
-        <button class="reset" id="reset">Volver a los valores base</button>
-      </div>
-
-      <div class="readout">
-        <span class="mono cap">Costo real por frasco</span>
-        <div class="big num" id="rCost">$1.642</div>
-        <span class="mono cap">Sobre <span class="num" id="rUnits">213</span> frascos por cada 100 kg</span>
-
-        <div class="split">
-          <div>
-            <span class="mono cap">Margen según tu planilla</span>
-            <div class="big num" id="rNaive">46%</div>
-          </div>
-          <div>
-            <span class="mono cap">Margen real</span>
-            <div class="big num" id="rReal">22%</div>
+            </div>
           </div>
         </div>
-
-        <p class="mini" id="rNote">Tu planilla calcula sobre la fruta comprada y los frascos teóricos. No descuenta el descarte ni el residuo, y no le carga al producto ni una hora de planta ni un peso de energía. La diferencia es de <b id="rGap">$512</b> por frasco.</p>
+        <div class="toast" id="toast">Lote L-0412 abierto</div>
+        <div class="cursor" id="cursor"><span class="ring" id="ring"></span><svg viewBox="0 0 22 22"><path d="M3 2l14 8.2-6.3 1.4L7.4 18z" fill="#FFFFFF" stroke="#1A1A2E" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
       </div>
     </div>
-  </div>
-</section>
-
-<section id="despues">
-  <div class="wrap">
-    <span class="mono eyebrow">Cómo queda</span>
-    <h2>Cada kilo atado <mark>a un lote</mark></h2>
-    <p class="sec-lede">No cambia cómo trabajás. Cambia que cada kilo que entra queda pegado a un lote, y ese lote se arrastra hasta el frasco que sale. Todo lo demás se deduce solo.</p>
-
-    <div class="chain">
-      <div class="link"><span class="mono step-n">Paso 01</span><b>Compra</b><p>Peso recibido, precio pagado y proveedor. Se abre el lote.</p></div>
-      <div class="link"><span class="mono step-n">Paso 02</span><b>Producción</b><p>Qué lotes se usaron, cuánto se descartó y por qué causa.</p></div>
-      <div class="link"><span class="mono step-n">Paso 03</span><b>Indirectos</b><p>Gas, energía y horas de planta repartidos por producción, no por mes.</p></div>
-      <div class="link"><span class="mono step-n">Paso 04</span><b>Terminado</b><p>Unidades buenas, rechazos y costo unitario cerrado del lote.</p></div>
-      <div class="link"><span class="mono step-n">Paso 05</span><b>Margen</b><p>Precio de lista contra el costo del lote que despachaste.</p></div>
+    <div class="bar">
+      <button class="pp" id="pp" aria-label="Pausar"><svg id="ppIco" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg></button>
+      <p class="cap" aria-live="polite"><span class="cap-n mono" id="capN">01</span><span id="capT">Cargás la compra como hoy cargás la factura. El sistema abre un lote.</span></p>
+      <span class="time mono num" id="time">0:00 / 0:40</span>
     </div>
+  </section>
 
-    <div class="ba">
-      <div class="antes">
-        <h3>Antes</h3>
-        <ul>
-          <li>El costo del frasco es un número que alguien calculó una vez.</li>
-          <li>La merma es un porcentaje fijo que nadie revisa.</li>
-          <li>Si un lote sale mal, no sabés de qué compra vino.</li>
-          <li>Los precios se actualizan por inflación, no por costo.</li>
-          <li>Recién en el cierre de año sabés qué producto pierde plata.</li>
-          <li>Comparás proveedores mirando el precio por kilo.</li>
-        </ul>
-      </div>
-      <div class="despues">
-        <h3>Después</h3>
-        <ul>
-          <li>El costo se recalcula con cada compra y cada producción.</li>
-          <li>La merma se mide por etapa, por producto y por causa.</li>
-          <li>Cada frasco despachado apunta al lote y a la compra que lo originó.</li>
-          <li>Los precios se mueven cuando se mueve el costo del lote.</li>
-          <li>Los productos se ordenan por margen real, mes a mes.</li>
-          <li>Comparás proveedores por costo del kilo aprovechado.</li>
-        </ul>
-      </div>
+  <ol class="chapters" id="chapters">
+    <li><button class="ch on" data-ch="0"><span class="mono">01</span><b>Cargás la compra</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="1"><span class="mono">02</span><b>Medís la merma</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="2"><span class="mono">03</span><b>Ves el costo real</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="3"><span class="mono">04</span><b>Rastreás cada frasco</b><span class="prog"><i></i></span></button></li>
+  </ol>
+
+  <section class="sum">
+    <div>
+      <h2>Qué resuelve</h2>
+      <p>Las fábricas chicas suelen costear en Excel con una merma fija. Este sistema registra lo que de verdad entra, se pierde y sale, y calcula solo el costo de cada lote.</p>
     </div>
+    <ul class="feats">
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5z"/><path d="M3 6.5 10 10l7-3.5M10 10v7"/></svg></span><div><b>Cada compra abre un lote</b><span>Peso, precio y proveedor quedan atados a lo que producís con eso.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 5h14M5 10h10M8 15h4"/></svg></span><div><b>Merma medida por etapa</b><span>Sabés cuánto se pierde en selección, pelado o envasado, y por qué.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="7"/><path d="M10 3v7l5 4"/></svg></span><div><b>Costo real por unidad</b><span>Materia prima aprovechada, envases, horas y energía, sin planillas.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="4.5" cy="10" r="2"/><circle cx="15.5" cy="5" r="2"/><circle cx="15.5" cy="15" r="2"/><path d="M6.4 9.2 13.6 5.8M6.4 10.8l7.2 3.4"/></svg></span><div><b>Trazabilidad hasta el cliente</b><span>De un frasco a la compra que lo originó y a quién se despachó.</span></div></li>
+    </ul>
+  </section>
 
-    <h3 style="margin-top:58px;font-size:17px">El costo de un frasco, abierto</h3>
-    <div class="tabla-wrap">
-      <table>
-        <thead>
-          <tr><th>Componente</th><th>De dónde sale el dato</th><th class="n">Por frasco</th><th class="n">Peso</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Fruta aprovechada</td><td>Compra, neta de descarte</td><td class="n">$845</td><td class="n">51%</td></tr>
-          <tr><td>Azúcar y aditivos</td><td>Compra del mes</td><td class="n">$223</td><td class="n">14%</td></tr>
-          <tr><td>Frasco, tapa y etiqueta</td><td>Compra de envases</td><td class="n">$310</td><td class="n">19%</td></tr>
-          <tr><td>Horas de planta</td><td>Horas cargadas a esa producción</td><td class="n">$180</td><td class="n">11%</td></tr>
-          <tr><td>Gas y energía</td><td>Factura repartida por lote</td><td class="n">$85</td><td class="n">5%</td></tr>
-          <tr class="sum"><td>Costo del frasco</td><td></td><td class="n">$1.642</td><td class="n">100%</td></tr>
-        </tbody>
-      </table>
+  <div class="foot">
+    <div class="chips"><span class="mono">Sirve para</span><span class="chip-r">Mermeladas y conservas</span><span class="chip-r">Alfajores</span><span class="chip-r">Panificados</span><span class="chip-r">Viandas</span><span class="chip-r">Lácteos</span></div>
+    <div class="cta-wrap">
+      <span class="mono cta-meta">Primera versión en 1 semana</span>
+      <a class="cta" href="https://wa.me/5492617268115" target="_blank" rel="noopener noreferrer">Quiero uno así para mi fábrica</a>
     </div>
-    <p style="font-size:15px;color:var(--teal-900);opacity:.8;margin-top:16px">La fruta descartada no aparece como línea aparte: ya está adentro de la primera. Los 74 kg que aprovechás cargan el precio de los 100 que compraste. Esa es exactamente la línea que tu planilla no ve.</p>
   </div>
-</section>
-
-<section class="dark">
-  <div class="wrap">
-    <span class="mono eyebrow">Cómo arrancamos</span>
-    <h2>Tu sistema, en <mark>cuatro pasos</mark></h2>
-    <p class="sec-lede">No hace falta que ordenes nada antes. El desorden de hoy es el punto de partida, no un requisito.</p>
-
-    <div class="pasos">
-      <div class="paso"><span class="mono step-n">Paso 01</span><b>Charla de 15 minutos</b><p>Nos contás cómo produce tu planta, con las palabras que usás en la planta.</p></div>
-      <div class="paso"><span class="mono step-n">Paso 02</span><b>Modelo de tu proceso</b><p>Te lo devolvemos armado para que lo corrijas. Todavía sin construir nada.</p></div>
-      <div class="paso"><span class="mono step-n">Paso 03</span><b>Primer lote costeado</b><p>Cargamos una producción real tuya y ves el costo abierto de un producto que conocés.</p></div>
-      <div class="paso"><span class="mono step-n">Paso 04</span><b>Sistema andando</b><p>Con tu equipo cargando, acompañado las primeras semanas hasta que sea rutina.</p></div>
-    </div>
-
-    <a class="cta" href="https://wa.me/5492617268115">Escribinos por WhatsApp</a>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <div>Tu Equipo IA · Costeo y trazabilidad para fábricas de alimentos</div>
-    <div class="mono">@tuequipoia</div>
-  </div>
-</footer>
+  <p class="note">Valores ilustrativos de una fábrica de mermeladas de seis personas. La mecánica es la misma para cualquier producto con merma.</p>
+</main>
 
 <script>
 (function(){
-  var B={p:1800,d:26,h:3200,env:310,v:2100};
-  var ids=['s1','s2','s3','s4','s5'], keys=['p','d','h','env','v'], S={};
-  var HORAS=12, CONC=0.78, RESIDUO=0.97, ENERGIA=18000, ADITIVOS=6500, AZUCAR_KG=950;
-  function fmt(n){return '$'+Math.round(n).toLocaleString('es-AR');}
+  var $=function(id){return document.getElementById(id)};
+  var screen=$('screen'), stage=$('stage'), cursor=$('cursor'), ring=$('ring');
+  var CAPS=[
+    'Cargás la compra como hoy cargás la factura. El sistema abre un lote.',
+    'En producción indicás qué lote usaste y cuánto se descartó en cada etapa.',
+    'El costo real de cada frasco sale solo, con la merma ya adentro.',
+    'Desde cualquier lote llegás a la compra que lo originó y a quién se le vendió.'
+  ];
+  var DUR=[10500,10500,9500,9500], TOTAL=DUR.reduce(function(a,b){return a+b},0);
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function calc(){
-    var kg=100;
-    var pulpa=kg*(1-S.d/100)*RESIDUO;
-    var azucar=pulpa*0.6;
-    var post=(pulpa+azucar)*CONC;
-    var buenos=Math.max(1,Math.floor(post*1000/420));
+  /* ---- escala del escenario ---- */
+  var W=960,H=560,scale=1;
+  function fit(){
+    var w=screen.clientWidth, narrow=w<620;
+    W=narrow?460:960; H=narrow?600:560;
+    stage.classList.toggle('narrow',narrow);
+    stage.style.width=W+'px'; stage.style.height=H+'px';
+    scale=w/W; stage.style.transform='scale('+scale+')';
+    screen.style.height=(H*scale)+'px';
+  }
+  fit();
+  if(window.ResizeObserver) new ResizeObserver(fit).observe(screen); else window.addEventListener('resize',fit);
 
-    var total=kg*S.p + azucar*AZUCAR_KG + ADITIVOS + buenos*S.env + ENERGIA + HORAS*S.h;
-    var real=total/buenos;
+  /* ---- reloj propio: todo se pausa con él ---- */
+  var playing=!reduce, now=0, last=performance.now(), frameCbs=[];
+  function loop(t){
+    var dt=Math.min(t-last,100); last=t; if(playing) now+=dt;
+    var cbs=frameCbs; frameCbs=[]; cbs.forEach(function(f){f()});
+    tickUI(); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  var runId=0, ff=false, ABORT={};
+  function frame(id){return new Promise(function(res,rej){frameCbs.push(function(){id===runId?res():rej(ABORT)})})}
+  function chk(id){if(id!==runId) throw ABORT}
+  async function wait(id,ms){chk(id); if(ff) return; var s=now; while(now-s<ms) await frame(id);}
+  async function tween(id,ms,fn){chk(id); if(ff){fn(1);return} var s=now; while(now-s<ms){var p=(now-s)/ms; fn(1-Math.pow(1-p,3)); await frame(id);} fn(1);}
 
-    // lo que calcula la planilla: sin descarte, sin residuo, sin horas ni energía
-    var azucarN=kg*0.6, postN=(kg+azucarN)*CONC;
-    var brutosN=Math.max(1,Math.floor(postN*1000/420));
-    var naive=(kg*S.p + azucarN*AZUCAR_KG + ADITIVOS + brutosN*S.env)/brutosN;
+  /* ---- utilidades de la escena ---- */
+  var cx=W*0.62, cy=H*0.55;
+  function place(){cursor.style.transform='translate('+cx+'px,'+cy+'px)'}
+  place();
+  async function moveTo(id,el,ms){
+    var r=el.getBoundingClientRect(), s=stage.getBoundingClientRect();
+    var tx=(r.left+r.width*0.55-s.left)/scale, ty=(r.top+r.height*0.6-s.top)/scale;
+    var x0=cx,y0=cy;
+    await tween(id,ms||750,function(p){cx=x0+(tx-x0)*p; cy=y0+(ty-y0)*p; place();});
+  }
+  async function click(id,el){
+    chk(id); ring.classList.remove('go'); void ring.offsetWidth; if(!ff) ring.classList.add('go');
+    if(el){el.classList.add('press'); await wait(id,160); el.classList.remove('press');} else await wait(id,160);
+  }
+  async function type(id,el,txt,speed){
+    el.classList.add('typing'); el.textContent='';
+    for(var i=0;i<txt.length;i++){ el.textContent=txt.slice(0,i+1); await wait(id,speed||85); }
+    el.classList.remove('typing');
+  }
+  var ars=function(n){return '$'+Math.round(n).toLocaleString('es-AR')};
+  function count(id,el,from,to,ms,fmt){return tween(id,ms,function(p){el.textContent=fmt(from+(to-from)*p)})}
+  function setView(i){
+    document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',+v.dataset.view===i)});
+    document.querySelectorAll('.nav').forEach(function(n){n.classList.toggle('on',+n.dataset.nav===i)});
+  }
+  function nav(i){return document.querySelector('.nav[data-nav="'+i+'"]')}
+  var kgFmt=function(n){return n.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+' kg'};
 
-    var mReal=(S.v-real)/S.v*100, mNaive=(S.v-naive)/S.v*100;
+  /* ---- estado inicial de cada pantalla ---- */
+  var RESET=[
+    function(){ $('fKg').innerHTML='<em class="ph">0</em>'; $('fPx').innerHTML='<em class="ph">$ 0</em>';
+      $('fKg').classList.remove('focus','typing'); $('fPx').classList.remove('focus','typing');
+      $('fTot').textContent='$0'; $('newRow').hidden=true; $('toast').classList.remove('on'); },
+    function(){ $('bLote').classList.remove('on'); for(var i=0;i<4;i++){$('t'+i).style.width='0'; $('k'+i).textContent='—'; if(i) $('d'+i).textContent='';} $('pRes').textContent='—'; },
+    function(){ $('cBig').textContent='$0'; $('mPlan').textContent='0%'; $('mReal').textContent='0%';
+      $('tileReal').classList.remove('hl'); $('tip').classList.remove('on');
+      document.querySelectorAll('#stack i').forEach(function(s){s.style.width='0'}); },
+    function(){ $('tTxt').innerHTML='<em class="ph">Buscá un lote o un frasco</em>'; $('tSearch').classList.remove('focus');
+      for(var i=0;i<4;i++) $('n'+i).classList.remove('on','sel'); $('detail').classList.remove('on'); }
+  ];
 
-    document.getElementById('rCost').textContent=fmt(real);
-    document.getElementById('rUnits').textContent=buenos;
-    document.getElementById('rNaive').textContent=Math.round(mNaive)+'%';
-    var rr=document.getElementById('rReal');
-    rr.textContent=Math.round(mReal)+'%';
-    rr.style.color = mReal<8 ? 'var(--mango)' : 'var(--teal-300)';
-
-    var note=document.getElementById('rNote');
-    if(mReal<0){
-      note.className='mini alerta';
-      note.innerHTML='A este precio, cada frasco sale con una pérdida de <b>'+fmt(real-S.v)+'</b>. Tu planilla, mientras tanto, sigue mostrando ganancia.';
-    }else{
-      note.className='mini';
-      note.innerHTML='Tu planilla calcula sobre la fruta comprada y los frascos teóricos. No descuenta el descarte ni el residuo, y no le carga al producto ni una hora de planta ni un peso de energía. La diferencia es de <b>'+fmt(real-naive)+'</b> por frasco.';
+  /* ---- guion de cada capítulo ---- */
+  var SCRIPT=[
+    async function(id){
+      setView(0);
+      await wait(id,500);
+      await moveTo(id,$('fKg')); await click(id); $('fKg').classList.add('focus');
+      await type(id,$('fKg'),'100'); $('fKg').classList.remove('focus');
+      await moveTo(id,$('fPx'),600); await click(id); $('fPx').classList.add('focus');
+      await type(id,$('fPx'),'$ 1.800'); $('fPx').classList.remove('focus');
+      await count(id,$('fTot'),0,180000,700,ars);
+      await moveTo(id,$('bSave'),650); await click(id,$('bSave'));
+      $('newRow').hidden=false; $('toast').classList.add('on');
+      await wait(id,2200); $('toast').classList.remove('on');
+      await wait(id,600);
+    },
+    async function(id){
+      await moveTo(id,nav(1)); await click(id); setView(1);
+      await wait(id,350);
+      await moveTo(id,$('bLote'),650); await click(id,$('bLote')); $('bLote').classList.add('on');
+      var kg=[100,91,74,71.8];
+      await tween(id,500,function(p){$('t0').style.width=(100*p)+'%'; $('k0').textContent=kgFmt(100*p)});
+      for(var i=1;i<4;i++){
+        await wait(id,350);
+        (function(i){ $('d'+i).textContent='−'+(kg[i-1]-kg[i]).toLocaleString('es-AR',{maximumFractionDigits:1})+' kg'; })(i);
+        await tween(id,650,(function(i){return function(p){var v=kg[i-1]+(kg[i]-kg[i-1])*p; $('t'+i).style.width=v+'%'; $('k'+i).textContent=kgFmt(v)}})(i));
+      }
+      await wait(id,400);
+      await moveTo(id,$('bClose'),650); await click(id,$('bClose'));
+      await count(id,$('pRes'),0,213,800,function(n){return Math.round(n)});
+      await wait(id,1500);
+    },
+    async function(id){
+      await moveTo(id,nav(2)); await click(id); setView(2);
+      await wait(id,300);
+      var segs=document.querySelectorAll('#stack i');
+      await tween(id,900,function(p){segs.forEach(function(s){s.style.width=(s.dataset.w*p)+'%'})});
+      await count(id,$('cBig'),0,1642,800,ars);
+      await count(id,$('mPlan'),0,46,500,function(n){return Math.round(n)+'%'});
+      await wait(id,300);
+      await moveTo(id,segs[0],700); $('tip').classList.add('on');
+      await wait(id,1800); $('tip').classList.remove('on');
+      await moveTo(id,$('tileReal'),700);
+      await count(id,$('mReal'),46,22,800,function(n){return Math.round(n)+'%'});
+      $('tileReal').classList.add('hl');
+      await wait(id,2000);
+    },
+    async function(id){
+      await moveTo(id,nav(3)); await click(id); setView(3);
+      await wait(id,300);
+      await moveTo(id,$('tSearch'),650); await click(id); $('tSearch').classList.add('focus');
+      await type(id,$('tTxt'),'L-0412',110); $('tSearch').classList.remove('focus');
+      for(var i=0;i<4;i++){ await wait(id,380); $('n'+i).classList.add('on'); }
+      await wait(id,500);
+      await moveTo(id,$('n0'),700); await click(id); $('n0').classList.add('sel'); $('detail').classList.add('on');
+      await wait(id,2600);
     }
+  ];
+
+  /* ---- reproducción ---- */
+  var cur=0, chStart=0, ended=false;
+  var chBtns=document.querySelectorAll('.ch');
+  async function run(i){
+    var id=++runId; cur=i; chStart=now; ended=false;
+    RESET[i](); $('capN').textContent='0'+(i+1); $('capT').textContent=CAPS[i];
+    chBtns.forEach(function(b,k){b.classList.toggle('on',k===i)});
+    try{
+      await SCRIPT[i](id);
+      ended=true;
+      var nx=(i+1)%4;
+      if(nx===0){ await wait(id,1200); }
+      run(nx);
+    }catch(e){ if(e!==ABORT) throw e; }
   }
-
-  function sync(i){
-    S[keys[i]]=parseFloat(document.getElementById(ids[i]).value);
-    var lbl=document.getElementById('v'+(i+1));
-    lbl.textContent=(i===1)?String(S[keys[i]]).replace('.',',')+'%':fmt(S[keys[i]]);
+  function tickUI(){
+    var el=Math.min(now-chStart,DUR[cur]);
+    chBtns.forEach(function(b,k){
+      var w=k<cur?100:(k>cur?0:(ended?100:Math.min(98,el/DUR[cur]*100)));
+      b.querySelector('.prog i').style.width=w+'%';
+    });
+    var before=DUR.slice(0,cur).reduce(function(a,b){return a+b},0);
+    $('time').textContent=mmss(before+el)+' / '+mmss(TOTAL);
   }
+  function mmss(ms){var s=Math.round(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
 
-  ids.forEach(function(id,i){
-    sync(i);
-    document.getElementById(id).addEventListener('input',function(){sync(i);calc();});
-  });
+  function setPlaying(p){
+    playing=p;
+    $('pp').setAttribute('aria-label',p?'Pausar':'Reproducir');
+    $('ppIco').innerHTML=p?'<rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/>':'<path d="M3 1.5v11l9.5-5.5z"/>';
+  }
+  $('pp').addEventListener('click',function(){setPlaying(!playing)});
+  screen.addEventListener('click',function(){setPlaying(!playing)});
+  chBtns.forEach(function(b){b.addEventListener('click',function(){ setPlaying(true); run(+b.dataset.ch); })});
 
-  document.getElementById('reset').addEventListener('click',function(){
-    document.getElementById('s1').value=B.p; document.getElementById('s2').value=B.d;
-    document.getElementById('s3').value=B.h; document.getElementById('s4').value=B.env;
-    document.getElementById('s5').value=B.v;
-    ids.forEach(function(_,i){sync(i);}); calc();
-  });
-
-  calc();
+  if(reduce){
+    /* sin animación: se muestra el primer capítulo terminado y en pausa */
+    setPlaying(false);
+    ff=true; var id=++runId; RESET[0](); SCRIPT[0](id).then(function(){ff=false; ended=true;});
+  } else {
+    setPlaying(true); run(0);
+  }
 })();
 </script>
+
 </body>
 </html>
