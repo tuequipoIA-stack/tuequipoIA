@@ -3,18 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Costeo y trazabilidad</title>
+<title>Costeo por receta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Vitrina: demo en formato video arriba (lo central), capítulos clicables, y un resumen corto abajo. Una sola apariencia clara, la de la marca. */
+
+/* Vitrina: demo en formato video arriba, capítulos clicables, resumen corto abajo. Misma apariencia clara de la marca que el caso de costeo. */
 :root{
   --crema:#F4F1EC; --papel:#FBFAF7; --blanco:#FFFFFF;
   --noche:#1A1A2E; --noche-2:#23233A; --noche-tenue:#A3A3B8;
   --teal:#1AABAA; --teal-300:#6FCFCE; --teal-700:#12817F; --teal-900:#0B5453; --teal-100:#D6F0EF;
   --mango:#F4A259; --mango-100:#FDEBD9; --mango-ink:#B4601A;
-  --sep:#E7E2D9; --tinta:#5E5A50; --tenue:#8C887F; --hueco:#EDE9E1;
+  --sep:#E7E2D9; --tinta:#5E5A50; --tenue:#8C887F; --hueco:#EDE9E1; --chat:#EFEBE4;
   --f-disp:"Archivo",system-ui,sans-serif;
   --f-body:"Figtree",system-ui,sans-serif;
   --f-mono:"DM Mono",ui-monospace,monospace;
@@ -27,7 +28,6 @@ body{margin:0;background:var(--crema);color:var(--noche);font-family:var(--f-bod
 .num{font-variant-numeric:tabular-nums}
 .page{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:28px 52px;display:flex;flex-direction:column;gap:22px}
 
-/* ---------- encabezado ---------- */
 .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 28px}
 .head-txt{display:flex;flex-direction:column;gap:8px;min-width:0}
 .eyebrow{color:var(--teal-700)}
@@ -35,7 +35,6 @@ h1{font-family:var(--f-disp);font-variation-settings:"wdth" 112,"wght" 800;font-
 mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inherit;padding:0 .05em}
 .lede{margin:0;color:var(--tinta);max-width:44ch;font-size:16px}
 
-/* ---------- reproductor ---------- */
 .player{background:var(--noche);border-radius:16px;overflow:hidden;box-shadow:0 22px 50px rgba(26,26,46,.18)}
 .screen{position:relative;width:100%;max-width:100%;overflow:hidden;cursor:pointer;
   background:radial-gradient(120% 90% at 85% 0%,rgba(26,171,170,.22),transparent 55%),var(--noche-2)}
@@ -56,7 +55,6 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
 .ch.on{border-color:var(--teal)}
 .ch.on .mono{color:var(--teal-700)}
 
-/* ---------- resumen ---------- */
 .sum{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:28px;padding-top:14px}
 .sum h2{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-weight:800;text-transform:uppercase;font-size:20px;line-height:1;margin:0 0 10px}
 .sum p{margin:0;color:var(--tinta);max-width:42ch}
@@ -76,15 +74,13 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
 .cta:hover{background:var(--teal-900)}
 .note{margin:0;color:var(--tenue);font-size:12.5px}
 
-@media (max-width:760px){
-  .sum{grid-template-columns:1fr;gap:18px}
-  .chapters{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media (max-width:520px){
-  .feats{grid-template-columns:1fr}
-  .time{display:none}
-  .cap{font-size:14px}
-}
+@media (max-width:760px){.sum{grid-template-columns:1fr;gap:18px}.chapters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.feats{grid-template-columns:1fr}.time{display:none}.cap{font-size:14px}}
+
+
+/* cinco capítulos */
+.chapters{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:760px){.chapters{grid-template-columns:repeat(5,minmax(132px,1fr));overflow-x:auto;padding-bottom:4px}}
 
 /* ================= la app simulada (coordenadas lógicas) ================= */
 .stage{position:absolute;left:0;top:0;transform-origin:0 0;font-family:var(--f-body);font-size:14px;color:var(--noche);line-height:1.4}
@@ -94,17 +90,27 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
 .app-title{margin-left:10px;font-weight:600;color:var(--noche)}
 .app-user{margin-left:auto}
 .app-body{flex:1;display:flex;min-height:0}
-.side{flex:none;width:180px;background:var(--noche);padding:16px 10px;display:flex;flex-direction:column;gap:4px}
+.side{flex:none;width:170px;background:var(--noche);padding:16px 10px;display:flex;flex-direction:column;gap:4px}
 .side-brand{color:var(--noche-tenue);font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:2px 10px 14px}
-.nav{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:#C9C9D6;font:600 13.5px var(--f-body);background:transparent;border:0;text-align:left;white-space:nowrap}
+.nav{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:#C9C9D6;font:600 13.5px var(--f-body);white-space:nowrap}
 .nav::before{content:"";width:6px;height:6px;border-radius:50%;background:#4A4A66;flex:none}
 .nav.on{background:rgba(26,171,170,.2);color:#fff}
 .nav.on::before{background:var(--teal)}
 .views{flex:1;position:relative;min-width:0}
-.view{position:absolute;inset:0;padding:22px 26px;display:flex;flex-direction:column;gap:16px;opacity:0;visibility:hidden;transition:opacity .25s}
+.view{position:absolute;inset:0;padding:20px 24px;display:flex;flex-direction:column;gap:14px;opacity:0;visibility:hidden;transition:opacity .25s}
 .view.on{opacity:1;visibility:visible}
+.vh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 .vk{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-700)}
 .vh h4{margin:2px 0 0;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.btn{background:var(--teal);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:700 13px var(--f-body);transition:transform .12s,background .12s;white-space:nowrap}
+.btn.press{transform:scale(.95);background:var(--teal-700)}
+.btn.done{background:var(--teal-100);color:var(--teal-900)}
+.card{background:var(--blanco);border:1px solid var(--sep);border-radius:10px}
+.toast{position:absolute;right:38px;top:70px;background:var(--noche);color:var(--crema);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:5}
+.toast.on{opacity:1;transform:none}
+.toast::before{content:"✓";color:var(--teal-300);font-weight:700}
+
+/* compras */
 .form{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
 .form label{font-size:11.5px;font-weight:600;color:var(--tenue)}
 .inp{display:block;margin-top:5px;height:38px;border:1px solid var(--sep);border-radius:8px;background:var(--blanco);padding:0 12px;line-height:36px;font-size:15px;color:var(--noche);font-weight:500;white-space:nowrap;overflow:hidden;transition:border-color .2s,box-shadow .2s}
@@ -115,76 +121,76 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
 .form-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .form-foot span{font-size:13px;color:var(--tenue)}
 .form-foot b{font-size:19px;color:var(--noche);margin-left:6px}
-.btn{background:var(--teal);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:700 13.5px var(--f-body);transition:transform .12s,background .12s}
-.btn.press{transform:scale(.95);background:var(--teal-700)}
-.btn.ghost{background:var(--blanco);color:var(--noche);border:1px solid var(--sep)}
 .tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .tbl th{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);font-weight:500;text-align:left;padding:7px 10px;border-bottom:1px solid var(--sep)}
-.tbl td{padding:9px 10px;border-bottom:1px solid var(--sep)}
-.tbl .r{text-align:right}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--sep)}
+.tbl .r{text-align:right;font-variant-numeric:tabular-nums}
 .lote{font-family:var(--f-mono);font-size:12px;color:var(--teal-700);font-weight:500}
 .tbl tr.new td{background:var(--mango-100);animation:flash 1.4s ease-out}
 @keyframes flash{from{background:var(--mango)}}
-.toast{position:absolute;right:38px;top:70px;background:var(--noche);color:var(--crema);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s;pointer-events:none;z-index:5}
-.toast.on{opacity:1;transform:none}
-.toast::before{content:"✓";color:var(--teal-300);font-weight:700}
 
-.picks{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.picks .lbl{font-size:12px;color:var(--tenue);font-weight:600;margin-right:2px}
-.chip{border:1px solid var(--sep);background:var(--blanco);border-radius:999px;padding:6px 12px;font:600 12.5px var(--f-body);color:var(--noche);transition:background .2s,border-color .2s}
-.chip.on{background:var(--teal-100);border-color:var(--teal);color:var(--teal-900)}
-.chip.press{transform:scale(.95)}
-.stgs{display:flex;flex-direction:column;gap:11px}
-.stg{display:grid;grid-template-columns:160px minmax(0,1fr) 92px;gap:14px;align-items:center}
-.stg-n{font-size:13.5px;font-weight:600;line-height:1.2}
-.stg-n em{display:block;font-style:normal;font-weight:400;font-size:11.5px;color:var(--tenue)}
-.track{height:12px;border-radius:6px;background:var(--hueco);overflow:hidden}
-.track i{display:block;height:100%;border-radius:6px;background:var(--teal);width:0}
-.stg.loss .track i{background:var(--teal-700)}
-.kg{text-align:right;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
-.kg small{display:block;font-size:11.5px;color:var(--mango-ink);font-weight:600;min-height:15px}
-.res{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--sep);padding-top:12px;margin-top:auto}
-.res-n{font-size:12px;color:var(--tenue);font-weight:600}
-.res-n b{display:block;font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:28px;color:var(--noche);line-height:1}
+/* pesaje */
+.weigh{display:flex;gap:16px;flex:1;min-height:0}
+.scale{flex:none;width:250px;background:var(--noche);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;color:var(--crema)}
+.scale .lb{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--noche-tenue)}
+.lcd{background:#0F2B2A;border-radius:10px;padding:12px 14px;text-align:right;font-family:var(--f-mono);font-size:40px;line-height:1;color:#7FF0DD;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.lcd small{font-size:14px;margin-left:4px;color:#4FB9A8}
+.scale .what{font-size:13px;min-height:20px}
+.scale .btn{margin-top:auto}
+.steps{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) 84px;gap:10px;align-items:center;padding:8px 12px;font-size:13.5px;opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s}
+.wrow.on{opacity:1;transform:none}
+.wrow b{font-weight:600}
+.wrow em{display:block;font-style:normal;font-size:11.5px;color:var(--tenue)}
+.wrow .k{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.wrow.loss .k{color:var(--mango-ink)}
+.wrow.net{background:var(--teal-100);border-color:var(--teal-300)}
+.wrow.net .k{color:var(--teal-900)}
+.kilos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:auto}
+.kt{padding:10px 12px}
+.kt span{display:block;font-size:11.5px;color:var(--tenue);font-weight:600}
+.kt b{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kt.hl{border-color:var(--mango);background:var(--mango-100)}
+.kt.hl b{color:var(--mango-ink)}
 
-.cost-top{display:flex;gap:14px}
-.card{background:var(--blanco);border:1px solid var(--sep);border-radius:10px;padding:14px 16px}
-.big-card{flex:1.1}
-.big-card .l,.tile .l{font-size:12px;color:var(--tenue);font-weight:600}
-.big{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:46px;line-height:1;margin:6px 0 4px;font-variant-numeric:tabular-nums}
-.big-card small{color:var(--tenue);font-size:12px}
-.tiles{flex:1;display:flex;flex-direction:column;gap:10px}
-.tile{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;transition:border-color .25s,background .25s}
-.tile .v{font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
-.tile.plan .v{color:var(--tenue)}
-.tile.real .v{color:var(--mango-ink)}
-.tile.hl{border-color:var(--mango);background:var(--mango-100)}
-.stack-wrap{position:relative}
-.stack{display:flex;height:26px;border-radius:7px;overflow:hidden;background:var(--hueco)}
-.stack i{display:block;height:100%;width:0}
-.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 14px;margin-top:10px;font-size:12.5px}
-.legend div{display:flex;align-items:center;gap:7px;min-width:0}
-.legend i{width:9px;height:9px;border-radius:2px;flex:none}
-.legend span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tinta)}
-.legend b{font-variant-numeric:tabular-nums}
-.tip{position:absolute;left:12px;top:-50px;background:var(--noche);color:var(--crema);font-size:12.5px;padding:8px 11px;border-radius:8px;white-space:nowrap;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;pointer-events:none}
+/* recetas */
+.dest .t{font-size:12px;color:var(--tenue);font-weight:600;margin-bottom:6px;display:block}
+.split{display:flex;height:30px;border-radius:7px;overflow:hidden;background:var(--hueco)}
+.split i{display:flex;align-items:center;padding-left:9px;font-style:normal;font-size:11.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;width:0}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--sep)}
+.tab{padding:8px 12px;font-size:13px;font-weight:600;color:var(--tenue);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s}
+.tab.on{color:var(--noche);border-bottom-color:var(--teal)}
+.tab.press{transform:scale(.96)}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:14px;flex:1;min-height:0}
+.rtbl{padding:4px 0}
+.rtbl .tbl td{padding:7px 12px}
+.rtbl .tbl th{padding:7px 12px}
+.tbl tr.dz td{background:var(--teal-100);font-weight:600}
+.tbl tr.tot td{font-weight:700;border-bottom:0;font-size:14.5px}
+.rside{display:flex;flex-direction:column;gap:10px}
+.cost{padding:12px 14px}
+.cost span{display:block;font-size:12px;color:var(--tenue);font-weight:600}
+.cost b{display:block;font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:36px;line-height:1.05;font-variant-numeric:tabular-nums}
+.cost small{display:block;font-size:12px;color:var(--tinta);margin-top:4px}
+.cost small s{color:var(--mango-ink)}
+.mini{display:flex;justify-content:space-between;padding:9px 14px;font-size:13px}
+.mini b{font-variant-numeric:tabular-nums}
+
+/* viandas */
+.vianda{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:14px;flex:1;min-height:0}
+.tbl td.y{color:var(--tenue);font-size:12px}
+.tip{position:absolute;background:var(--noche);color:var(--crema);font-size:12.5px;padding:8px 11px;border-radius:8px;white-space:nowrap;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;pointer-events:none;z-index:6}
 .tip.on{opacity:1;transform:none}
-.tip::after{content:"";position:absolute;left:24px;bottom:-5px;width:10px;height:10px;background:var(--noche);transform:rotate(45deg)}
+.vt{position:relative}
 
-.search{display:flex;align-items:center;gap:8px;margin-top:0}
-.search .inp{flex:1;margin:0;display:flex;align-items:center;gap:8px}
-.search svg{width:15px;height:15px;color:var(--tenue);flex:none}
-.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.node{position:relative;background:var(--blanco);border:1px solid var(--sep);border-radius:10px;padding:12px;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s,border-color .2s,box-shadow .2s}
-.node.on{opacity:1;transform:none}
-.node.sel{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-100)}
-.node .vk{display:block;margin-bottom:4px}
-.node b{display:block;font-size:14px;line-height:1.25}
-.node span{display:block;font-size:12px;color:var(--tenue);margin-top:3px}
-.node:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:50%;transform:translate(50%,-50%);color:var(--teal-700);font-weight:700;font-size:14px}
-.detail{background:var(--teal-100);color:var(--teal-900);border-radius:10px;padding:12px 14px;font-size:13px;opacity:0;transition:opacity .3s}
-.detail.on{opacity:1}
-.detail b{display:block;font-size:13.5px;margin-bottom:2px}
+/* precios */
+.banner{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--mango-100);border:1px solid var(--mango);border-radius:10px;font-size:13.5px}
+.banner b{font-size:15px}
+.banner .up{margin-left:auto;font-family:var(--f-disp);font-variation-settings:"wdth" 108,"wght" 800;font-size:22px;color:var(--mango-ink)}
+.tbl td.dif{color:var(--mango-ink);font-weight:700}
+.tbl td .old{color:var(--tenue);text-decoration:line-through;margin-right:8px;font-weight:400}
+.pfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto}
+.pfoot span{font-size:12.5px;color:var(--tinta);max-width:52ch}
 
 .cursor{position:absolute;left:0;top:0;width:22px;height:22px;z-index:10;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
 .cursor svg{width:22px;height:22px;display:block}
@@ -195,19 +201,27 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
 /* layout angosto del simulador (celulares) */
 .stage.narrow .app{inset:10px}
 .stage.narrow .app-body{flex-direction:column}
-.stage.narrow .side{width:auto;flex-direction:row;padding:8px;gap:2px}
+.stage.narrow .side{width:auto;flex-direction:row;padding:8px;gap:0}
 .stage.narrow .side-brand,.stage.narrow .app-user{display:none}
-.stage.narrow .nav{padding:8px 9px;font-size:12.5px;gap:6px}
-.stage.narrow .view{padding:16px}
+.stage.narrow .nav{padding:8px 7px;font-size:12px;gap:5px}
+.stage.narrow .nav::before{display:none}
+.stage.narrow .view{padding:14px 14px;gap:11px}
 .stage.narrow .c2{display:none}
-.stage.narrow .stg{grid-template-columns:118px minmax(0,1fr) 72px;gap:10px}
-.stage.narrow .cost-top{flex-direction:column}
-.stage.narrow .tiles{flex-direction:row}
-.stage.narrow .tile{flex:1;flex-direction:column;align-items:flex-start}
-.stage.narrow .legend{grid-template-columns:repeat(2,minmax(0,1fr))}
-.stage.narrow .chain{grid-template-columns:1fr 1fr}
-.stage.narrow .node:nth-child(2)::after{display:none}
-.stage.narrow .big{font-size:40px}
+.stage.narrow .weigh{flex-direction:column}
+.stage.narrow .scale{width:auto;flex-direction:row;align-items:center;flex-wrap:wrap;padding:12px}
+.stage.narrow .scale .lb,.stage.narrow .scale .what{display:none}
+.stage.narrow .lcd{flex:1;font-size:30px}
+.stage.narrow .scale .btn{margin:0}
+.stage.narrow .wrow{padding:6px 10px}
+.stage.narrow .kt b{font-size:20px}
+.stage.narrow .rec,.stage.narrow .vianda{grid-template-columns:1fr}
+.stage.narrow .rside{flex-direction:row}
+.stage.narrow .rside>*{flex:1}
+.stage.narrow .cost b{font-size:28px}
+.stage.narrow .mini.c3{display:none}
+.stage.narrow .tab{padding:7px 8px;font-size:12px}
+.stage.narrow .pfoot span{display:none}
+.stage.narrow .split i{font-size:10.5px;padding-left:6px}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -218,32 +232,34 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
 <main class="page">
   <header class="head">
     <div class="head-txt">
-      <span class="mono eyebrow">Caso de uso · Fábricas de alimentos</span>
-      <h1>Costeo y <mark>trazabilidad</mark></h1>
+      <span class="mono eyebrow">Caso de uso · Viandas y fábricas de alimentos</span>
+      <h1>Costeo por <mark>receta</mark></h1>
     </div>
-    <p class="lede">Mirá cómo una fábrica de mermeladas pasa de la factura del proveedor al costo real de cada frasco.</p>
+    <p class="lede">Un cajón de duraznos termina en frascos en almíbar, tartas y el postre de tus viandas. Mirá cuánto cuesta de verdad cada uno.</p>
   </header>
 
   <section class="player" aria-label="Demo del sistema">
     <div class="screen" id="screen" title="Pausar o reproducir">
       <div class="stage" id="stage">
         <div class="app">
-          <div class="app-top"><i></i><i></i><i></i><span class="app-title">Costeo de planta</span><span class="app-user">Dulces de la Quebrada · 6 personas</span></div>
+          <div class="app-top"><i></i><i></i><i></i><span class="app-title">Costeo de cocina</span><span class="app-user">Cocina de producción · viandas y pastelería</span></div>
           <div class="app-body">
             <nav class="side">
-              <span class="side-brand">Tu planta</span>
+              <span class="side-brand">Tu cocina</span>
               <span class="nav on" data-nav="0">Compras</span>
-              <span class="nav" data-nav="1">Producción</span>
-              <span class="nav" data-nav="2">Costos</span>
-              <span class="nav" data-nav="3">Trazabilidad</span>
+              <span class="nav" data-nav="1">Pesaje</span>
+              <span class="nav" data-nav="2">Recetas</span>
+              <span class="nav" data-nav="3">Viandas</span>
+              <span class="nav" data-nav="4">Precios</span>
             </nav>
             <div class="views">
 
+              <!-- 1 · Compras -->
               <section class="view on" data-view="0">
-                <div class="vh"><span class="vk">Compras</span><h4>Nueva compra de materia prima</h4></div>
+                <div class="vh"><div><span class="vk">Compras</span><h4>Nueva compra de materia prima</h4></div></div>
                 <div class="form">
                   <label>Proveedor<span class="inp">Finca Los Álamos</span></label>
-                  <label>Materia prima<span class="inp">Durazno</span></label>
+                  <label>Materia prima<span class="inp">Durazno · 3 cajones</span></label>
                   <label>Kilos recibidos<span class="inp" id="fKg"></span></label>
                   <label>Precio por kilo<span class="inp" id="fPx"></span></label>
                 </div>
@@ -254,62 +270,108 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
                 <table class="tbl">
                   <thead><tr><th>Lote</th><th class="c2">Proveedor</th><th>Materia prima</th><th class="r">Kilos</th><th class="r">Total</th></tr></thead>
                   <tbody>
-                    <tr class="new" id="newRow" hidden><td class="lote">L-0412</td><td class="c2">Finca Los Álamos</td><td>Durazno</td><td class="r num">100</td><td class="r num">$180.000</td></tr>
-                    <tr><td class="lote">L-0411</td><td class="c2">Huerta San Martín</td><td>Frutilla</td><td class="r num">60</td><td class="r num">$138.000</td></tr>
-                    <tr><td class="lote">L-0410</td><td class="c2">Finca Los Álamos</td><td>Ciruela</td><td class="r num">80</td><td class="r num">$112.000</td></tr>
+                    <tr class="new" id="newRow" hidden><td class="lote">L-0412</td><td class="c2">Finca Los Álamos</td><td>Durazno</td><td class="r">60</td><td class="r">$90.000</td></tr>
+                    <tr><td class="lote">L-0411</td><td class="c2">Avícola San Rafael</td><td>Pechuga con hueso</td><td class="r">40</td><td class="r">$208.000</td></tr>
+                    <tr><td class="lote">L-0410</td><td class="c2">Mercado Cooperativo</td><td>Papa</td><td class="r">80</td><td class="r">$64.000</td></tr>
                   </tbody>
                 </table>
               </section>
 
+              <!-- 2 · Pesaje -->
               <section class="view" data-view="1">
-                <div class="vh"><span class="vk">Producción</span><h4>Mermelada de durazno · frasco 420 g</h4></div>
-                <div class="picks"><span class="lbl">Lote usado</span><button class="chip" id="bLote" tabindex="-1">L-0412 · Durazno 100 kg</button><button class="chip" tabindex="-1">L-0410 · Ciruela</button></div>
-                <div class="stgs">
-                  <div class="stg"><div class="stg-n">Recibido<em>Factura del proveedor</em></div><div class="track"><i id="t0"></i></div><div class="kg"><span id="k0">—</span><small></small></div></div>
-                  <div class="stg loss"><div class="stg-n">Selección<em>Fruta golpeada o verde</em></div><div class="track"><i id="t1"></i></div><div class="kg"><span id="k1">—</span><small id="d1"></small></div></div>
-                  <div class="stg loss"><div class="stg-n">Pelado y carozo<em>Descarte de proceso</em></div><div class="track"><i id="t2"></i></div><div class="kg"><span id="k2">—</span><small id="d2"></small></div></div>
-                  <div class="stg loss"><div class="stg-n">Envasado<em>Residuo y ajuste de llenado</em></div><div class="track"><i id="t3"></i></div><div class="kg"><span id="k3">—</span><small id="d3"></small></div></div>
-                </div>
-                <div class="res">
-                  <div class="res-n">Frascos buenos<b class="num" id="pRes">—</b></div>
-                  <button class="btn" id="bClose" tabindex="-1">Cerrar producción</button>
+                <div class="vh"><div><span class="vk">Pesaje · lote L-0412</span><h4>Cuánto durazno se aprovecha</h4></div></div>
+                <div class="weigh">
+                  <div class="scale">
+                    <span class="lb">Balanza de cocina</span>
+                    <div class="lcd" id="lcd">60,0<small>kg</small></div>
+                    <span class="what" id="what">Durazno entero, recién llegado</span>
+                    <button class="btn" id="bReg" tabindex="-1">Registrar pesada</button>
+                  </div>
+                  <div class="steps">
+                    <div class="wrow card on"><div><b>Peso comprado</b><em>3 cajones · factura del proveedor</em></div><span class="k">60,0 kg</span></div>
+                    <div class="wrow card loss" id="w1"><div><b>Carozo</b><em>Se pesa al descarozar</em></div><span class="k">−7,8 kg</span></div>
+                    <div class="wrow card loss" id="w2"><div><b>Cáscara</b><em>Al pelar</em></div><span class="k">−6,0 kg</span></div>
+                    <div class="wrow card loss" id="w3"><div><b>Golpeados y verdes</b><em>Descarte de selección</em></div><span class="k">−4,2 kg</span></div>
+                    <div class="wrow card net" id="w4"><div><b>Durazno aprovechable</b><em>Lo que de verdad entra a las recetas</em></div><span class="k">42,0 kg</span></div>
+                    <div class="kilos">
+                      <div class="card kt"><span>Rendimiento</span><b id="kR">—</b></div>
+                      <div class="card kt"><span>Kilo pagado</span><b>$1.500</b></div>
+                      <div class="card kt" id="ktReal"><span>Kilo aprovechado</span><b id="kK">—</b></div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
+              <!-- 3 · Recetas -->
               <section class="view" data-view="2">
-                <div class="vh"><span class="vk">Costos</span><h4>Costo por frasco · lote L-0412</h4></div>
-                <div class="cost-top">
-                  <div class="card big-card"><span class="l">Costo real del frasco</span><div class="big" id="cBig">$0</div><small>Sobre 213 frascos de 420 g</small></div>
-                  <div class="tiles">
-                    <div class="card tile plan"><span class="l">Margen según la planilla</span><span class="v" id="mPlan">0%</span></div>
-                    <div class="card tile real" id="tileReal"><span class="l">Margen real</span><span class="v" id="mReal">0%</span></div>
+                <div class="vh"><div><span class="vk">Recetas · lote L-0412</span><h4>Un lote, tres productos</h4></div></div>
+                <div class="dest"><span class="t">A dónde fueron los 42 kg aprovechados</span>
+                  <div class="split" id="split">
+                    <i style="background:var(--teal-900)" data-w="42.9">Almíbar 18 kg</i><i style="background:var(--teal-700)" data-w="33.3">Tartas 14 kg</i><i style="background:var(--mango)" data-w="23.8">Postre viandas 10 kg</i>
                   </div>
                 </div>
-                <div class="stack-wrap">
-                  <div class="tip" id="tip">Incluye los 28 kg que no llegaron al frasco</div>
-                  <div class="stack" id="stack">
-                    <i style="background:var(--teal-900)" data-w="51"></i><i style="background:var(--teal-700)" data-w="14"></i><i style="background:var(--teal)" data-w="19"></i><i style="background:var(--teal-300)" data-w="11"></i><i style="background:var(--mango)" data-w="5"></i>
+                <div class="tabs"><span class="tab on" id="tb0">Tarta de durazno</span><span class="tab" id="tb1">Duraznos en almíbar</span><span class="tab" id="tb2">Postre de vianda</span></div>
+                <div class="rec">
+                  <div class="card rtbl">
+                    <table class="tbl">
+                      <thead><tr><th>Ingrediente</th><th class="r">Peso</th><th class="r">Costo</th></tr></thead>
+                      <tbody id="recBody"></tbody>
+                    </table>
                   </div>
-                  <div class="legend">
-                    <div><i style="background:var(--teal-900)"></i><span>Fruta aprovechada</span><b>$845</b></div>
-                    <div><i style="background:var(--teal-700)"></i><span>Azúcar y aditivos</span><b>$223</b></div>
-                    <div><i style="background:var(--teal)"></i><span>Frasco y etiqueta</span><b>$310</b></div>
-                    <div><i style="background:var(--teal-300)"></i><span>Horas de planta</span><b>$180</b></div>
-                    <div><i style="background:var(--mango)"></i><span>Gas y energía</span><b>$85</b></div>
+                  <div class="rside">
+                    <div class="card cost"><span id="rU">Costo por tarta</span><b id="rTot">$0</b><small>Con el kilo pagado daba <s id="rPlan">$3.750</s></small></div>
+                    <div class="card mini c3"><span>Precio de venta</span><b id="rPrice">$9.800</b></div>
+                    <div class="card mini"><span>Margen real</span><b id="rMarg">57%</b></div>
                   </div>
                 </div>
               </section>
 
+              <!-- 4 · Viandas -->
               <section class="view" data-view="3">
-                <div class="vh"><span class="vk">Trazabilidad</span><h4>¿De dónde salió este frasco?</h4></div>
-                <div class="search"><span class="inp" id="tSearch"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg><span id="tTxt"><em class="ph">Buscá un lote o un frasco</em></span></span></div>
-                <div class="chain">
-                  <div class="node" id="n0"><span class="vk">Compra · 02/10</span><b>Finca Los Álamos</b><span>Durazno · 100 kg</span></div>
-                  <div class="node" id="n1"><span class="vk">Producción · 03/10</span><b>213 frascos</b><span>Merma 28,2%</span></div>
-                  <div class="node" id="n2"><span class="vk">Despacho · 06/10</span><b>Almacén Don Tito</b><span>48 frascos</span></div>
-                  <div class="node" id="n3"><span class="vk">Despacho · 07/10</span><b>Dietética Verde</b><span>60 frascos</span></div>
+                <div class="vh"><div><span class="vk">Viandas</span><h4>Pollo al horno con puré y postre</h4></div></div>
+                <div class="vianda">
+                  <div class="card vt">
+                    <div class="tip" id="tip">Sale del lote L-0412 de durazno</div>
+                    <table class="tbl">
+                      <thead><tr><th>Componente</th><th class="r">Peso en la vianda</th><th class="r c2">Rinde</th><th class="r">Costo</th></tr></thead>
+                      <tbody>
+                        <tr><td>Pollo al horno</td><td class="r">180 g</td><td class="r y c2">72%</td><td class="r">$1.300</td></tr>
+                        <tr><td>Puré de papa</td><td class="r">250 g</td><td class="r y c2">85%</td><td class="r">$235</td></tr>
+                        <tr><td>Manteca y leche</td><td class="r">30 g</td><td class="r y c2">—</td><td class="r">$120</td></tr>
+                        <tr class="dz" id="vPost"><td>Postre de durazno</td><td class="r">100 g</td><td class="r y c2">70%</td><td class="r">$304</td></tr>
+                        <tr><td>Bandeja y tapa</td><td class="r">1 u.</td><td class="r y c2">—</td><td class="r">$220</td></tr>
+                        <tr><td>Cocina, gas y mano de obra</td><td class="r">—</td><td class="r y c2">—</td><td class="r">$450</td></tr>
+                        <tr class="tot"><td>Costo de la vianda</td><td></td><td class="c2"></td><td class="r" id="vTot">$0</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="rside">
+                    <div class="card cost"><span>Te deja por vianda</span><b id="vGan">$0</b><small>Precio de venta $5.900</small></div>
+                    <div class="card mini"><span>Margen</span><b id="vMarg">0%</b></div>
+                    <div class="card mini c3"><span>120 viandas por día</span><b id="vDia">$0</b></div>
+                  </div>
                 </div>
-                <div class="detail" id="detail"><b>Factura A 0003-00004521 · Finca Los Álamos</b>100 kg de durazno a $1.800 el kilo. Si un cliente reclama, sabés qué compra revisar y qué otros frascos salieron de ella.</div>
+              </section>
+
+              <!-- 5 · Precios -->
+              <section class="view" data-view="4">
+                <div class="vh"><div><span class="vk">Precios</span><h4>Qué cambia si sube el durazno</h4></div></div>
+                <div class="banner" id="ban"><div><b>Nueva compra: durazno a $1.800 el kilo</b><br>Lote L-0420 · Finca Los Álamos</div><span class="up">+20%</span></div>
+                <div class="card">
+                  <table class="tbl">
+                    <thead><tr><th>Producto</th><th class="r">Costo</th><th class="r">Diferencia</th><th class="r c2">Margen</th></tr></thead>
+                    <tbody>
+                      <tr><td>Tarta de durazno</td><td class="r"><span class="old" id="o0"></span><b id="p0">$4.200</b></td><td class="r dif" id="d0"></td><td class="r c2" id="m0">57%</td></tr>
+                      <tr><td>Duraznos en almíbar</td><td class="r"><span class="old" id="o1"></span><b id="p1">$1.891</b></td><td class="r dif" id="d1"></td><td class="r c2" id="m1">41%</td></tr>
+                      <tr><td>Postre de vianda</td><td class="r"><span class="old" id="o2"></span><b id="p2">$304</b></td><td class="r dif" id="d2"></td><td class="r c2">—</td></tr>
+                      <tr><td>Vianda pollo con puré</td><td class="r"><span class="old" id="o3"></span><b id="p3">$2.629</b></td><td class="r dif" id="d3"></td><td class="r c2" id="m3">55%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="pfoot">
+                  <span>El frasco en almíbar es el que más margen pierde: conviene revisar su precio primero.</span>
+                  <button class="btn" id="bUpd" tabindex="-1">Actualizar precios sugeridos</button>
+                </div>
               </section>
 
             </div>
@@ -321,39 +383,40 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
     </div>
     <div class="bar">
       <button class="pp" id="pp" aria-label="Pausar"><svg id="ppIco" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg></button>
-      <p class="cap" aria-live="polite"><span class="cap-n mono" id="capN">01</span><span id="capT">Cargás la compra como hoy cargás la factura. El sistema abre un lote.</span></p>
-      <span class="time mono num" id="time">0:00 / 0:40</span>
+      <p class="cap" aria-live="polite"><span class="cap-n mono" id="capN">01</span><span id="capT">Cargás la compra de durazno como hoy cargás la factura. Queda un lote.</span></p>
+      <span class="time mono num" id="time">0:00 / 0:52</span>
     </div>
   </section>
 
-  <ol class="chapters" id="chapters">
+  <ol class="chapters">
     <li><button class="ch on" data-ch="0"><span class="mono">01</span><b>Cargás la compra</b><span class="prog"><i></i></span></button></li>
-    <li><button class="ch" data-ch="1"><span class="mono">02</span><b>Medís la merma</b><span class="prog"><i></i></span></button></li>
-    <li><button class="ch" data-ch="2"><span class="mono">03</span><b>Ves el costo real</b><span class="prog"><i></i></span></button></li>
-    <li><button class="ch" data-ch="3"><span class="mono">04</span><b>Rastreás cada frasco</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="1"><span class="mono">02</span><b>Pesás lo que se aprovecha</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="2"><span class="mono">03</span><b>Costeás cada receta</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="3"><span class="mono">04</span><b>Armás la vianda</b><span class="prog"><i></i></span></button></li>
+    <li><button class="ch" data-ch="4"><span class="mono">05</span><b>Sube un insumo</b><span class="prog"><i></i></span></button></li>
   </ol>
 
   <section class="sum">
     <div>
       <h2>Qué resuelve</h2>
-      <p>Las fábricas chicas suelen costear en Excel con una merma fija. Este sistema registra lo que de verdad entra, se pierde y sale, y calcula solo el costo de cada lote.</p>
+      <p>En una cocina de producción, una misma compra termina en varios productos. Si no pesás cuánto se aprovecha, cada plato carga un costo inventado. Este sistema pesa, reparte y costea cada receta con el kilo real.</p>
     </div>
     <ul class="feats">
-      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5z"/><path d="M3 6.5 10 10l7-3.5M10 10v7"/></svg></span><div><b>Cada compra abre un lote</b><span>Peso, precio y proveedor quedan atados a lo que producís con eso.</span></div></li>
-      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 5h14M5 10h10M8 15h4"/></svg></span><div><b>Merma medida por etapa</b><span>Sabés cuánto se pierde en selección, pelado o envasado, y por qué.</span></div></li>
-      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="7"/><path d="M10 3v7l5 4"/></svg></span><div><b>Costo real por unidad</b><span>Materia prima aprovechada, envases, horas y energía, sin planillas.</span></div></li>
-      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="4.5" cy="10" r="2"/><circle cx="15.5" cy="5" r="2"/><circle cx="15.5" cy="15" r="2"/><path d="M6.4 9.2 13.6 5.8M6.4 10.8l7.2 3.4"/></svg></span><div><b>Trazabilidad hasta el cliente</b><span>De un frasco a la compra que lo originó y a quién se despachó.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 16h12l-1.5-8h-9z"/><path d="M8 8V6a2 2 0 0 1 4 0v2"/></svg></span><div><b>Rendimiento medido al pesar</b><span>Carozo, cáscara, hueso o descarte: sabés cuánto se usa de cada kilo.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="4.5" cy="10" r="2"/><circle cx="15.5" cy="4.5" r="2"/><circle cx="15.5" cy="10" r="2"/><circle cx="15.5" cy="15.5" r="2"/><path d="M6.5 10h7M6.2 9 13.8 5.3M6.2 11l7.6 3.7"/></svg></span><div><b>Una compra, varios productos</b><span>El mismo lote reparte su costo entre tartas, conservas y postres.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="14" height="10" rx="2"/><path d="M10 5v10M3 10h7"/></svg></span><div><b>Costo por porción y por vianda</b><span>Cada componente con su peso, su merma y su envase.</span></div></li>
+      <li><span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 14l5-5 3 3 6-6"/><path d="M13 6h4v4"/></svg></span><div><b>Precios que siguen al costo</b><span>Si sube un insumo, ves qué productos toca y cuánto.</span></div></li>
     </ul>
   </section>
 
   <div class="foot">
-    <div class="chips"><span class="mono">Sirve para</span><span class="chip-r">Mermeladas y conservas</span><span class="chip-r">Alfajores</span><span class="chip-r">Panificados</span><span class="chip-r">Viandas</span><span class="chip-r">Lácteos</span></div>
+    <div class="chips"><span class="mono">Sirve para</span><span class="chip-r">Viandas</span><span class="chip-r">Cocinas de producción</span><span class="chip-r">Pastelería</span><span class="chip-r">Conservas</span><span class="chip-r">Catering</span></div>
     <div class="cta-wrap">
       <span class="mono cta-meta">Primera versión en 1 semana</span>
-      <a class="cta" href="https://wa.me/5492617268115" target="_blank" rel="noopener noreferrer">Quiero uno así para mi fábrica</a>
+      <a class="cta" href="https://wa.me/5492617268115" target="_blank" rel="noopener noreferrer">Quiero costear mis recetas</a>
     </div>
   </div>
-  <p class="note">Valores ilustrativos de una fábrica de mermeladas de seis personas. La mecánica es la misma para cualquier producto con merma.</p>
+  <p class="note">Valores ilustrativos. La mecánica es la misma para cualquier insumo con merma: carnes, verduras, frutas o lácteos.</p>
 </main>
 
 <script>
@@ -361,19 +424,32 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
   var $=function(id){return document.getElementById(id)};
   var screen=$('screen'), stage=$('stage'), cursor=$('cursor'), ring=$('ring');
   var CAPS=[
-    'Cargás la compra como hoy cargás la factura. El sistema abre un lote.',
-    'En producción indicás qué lote usaste y cuánto se descartó en cada etapa.',
-    'El costo real de cada frasco sale solo, con la merma ya adentro.',
-    'Desde cualquier lote llegás a la compra que lo originó y a quién se le vendió.'
+    'Cargás la compra de durazno como hoy cargás la factura. Queda un lote.',
+    'Al limpiar, pesás lo que se descarta. El kilo que usás cuesta $2.143, no $1.500.',
+    'El mismo lote termina en tartas, frascos en almíbar y postres. Cada receta toma el kilo real.',
+    'La vianda suma cada componente con su peso y su merma. Sabés cuánto te deja cada una.',
+    'Si sube el durazno, ves al instante cuánto aumenta cada producto que lo usa.'
   ];
-  var DUR=[10500,10500,9500,9500], TOTAL=DUR.reduce(function(a,b){return a+b},0);
+  var DUR=[10000,11000,12500,9000,9500], TOTAL=DUR.reduce(function(a,b){return a+b},0);
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---- escala del escenario ---- */
+  var REC=[
+    {u:'Costo por tarta',rows:[['Durazno aprovechado','700 g','$1.500',1],['Masa (harina, manteca, huevo)','420 g','$1.150'],['Crema pastelera y azúcar','300 g','$420'],['Horno, gas y mano de obra','45 min','$850'],['Caja','1 u.','$280']],tot:4200,plan:'$3.750',price:'$9.800',marg:'57%'},
+    {u:'Costo por frasco de 800 g',rows:[['Durazno aprovechado','500 g','$1.071',1],['Almíbar (azúcar y agua)','300 g','$180'],['Frasco, tapa y etiqueta','1 u.','$380'],['Gas y mano de obra','—','$260']],tot:1891,plan:'$1.570',price:'$3.200',marg:'41%'},
+    {u:'Costo por porción',rows:[['Durazno aprovechado','100 g','$214',1],['Almíbar liviano','40 g','$30'],['Pote con tapa','1 u.','$60']],tot:304,plan:'$240',price:'Va en la vianda',marg:'—'}
+  ];
+  var ars=function(n){return '$'+Math.round(n).toLocaleString('es-AR')};
+  function showRec(i){
+    for(var j=0;j<3;j++) $('tb'+j).classList.toggle('on',j===i);
+    var r=REC[i];
+    $('recBody').innerHTML=r.rows.map(function(x){return '<tr'+(x[3]?' class="dz"':'')+'><td>'+x[0]+'</td><td class="r">'+x[1]+'</td><td class="r">'+x[2]+'</td></tr>'}).join('')+'<tr class="tot"><td>Total</td><td></td><td class="r">'+ars(r.tot)+'</td></tr>';
+    $('rU').textContent=r.u; $('rPlan').textContent=r.plan; $('rPrice').textContent=r.price; $('rMarg').textContent=r.marg;
+  }
+
   var W=960,H=560,scale=1;
   function fit(){
     var w=screen.clientWidth, narrow=w<620;
-    W=narrow?460:960; H=narrow?600:560;
+    W=narrow?460:960; H=narrow?620:560;
     stage.classList.toggle('narrow',narrow);
     stage.style.width=W+'px'; stage.style.height=H+'px';
     scale=w/W; stage.style.transform='scale('+scale+')';
@@ -382,7 +458,6 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
   fit();
   if(window.ResizeObserver) new ResizeObserver(fit).observe(screen); else window.addEventListener('resize',fit);
 
-  /* ---- reloj propio: todo se pausa con él ---- */
   var playing=!reduce, now=0, last=performance.now(), frameCbs=[];
   function loop(t){
     var dt=Math.min(t-last,100); last=t; if(playing) now+=dt;
@@ -396,7 +471,6 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
   async function wait(id,ms){chk(id); if(ff) return; var s=now; while(now-s<ms) await frame(id);}
   async function tween(id,ms,fn){chk(id); if(ff){fn(1);return} var s=now; while(now-s<ms){var p=(now-s)/ms; fn(1-Math.pow(1-p,3)); await frame(id);} fn(1);}
 
-  /* ---- utilidades de la escena ---- */
   var cx=W*0.62, cy=H*0.55;
   function place(){cursor.style.transform='translate('+cx+'px,'+cy+'px)'}
   place();
@@ -415,88 +489,107 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
     for(var i=0;i<txt.length;i++){ el.textContent=txt.slice(0,i+1); await wait(id,speed||85); }
     el.classList.remove('typing');
   }
-  var ars=function(n){return '$'+Math.round(n).toLocaleString('es-AR')};
   function count(id,el,from,to,ms,fmt){return tween(id,ms,function(p){el.textContent=fmt(from+(to-from)*p)})}
   function setView(i){
     document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',+v.dataset.view===i)});
     document.querySelectorAll('.nav').forEach(function(n){n.classList.toggle('on',+n.dataset.nav===i)});
   }
   function nav(i){return document.querySelector('.nav[data-nav="'+i+'"]')}
-  var kgFmt=function(n){return n.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})+' kg'};
+  var kg=function(n){return n.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1})};
+  function toast(t){$('toast').textContent=t; $('toast').classList.add('on');}
 
-  /* ---- estado inicial de cada pantalla ---- */
+  var OLD=[4200,1891,304,2629], NEW=[4500,2105,347,2672], MNEW=['54%','34%',null,'55%'], MOLD=['57%','41%',null,'55%'];
   var RESET=[
     function(){ $('fKg').innerHTML='<em class="ph">0</em>'; $('fPx').innerHTML='<em class="ph">$ 0</em>';
       $('fKg').classList.remove('focus','typing'); $('fPx').classList.remove('focus','typing');
       $('fTot').textContent='$0'; $('newRow').hidden=true; $('toast').classList.remove('on'); },
-    function(){ $('bLote').classList.remove('on'); for(var i=0;i<4;i++){$('t'+i).style.width='0'; $('k'+i).textContent='—'; if(i) $('d'+i).textContent='';} $('pRes').textContent='—'; },
-    function(){ $('cBig').textContent='$0'; $('mPlan').textContent='0%'; $('mReal').textContent='0%';
-      $('tileReal').classList.remove('hl'); $('tip').classList.remove('on');
-      document.querySelectorAll('#stack i').forEach(function(s){s.style.width='0'}); },
-    function(){ $('tTxt').innerHTML='<em class="ph">Buscá un lote o un frasco</em>'; $('tSearch').classList.remove('focus');
-      for(var i=0;i<4;i++) $('n'+i).classList.remove('on','sel'); $('detail').classList.remove('on'); }
+    function(){ $('lcd').innerHTML='60,0<small>kg</small>'; $('what').textContent='Durazno entero, recién llegado';
+      for(var i=1;i<5;i++) $('w'+i).classList.remove('on'); $('kR').textContent='—'; $('kK').textContent='—'; $('ktReal').classList.remove('hl'); },
+    function(){ document.querySelectorAll('#split i').forEach(function(s){s.style.width='0'}); showRec(0); $('rTot').textContent='$0'; },
+    function(){ $('vTot').textContent='$0'; $('vGan').textContent='$0'; $('vMarg').textContent='0%'; $('vDia').textContent='$0'; $('tip').classList.remove('on'); },
+    function(){ for(var i=0;i<4;i++){ $('o'+i).textContent=''; $('p'+i).textContent=ars(OLD[i]); $('d'+i).textContent=''; if(MOLD[i]) $('m'+i).textContent=MOLD[i]; }
+      var b=$('bUpd'); b.textContent='Actualizar precios sugeridos'; b.classList.remove('done'); $('toast').classList.remove('on'); }
   ];
 
-  /* ---- guion de cada capítulo ---- */
   var SCRIPT=[
     async function(id){
       setView(0);
       await wait(id,500);
       await moveTo(id,$('fKg')); await click(id); $('fKg').classList.add('focus');
-      await type(id,$('fKg'),'100'); $('fKg').classList.remove('focus');
+      await type(id,$('fKg'),'60'); $('fKg').classList.remove('focus');
       await moveTo(id,$('fPx'),600); await click(id); $('fPx').classList.add('focus');
-      await type(id,$('fPx'),'$ 1.800'); $('fPx').classList.remove('focus');
-      await count(id,$('fTot'),0,180000,700,ars);
+      await type(id,$('fPx'),'$ 1.500'); $('fPx').classList.remove('focus');
+      await count(id,$('fTot'),0,90000,700,ars);
       await moveTo(id,$('bSave'),650); await click(id,$('bSave'));
-      $('newRow').hidden=false; $('toast').classList.add('on');
+      $('newRow').hidden=false; toast('Lote L-0412 abierto');
       await wait(id,2200); $('toast').classList.remove('on');
-      await wait(id,600);
+      await wait(id,500);
     },
     async function(id){
       await moveTo(id,nav(1)); await click(id); setView(1);
-      await wait(id,350);
-      await moveTo(id,$('bLote'),650); await click(id,$('bLote')); $('bLote').classList.add('on');
-      var kg=[100,91,74,71.8];
-      await tween(id,500,function(p){$('t0').style.width=(100*p)+'%'; $('k0').textContent=kgFmt(100*p)});
-      for(var i=1;i<4;i++){
+      await wait(id,500);
+      var steps=[[60,52.2,'Carozo afuera'],[52.2,46.2,'Pelado'],[46.2,42,'Sin golpeados ni verdes']];
+      for(var i=0;i<3;i++){
+        await moveTo(id,$('bReg'),i?400:700); await click(id,$('bReg'));
+        $('what').textContent=steps[i][2];
+        await count(id,$('lcd'),steps[i][0],steps[i][1],600,function(n){return kg(n)}); $('lcd').innerHTML=kg(steps[i][1])+'<small>kg</small>';
+        $('w'+(i+1)).classList.add('on');
         await wait(id,350);
-        (function(i){ $('d'+i).textContent='−'+(kg[i-1]-kg[i]).toLocaleString('es-AR',{maximumFractionDigits:1})+' kg'; })(i);
-        await tween(id,650,(function(i){return function(p){var v=kg[i-1]+(kg[i]-kg[i-1])*p; $('t'+i).style.width=v+'%'; $('k'+i).textContent=kgFmt(v)}})(i));
       }
+      $('w4').classList.add('on');
       await wait(id,400);
-      await moveTo(id,$('bClose'),650); await click(id,$('bClose'));
-      await count(id,$('pRes'),0,213,800,function(n){return Math.round(n)});
-      await wait(id,1500);
+      await count(id,$('kR'),100,70,600,function(n){return Math.round(n)+'%'});
+      await count(id,$('kK'),1500,2143,800,ars); $('ktReal').classList.add('hl');
+      await moveTo(id,$('ktReal'),700);
+      await wait(id,1800);
     },
     async function(id){
       await moveTo(id,nav(2)); await click(id); setView(2);
       await wait(id,300);
-      var segs=document.querySelectorAll('#stack i');
-      await tween(id,900,function(p){segs.forEach(function(s){s.style.width=(s.dataset.w*p)+'%'})});
-      await count(id,$('cBig'),0,1642,800,ars);
-      await count(id,$('mPlan'),0,46,500,function(n){return Math.round(n)+'%'});
-      await wait(id,300);
-      await moveTo(id,segs[0],700); $('tip').classList.add('on');
-      await wait(id,1800); $('tip').classList.remove('on');
-      await moveTo(id,$('tileReal'),700);
-      await count(id,$('mReal'),46,22,800,function(n){return Math.round(n)+'%'});
-      $('tileReal').classList.add('hl');
-      await wait(id,2000);
+      var sp=document.querySelectorAll('#split i');
+      await tween(id,900,function(p){sp.forEach(function(s){s.style.width=(s.dataset.w*p)+'%'})});
+      await count(id,$('rTot'),0,4200,700,ars);
+      await wait(id,1500);
+      for(var i=1;i<3;i++){
+        await moveTo(id,$('tb'+i),650); await click(id,$('tb'+i)); showRec(i);
+        await count(id,$('rTot'),0,REC[i].tot,600,ars);
+        await wait(id,1500);
+      }
+      await wait(id,400);
     },
     async function(id){
       await moveTo(id,nav(3)); await click(id); setView(3);
-      await wait(id,300);
-      await moveTo(id,$('tSearch'),650); await click(id); $('tSearch').classList.add('focus');
-      await type(id,$('tTxt'),'L-0412',110); $('tSearch').classList.remove('focus');
-      for(var i=0;i<4;i++){ await wait(id,380); $('n'+i).classList.add('on'); }
+      await wait(id,400);
+      await count(id,$('vTot'),0,2629,900,ars);
+      await Promise.all([
+        count(id,$('vGan'),0,3271,800,ars),
+        count(id,$('vMarg'),0,55,800,function(n){return Math.round(n)+'%'}),
+        count(id,$('vDia'),0,392520,800,ars)
+      ]);
       await wait(id,500);
-      await moveTo(id,$('n0'),700); await click(id); $('n0').classList.add('sel'); $('detail').classList.add('on');
-      await wait(id,2600);
+      var row=$('vPost'), tip=$('tip');
+      await moveTo(id,row.cells[0],750);
+      tip.style.left=(row.offsetLeft+12)+'px'; tip.style.top=(row.offsetTop-34)+'px'; tip.classList.add('on');
+      await wait(id,2200); tip.classList.remove('on');
+      await wait(id,400);
+    },
+    async function(id){
+      await moveTo(id,nav(4)); await click(id); setView(4);
+      await wait(id,900);
+      for(var i=0;i<4;i++){
+        $('o'+i).textContent=ars(OLD[i]);
+        await count(id,$('p'+i),OLD[i],NEW[i],500,ars);
+        $('d'+i).textContent='+'+ars(NEW[i]-OLD[i]); if(MNEW[i]) $('m'+i).textContent=MNEW[i];
+        await wait(id,250);
+      }
+      await wait(id,800);
+      await moveTo(id,$('bUpd'),750); await click(id,$('bUpd'));
+      $('bUpd').textContent='Precios actualizados ✓'; $('bUpd').classList.add('done'); toast('Lista de precios sugeridos al día');
+      await wait(id,2200); $('toast').classList.remove('on');
     }
   ];
 
-  /* ---- reproducción ---- */
-  var cur=0, chStart=0, ended=false;
+  var cur=0, chStart=0, ended=false, N=SCRIPT.length;
   var chBtns=document.querySelectorAll('.ch');
   async function run(i){
     var id=++runId; cur=i; chStart=now; ended=false;
@@ -505,7 +598,7 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
     try{
       await SCRIPT[i](id);
       ended=true;
-      var nx=(i+1)%4;
+      var nx=(i+1)%N;
       if(nx===0){ await wait(id,1200); }
       run(nx);
     }catch(e){ if(e!==ABORT) throw e; }
@@ -520,7 +613,6 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
     $('time').textContent=mmss(before+el)+' / '+mmss(TOTAL);
   }
   function mmss(ms){var s=Math.round(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
-
   function setPlaying(p){
     playing=p;
     $('pp').setAttribute('aria-label',p?'Pausar':'Reproducir');
@@ -530,8 +622,8 @@ mark{background:linear-gradient(transparent 60%,var(--teal-100) 60%);color:inher
   screen.addEventListener('click',function(){setPlaying(!playing)});
   chBtns.forEach(function(b){b.addEventListener('click',function(){ setPlaying(true); run(+b.dataset.ch); })});
 
+  showRec(0);
   if(reduce){
-    /* sin animación: se muestra el primer capítulo terminado y en pausa */
     setPlaying(false);
     ff=true; var id=++runId; RESET[0](); SCRIPT[0](id).then(function(){ff=false; ended=true;});
   } else {
