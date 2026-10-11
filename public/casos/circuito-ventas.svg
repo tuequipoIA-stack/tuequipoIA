@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 275" role="img" aria-label="Circuito de ventas: vidriera, tienda y difusión">
+<rect width="400" height="275" fill="#eef7f6"/>
+<text x="46" y="60" font-family="Sora, system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="1.4" fill="#12807f">CIRCUITO DE VENTAS</text>
+<g font-family="Sora, system-ui, sans-serif" font-size="11.5" font-weight="700" text-anchor="middle">
+<rect x="46" y="86" width="84" height="64" rx="12" fill="#1A1A2E"/><text x="88" y="114" fill="#6FCFCE">01</text><text x="88" y="132" fill="#fff">VIDRIERA</text>
+<rect x="158" y="86" width="84" height="64" rx="12" fill="#1AABAA"/><text x="200" y="114" fill="#1A1A2E" opacity=".7">02</text><text x="200" y="132" fill="#1A1A2E">TIENDA</text>
+<rect x="270" y="86" width="84" height="64" rx="12" fill="#F4A259"/><text x="312" y="114" fill="#1A1A2E" opacity=".7">03</text><text x="312" y="132" fill="#1A1A2E">DIFUSIÓN</text>
+</g>
+<g stroke="#12807f" stroke-width="2" fill="none" stroke-linecap="round"><path d="M134 118h20M149 113l5 5-5 5"/><path d="M246 118h20M261 113l5 5-5 5"/></g>
+<text x="46" y="224" font-family="Sora, system-ui, sans-serif" font-size="19" font-weight="800" fill="#1A1A2E">Más ventas, no más software</text>
+<line x1="46" y1="240" x2="354" y2="240" stroke="#1AABAA" stroke-width="1.5" opacity=".3"/>
+</svg>
