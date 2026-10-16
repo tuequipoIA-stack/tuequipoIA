@@ -39,7 +39,7 @@ export default function SuscripcionModal({ open, initial, onClose, onSave, onDel
   };
 
   const inputCls = "rounded-lg px-3 py-2 text-sm outline-none w-full";
-  const inputStyle = { border: "1px solid #e4dfd3" };
+  const inputStyle = { border: "1px solid #d9d1bf" };
   const campo = (label, input) => (
     <div>
       <span style={{ color: "#8a8578" }} className="text-[11px] block mb-1">{label}</span>
@@ -80,7 +80,7 @@ export default function SuscripcionModal({ open, initial, onClose, onSave, onDel
             </button>
           ) : <span />}
           <div className="flex gap-2">
-            <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium" style={{ background: "#eee9dd", color: "#6b6759" }}>
+            <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium" style={{ background: "#e2dbcc", color: "#6b6759" }}>
               Cancelar
             </button>
             <button onClick={guardar} className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ background: BRAND.teal, color: BRAND.navy }}>

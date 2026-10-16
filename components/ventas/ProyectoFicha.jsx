@@ -6,7 +6,7 @@ import { BRAND, HITO_ESTADOS, FACTURA_ESTADOS } from "@/lib/constants";
 import { money } from "@/lib/helpers";
 
 const inputCls = "rounded-lg px-3 py-2 text-sm outline-none w-full";
-const inputStyle = { border: "1px solid #e4dfd3" };
+const inputStyle = { border: "1px solid #d9d1bf" };
 
 function sumarMes(fechaISO) {
   const [y, m, d] = fechaISO.split("-").map(Number);
@@ -111,7 +111,7 @@ function TabAvance({ proyectoId }) {
           <span style={{ color: "#8a8578" }} className="text-xs">Avance del proyecto</span>
           <span style={{ color: BRAND.navy }} className="text-xs font-semibold">{avance}%</span>
         </div>
-        <div className="h-2 rounded-full overflow-hidden" style={{ background: "#eee9dd" }}>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: "#e2dbcc" }}>
           <div className="h-full" style={{ width: `${avance}%`, background: BRAND.teal }} />
         </div>
       </div>
@@ -134,7 +134,7 @@ function TabAvance({ proyectoId }) {
             </div>
             <div className="flex items-center gap-2">
               <select value={h.estado} onChange={(e) => cambiarEstado(h.id, e.target.value)}
-                className="text-[11px] px-1.5 py-1 rounded-md outline-none" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                className="text-[11px] px-1.5 py-1 rounded-md outline-none" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                 {HITO_ESTADOS.map((e) => <option key={e.id} value={e.id}>{e.label}</option>)}
               </select>
               <button onClick={() => eliminar(h.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
@@ -262,7 +262,7 @@ function TabFacturacion({ proyecto }) {
             </div>
             <div className="flex items-center gap-2">
               <select value={f.estado} onChange={(e) => cambiarEstadoFactura(f.id, e.target.value)}
-                className="text-[11px] px-1.5 py-1 rounded-md outline-none" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                className="text-[11px] px-1.5 py-1 rounded-md outline-none" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                 {FACTURA_ESTADOS.map((e) => <option key={e.id} value={e.id}>{e.label}</option>)}
               </select>
               <button onClick={() => eliminarFactura(f.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
@@ -303,7 +303,7 @@ export default function ProyectoFicha({ open, proyecto, onClose, onGuardarResume
         <div className="flex gap-1.5 mb-4 flex-wrap">
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} className="px-3 py-1.5 rounded-md text-xs font-medium"
-              style={tab === t.id ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+              style={tab === t.id ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
               {t.label}
             </button>
           ))}

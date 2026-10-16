@@ -26,7 +26,7 @@ export default function PilaresContenidoTab() {
       {/* 4 pilares principales */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         {PILARES.map((p) => (
-          <div key={p.numero} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+          <div key={p.numero} className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
             <div className="flex items-start justify-between mb-2">
               <span style={{ color: "#d8d2c3" }} className="text-2xl font-bold leading-none">{p.numero}</span>
               <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full"
@@ -56,7 +56,7 @@ export default function PilaresContenidoTab() {
       </div>
 
       {/* La regla del 4-3-2-1 */}
-      <div className="rounded-xl p-5 mb-6" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-5 mb-6" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <span style={{ color: "#a89f88" }} className="text-[10px] font-semibold uppercase tracking-widest">Cómo se distribuye en la semana</span>
         <h3 style={{ color: BRAND.navy }} className="text-xl font-bold mt-1 mb-2">
           La regla del <span style={{ color: "#127a79" }}>4-3-2-1</span>.
@@ -69,7 +69,7 @@ export default function PilaresContenidoTab() {
         <div className="overflow-x-auto -mx-1">
           <table className="w-full text-left text-xs min-w-[520px]">
             <thead>
-              <tr style={{ borderBottom: "1px solid #e4dfd3" }}>
+              <tr style={{ borderBottom: "1px solid #d9d1bf" }}>
                 <th className="px-1 pb-2" style={{ color: "#8a8578" }}>Pilar</th>
                 <th className="px-1 pb-2" style={{ color: "#8a8578" }}>Frecuencia semanal</th>
                 <th className="px-1 pb-2" style={{ color: "#8a8578" }}>Mejor formato 2026</th>
@@ -91,7 +91,7 @@ export default function PilaresContenidoTab() {
       </div>
 
       {/* Ritmo de publicación */}
-      <div className="rounded-xl p-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <span style={{ color: BRAND.navy }} className="text-sm font-semibold block mb-4">El ritmo de publicación que recomendamos</span>
         <div className="grid grid-cols-3 gap-3">
           {RITMO.map((r) => (

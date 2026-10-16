@@ -24,13 +24,13 @@ function cargarScriptMercadoPago() {
 }
 
 const inputStyle = {
-  border: "1px solid #e4dfd3",
+  border: "1px solid #d9d1bf",
   borderRadius: "0.5rem",
   padding: "0.5rem 0.75rem",
   fontSize: "0.875rem",
   height: "38px",
   width: "100%",
-  background: "#ffffff",
+  background: "#f6f2ea",
 };
 
 export default function CambiarTarjetaForm({ onSuccess, onCancel }) {

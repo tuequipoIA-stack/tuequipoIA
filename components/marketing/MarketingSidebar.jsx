@@ -15,7 +15,7 @@ export default function MarketingSidebar() {
   return (
     <div className="flex flex-col gap-4">
       {/* Antes de publicar */}
-      <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div className="flex items-center gap-2 mb-3">
           <ClipboardCheck size={15} color={BRAND.navy} />
           <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Antes de publicar</span>
@@ -47,7 +47,7 @@ export default function MarketingSidebar() {
       {/* Agente de marketing */}
       <a href={AGENTE_MARKETING_URL} target="_blank" rel="noopener noreferrer"
         className="rounded-xl p-4 flex items-center justify-between gap-2 hover:opacity-90 transition-opacity"
-        style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "#eef7f6" }}>
             <MessageCircle size={14} color="#127a79" />

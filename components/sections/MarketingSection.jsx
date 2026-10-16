@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import CalendarioContenidoTab from "@/components/marketing/CalendarioContenidoTab";
 import PilaresContenidoTab from "@/components/marketing/PilaresContenidoTab";
@@ -9,8 +9,10 @@ import MarketingSidebar from "@/components/marketing/MarketingSidebar";
 import AudioAyuda from "@/components/AudioAyuda";
 import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
-export default function MarketingSection() {
-  const [vista, setVista] = useState("calendario");
+export default function MarketingSection({ vista: vistaProp, onVista }) {
+  const [vista, setVistaInterna] = useState(vistaProp || "calendario");
+  useEffect(() => { if (vistaProp) setVistaInterna(vistaProp); }, [vistaProp]);
+  const setVista = (v) => { setVistaInterna(v); onVista?.(v); };
   const [focoPiezaId, setFocoPiezaId] = useState(null);
   const tabs = [
     { id: "calendario", label: "Calendario de contenido" },
@@ -36,7 +38,7 @@ export default function MarketingSection() {
           <div className="flex gap-1.5 mb-5 flex-wrap">
             {tabs.map((t) => (
               <button key={t.id} onClick={() => setVista(t.id)} className="px-3 py-1.5 rounded-md text-xs font-medium"
-                style={vista === t.id ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+                style={vista === t.id ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
                 {t.label}
               </button>
             ))}

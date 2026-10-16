@@ -52,7 +52,7 @@ export default function ChatView({ agent, business, onBack }) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center gap-3 pb-4 mb-4" style={{ borderBottom: "1px solid #e4dfd3" }}>
+      <div className="flex items-center gap-3 pb-4 mb-4" style={{ borderBottom: "1px solid #d9d1bf" }}>
         <button onClick={onBack} className="p-1.5 rounded-md hover:opacity-70" style={{ color: BRAND.navy }}>
           <ArrowLeft size={18} />
         </button>
@@ -74,14 +74,14 @@ export default function ChatView({ agent, business, onBack }) {
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className="max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
-              style={m.role === "user" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#ffffff", color: BRAND.navy, border: "1px solid #e4dfd3" }}>
+              style={m.role === "user" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#f6f2ea", color: BRAND.navy, border: "1px solid #d9d1bf" }}>
               {m.content}
             </div>
           </div>
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="rounded-2xl px-4 py-2.5 text-sm" style={{ background: "#ffffff", color: "#8a8578", border: "1px solid #e4dfd3" }}>
+            <div className="rounded-2xl px-4 py-2.5 text-sm" style={{ background: "#f6f2ea", color: "#8a8578", border: "1px solid #d9d1bf" }}>
               {agent.name} está pensando...
             </div>
           </div>
@@ -89,12 +89,12 @@ export default function ChatView({ agent, business, onBack }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="pt-4 mt-2" style={{ borderTop: "1px solid #e4dfd3" }}>
+      <div className="pt-4 mt-2" style={{ borderTop: "1px solid #d9d1bf" }}>
         <div className="flex items-end gap-2">
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKey}
             placeholder={`Escribile a ${agent.name}...`} rows={1}
             className="flex-1 resize-none rounded-xl px-4 py-3 text-sm outline-none"
-            style={{ background: "#ffffff", color: BRAND.navy, border: "1px solid #e4dfd3" }} />
+            style={{ background: "#f6f2ea", color: BRAND.navy, border: "1px solid #d9d1bf" }} />
           <button onClick={send} disabled={loading || !input.trim()} className="rounded-xl p-3 disabled:opacity-40"
             style={{ background: BRAND.teal, color: BRAND.navy }}>
             <Send size={16} />

@@ -59,7 +59,7 @@ function SuscripcionBlock() {
   if (error) return null;
   if (!sub) {
     return (
-      <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <p style={{ color: "#8a8578" }} className="text-sm">Cargando suscripción...</p>
       </div>
     );
@@ -69,7 +69,7 @@ function SuscripcionBlock() {
   const diasTrial = sub.trialEndsAt ? Math.max(0, Math.ceil((new Date(sub.trialEndsAt) - new Date()) / 86400000)) : null;
 
   return (
-    <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
       <div className="flex items-center justify-between mb-3">
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold">Suscripción</div>
         <span className="text-xs px-2 py-1 rounded-full font-semibold" style={{ background: estado.bg, color: estado.text }}>
@@ -322,7 +322,7 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
       <p style={{ color: "#6b6759" }} className="text-sm mb-6">Tu cuenta, tu negocio y tu logo.</p>
 
       {/* Cuenta */}
-      <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-1">Cuenta</div>
         <p style={{ color: "#8a8578" }} className="text-sm">{email || "—"}</p>
       </div>
@@ -331,11 +331,11 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
       <SuscripcionBlock />
 
       {/* Logo */}
-      <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">Logo del negocio</div>
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden shrink-0"
-            style={{ background: "#f0ece2", border: "1px solid #e4dfd3" }}>
+            style={{ background: "#f0ece2", border: "1px solid #d9d1bf" }}>
             {logoSrc && (
               <img src={logoSrc} alt="Logo" className="w-full h-full object-contain"
                 onError={(e) => { e.currentTarget.style.display = "none"; }} />
@@ -357,14 +357,14 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
       </div>
 
       {/* Datos del negocio */}
-      <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">Datos del negocio</div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Nombre</span>
         <input value={nombre} onChange={(e) => setNombre(e.target.value)}
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Rubro</span>
         <input value={rubro} onChange={(e) => setRubro(e.target.value)}
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">¿Qué vendés?</span>
         <div className="grid grid-cols-2 gap-2 mb-3">
           {TIPOS_NEGOCIO.map((t) => (
@@ -407,17 +407,17 @@ export default function PerfilSection({ business, onBusinessUpdate }) {
       </div>
 
       {/* Cambiar contraseña */}
-      <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">Cambiar contraseña</div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Nueva contraseña</span>
         <div className="mb-3">
           <PasswordInput dark={false} value={nuevaPassword} onChange={(e) => setNuevaPassword(e.target.value)}
-            className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
         </div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Repetí la contraseña</span>
         <div className="mb-3">
           <PasswordInput dark={false} value={confirmarPassword} onChange={(e) => setConfirmarPassword(e.target.value)}
-            className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
         </div>
         {passwordError && <p className="text-xs mb-3" style={{ color: "#b3453f" }}>{passwordError}</p>}
         {passwordMsg && <p className="text-xs mb-3" style={{ color: "#127a79" }}>{passwordMsg}</p>}

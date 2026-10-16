@@ -49,12 +49,12 @@ export default function SearchableSelect({
         placeholder={placeholder}
         autoComplete="off"
         className="rounded-lg px-3 py-2 text-sm outline-none w-full"
-        style={{ border: "1px solid #e4dfd3" }}
+        style={{ border: "1px solid #d9d1bf" }}
       />
       {abierto && (
         <div
           className="absolute left-0 right-0 mt-1 rounded-lg overflow-y-auto z-30"
-          style={{ background: "#ffffff", border: "1px solid #e4dfd3", maxHeight: 220, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
+          style={{ background: "#f6f2ea", border: "1px solid #d9d1bf", maxHeight: 220, boxShadow: "0 8px 20px rgba(0,0,0,0.1)" }}
         >
           {clearLabel && (
             <div

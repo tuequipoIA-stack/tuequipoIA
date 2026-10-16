@@ -65,7 +65,7 @@ export default function UnidadSwitcher({ collapsed }) {
 
       {abierto && (
         <div className="absolute left-0 top-full mt-1 w-64 rounded-xl p-2 z-30"
-          style={{ background: "#ffffff", border: "1px solid #e4dfd3", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
+          style={{ background: "#f6f2ea", border: "1px solid #d9d1bf", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
           {!creando ? (
             <>
               <div style={{ color: "#8a8578" }} className="text-[10px] uppercase font-semibold px-2 pb-1.5 pt-1">Tus unidades de negocio</div>
@@ -92,7 +92,7 @@ export default function UnidadSwitcher({ collapsed }) {
               <div style={{ color: "#1A1A2E" }} className="text-xs font-semibold mb-2">Nueva unidad</div>
               <input value={nuevoNombre} onChange={(e) => setNuevoNombre(e.target.value)}
                 placeholder="Ej: Picadas, Viandas empresariales..."
-                className="w-full rounded-lg px-2.5 py-2 text-sm outline-none mb-2" style={{ border: "1px solid #e4dfd3" }} />
+                className="w-full rounded-lg px-2.5 py-2 text-sm outline-none mb-2" style={{ border: "1px solid #d9d1bf" }} />
               <div className="grid grid-cols-2 gap-1.5 mb-2">
                 {TIPOS_NEGOCIO.map((t) => (
                   <button key={t.id} onClick={() => setNuevoTipo(t.id)}

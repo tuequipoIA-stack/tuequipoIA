@@ -63,11 +63,11 @@ export default function CalendarioContenidoTab({ onVerOrigen }) {
       <p style={{ color: "#6b6759" }} className="text-sm mb-4">Planificá qué vas a publicar, y cuándo. Tocá un día para agregar o ver tarjetas, y arrastralas para moverlas.</p>
 
       <div className="flex items-center justify-between mb-3">
-        <button onClick={() => cambiarMes(-1)} className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: "#eee9dd", color: BRAND.navy }}>
+        <button onClick={() => cambiarMes(-1)} className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: "#e2dbcc", color: BRAND.navy }}>
           <ArrowLeft size={14} />
         </button>
         <span style={{ color: BRAND.navy }} className="text-sm font-semibold capitalize">{MESES[mesActual.month]} {mesActual.year}</span>
-        <button onClick={() => cambiarMes(1)} className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: "#eee9dd", color: BRAND.navy }}>
+        <button onClick={() => cambiarMes(1)} className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: "#e2dbcc", color: BRAND.navy }}>
           <ArrowLeft size={14} style={{ transform: "rotate(180deg)" }} />
         </button>
       </div>
@@ -95,7 +95,7 @@ export default function CalendarioContenidoTab({ onVerOrigen }) {
               style={{
                 minHeight: "58px",
                 background: esSeleccionado ? "#eef7f6" : "#ffffff",
-                border: esSeleccionado ? `1.5px solid ${BRAND.teal}` : "1px solid #e4dfd3",
+                border: esSeleccionado ? `1.5px solid ${BRAND.teal}` : "1px solid #d9d1bf",
               }}
             >
               <span style={{ color: esHoy ? BRAND.teal : BRAND.navy }} className="text-xs font-semibold mb-1">{dia}</span>
@@ -120,7 +120,7 @@ export default function CalendarioContenidoTab({ onVerOrigen }) {
       </div>
 
       {diaSeleccionado && (
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <span style={{ color: BRAND.navy }} className="text-sm font-semibold capitalize block mb-3">
             {new Date(diaSeleccionado + "T00:00:00").toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })}
           </span>
@@ -160,16 +160,16 @@ export default function CalendarioContenidoTab({ onVerOrigen }) {
           <div className="pt-3" style={{ borderTop: "1px solid #f0ece2" }}>
             <div className="flex gap-2 mb-2">
               <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }}>
+                className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }}>
                 {TIPOS_PUBLICACION.map((t) => <option key={t}>{t}</option>)}
               </select>
             </div>
             <textarea value={form.copy} onChange={(e) => setForm({ ...form, copy: e.target.value })} rows={3}
               placeholder="Copy que vas a usar..."
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-2" style={{ border: "1px solid #e4dfd3" }} />
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-2" style={{ border: "1px solid #d9d1bf" }} />
             <input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })}
               placeholder="Link al creativo (Drive, Canva, etc.)"
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
             <button onClick={agregar} className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold"
               style={{ background: BRAND.teal, color: BRAND.navy }}>
               <Plus size={14} /> Agregar tarjeta a este día

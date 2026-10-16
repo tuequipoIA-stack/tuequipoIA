@@ -54,7 +54,7 @@ export default function SeguimientoBoard({ unidadId }) {
 
   if (proyectos.length === 0) {
     return (
-      <div className="rounded-xl p-6 text-center" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+      <div className="rounded-xl p-6 text-center" style={{ background: "#f6f2ea", border: "1px dashed #d8d2c3" }}>
         <Briefcase size={20} color="#b3ab98" className="mx-auto mb-2" />
         <p style={{ color: "#8a8578" }} className="text-sm">Todavía no hay proyectos. Se crean automáticamente al marcar un prospecto del CRM como &quot;Ganado&quot;.</p>
       </div>
@@ -71,7 +71,7 @@ export default function SeguimientoBoard({ unidadId }) {
             <div key={col.id}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => arrastrando && moverProyecto(arrastrando, col.id)}
-              className="rounded-xl p-3 shrink-0" style={{ background: "#f0ece2", border: "1px solid #e4dfd3", width: "260px" }}>
+              className="rounded-xl p-3 shrink-0" style={{ background: "#f0ece2", border: "1px solid #d9d1bf", width: "260px" }}>
               <div className="flex items-center justify-between mb-2 px-1">
                 <span style={{ color: "#6b6759" }} className="text-xs font-semibold uppercase tracking-wide">
                   {col.label} ({items.length})
@@ -84,7 +84,7 @@ export default function SeguimientoBoard({ unidadId }) {
                     onDragEnd={() => setArrastrando(null)}
                     onClick={() => setProyectoAbierto(p)}
                     className="rounded-lg p-3 cursor-grab active:cursor-grabbing"
-                    style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                    style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                     <div style={{ color: BRAND.navy }} className="text-sm font-semibold">{p.cliente}</div>
                     {p.servicio && <div style={{ color: "#8a8578" }} className="text-xs">{p.servicio}</div>}
                     {p.monto > 0 && <div style={{ color: BRAND.teal }} className="text-xs font-semibold mt-1">{money(p.monto)}</div>}
@@ -96,7 +96,7 @@ export default function SeguimientoBoard({ unidadId }) {
                     <select value={p.etapa_seguimiento}
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => moverProyecto(p.id, e.target.value)}
-                      className="mt-2 text-[10px] px-1.5 py-1 rounded-md font-medium outline-none w-full" style={{ background: "#eee9dd", color: "#6b6759", border: "none" }}>
+                      className="mt-2 text-[10px] px-1.5 py-1 rounded-md font-medium outline-none w-full" style={{ background: "#e2dbcc", color: "#6b6759", border: "none" }}>
                       {VENTAS_ETAPAS_SEGUIMIENTO.filter((e) => e.id !== "en_mantenimiento" || p.mantenimiento_activo).map((e) => (
                         <option key={e.id} value={e.id}>{e.label}</option>
                       ))}

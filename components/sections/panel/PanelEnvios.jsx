@@ -27,7 +27,7 @@ function ColaWhatsapp({ contactos, segmento, onCerrar, onRegistrado }) {
   };
 
   return (
-    <div className="rounded-xl p-4 mt-3" style={{ background: "#faf9f6", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4 mt-3" style={{ background: "#faf9f6", border: "1px solid #d9d1bf" }}>
       <div className="flex items-center justify-between mb-3">
         <h4 style={{ color: BRAND.navy }} className="text-sm font-semibold">Cola de WhatsApp — {segNombre(segmento)} ({objetivo.length})</h4>
         <button onClick={onCerrar} className="text-xs" style={{ color: "#8a8578" }}>Cerrar</button>
@@ -41,7 +41,7 @@ function ColaWhatsapp({ contactos, segmento, onCerrar, onRegistrado }) {
             const href = waLink(c, mensaje);
             const ya = !!enviados[c.id];
             return (
-              <div key={c.id} className="flex items-start justify-between gap-3 rounded-lg p-2.5" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+              <div key={c.id} className="flex items-start justify-between gap-3 rounded-lg p-2.5" style={{ background: "#f6f2ea", border: "1px solid #eee7d8" }}>
                 <div className="text-sm flex-1">
                   <strong style={{ color: BRAND.navy }}>{c.nombre}</strong> <span style={{ color: "#8a8578" }}>{c.empresa}</span>
                   <p className="text-xs mt-1 whitespace-pre-wrap" style={{ color: "#6b6759" }}>{mensaje}</p>
@@ -102,7 +102,7 @@ export default function PanelEnvios({ segmentos, contactos, marcaFiltro, recarga
       <div>
         <div className="flex items-center justify-between gap-2 mb-1">
           <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Envíos</h2>
-          <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+          <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#f6f2ea" }}>
             <RefreshCw size={13} />
             Actualizar
           </button>
@@ -116,7 +116,7 @@ export default function PanelEnvios({ segmentos, contactos, marcaFiltro, recarga
     <div>
       <div className="flex items-center justify-between gap-2 mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Envíos</h2>
-        <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+        <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#f6f2ea" }}>
           <RefreshCw size={13} />
           Actualizar
         </button>
@@ -130,7 +130,7 @@ export default function PanelEnvios({ segmentos, contactos, marcaFiltro, recarga
           const resultado = resultados[seg.id];
           const colaEstaAbierta = colaAbierta === seg.id;
           return (
-            <div key={seg.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+            <div key={seg.id} className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
               <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                 <div>
                   <strong style={{ color: BRAND.navy }}>{segNombre(seg)}</strong>{" "}

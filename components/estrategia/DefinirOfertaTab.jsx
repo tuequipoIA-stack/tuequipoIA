@@ -86,16 +86,16 @@ export default function DefinirOfertaTab() {
       <AgenteOfertaCard />
 
       {/* Cliente ideal */}
-      <div className="rounded-xl p-4 mb-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">¿Quién es tu cliente ideal?</div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Nombre o apodo</span>
         <input value={cliente.nombre} onChange={(e) => setCliente({ ...cliente, nombre: e.target.value })}
           placeholder='Ej: "María, la mamá ocupada"'
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">¿Quién es? (edad, rutina, qué hace, dónde está)</span>
         <textarea value={cliente.descripcion} onChange={(e) => setCliente({ ...cliente, descripcion: e.target.value })} rows={3}
           placeholder="Ej: mujer de 30-40 años, trabaja full time, tiene poco tiempo para cocinar..."
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
         <button onClick={guardarCliente} className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ background: BRAND.teal, color: BRAND.navy }}>
           Guardar cliente ideal
         </button>
@@ -103,12 +103,12 @@ export default function DefinirOfertaTab() {
       </div>
 
       {/* Oferta de valor */}
-      <div className="rounded-xl p-4 mb-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">¿Cuál es tu oferta de valor?</div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Más allá del producto o servicio, ¿qué le ofrecés a tu cliente?</span>
         <textarea value={valor.propuesta} onChange={(e) => setValor({ ...valor, propuesta: e.target.value })} rows={3}
           placeholder="Ej: le ofrezco tranquilidad de saber que come sano sin esfuerzo, y trato cercano tipo casa de familia..."
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
         <button onClick={guardarValor} className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ background: BRAND.teal, color: BRAND.navy }}>
           Guardar oferta de valor
         </button>
@@ -116,12 +116,12 @@ export default function DefinirOfertaTab() {
       </div>
 
       {/* Dolores */}
-      <div className="rounded-xl p-4 mb-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">¿Cuáles son los dolores de tus clientes?</div>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-1">¿Qué le duele, qué necesita o qué le cuesta resolver hoy?</span>
         <textarea value={dolores} onChange={(e) => setDolores(e.target.value)} rows={3}
           placeholder="Ej: no tiene tiempo de cocinar sano, se siente culpable por pedir delivery todos los días..."
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
         <button onClick={guardarDolores} className="rounded-lg px-4 py-2 text-sm font-semibold" style={{ background: BRAND.teal, color: BRAND.navy }}>
           Guardar dolores
         </button>
@@ -129,7 +129,7 @@ export default function DefinirOfertaTab() {
       </div>
 
       {/* Objetivos por horizonte */}
-      <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-1">¿Cuál es tu objetivo en el tiempo?</div>
         <p style={{ color: "#8a8578" }} className="text-xs mb-3">Un objetivo concreto para cada horizonte. No hace falta llenarlos todos ahora.</p>
         <div className="space-y-3 mb-3">
@@ -138,7 +138,7 @@ export default function DefinirOfertaTab() {
               <span style={{ color: "#8a8578" }} className="text-xs block mb-1">{h.label}</span>
               <input value={objetivos[h.key] || ""} onChange={(e) => setObjetivos({ ...objetivos, [h.key]: e.target.value })}
                 placeholder="Ej: duplicar ventas mensuales"
-                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
             </div>
           ))}
         </div>

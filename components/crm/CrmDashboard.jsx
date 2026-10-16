@@ -17,7 +17,7 @@ const ETAPAS_PROYECTO_EJECUTADO = ["cobrado", "en_mantenimiento"];
 
 function StatCard({ label, valor, color, sub }) {
   return (
-    <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
       <div style={{ color: "#8a8578" }} className="text-xs mb-1">{label}</div>
       <div style={{ color: color || BRAND.navy }} className="text-xl font-semibold">{valor}</div>
       {sub && <div style={{ color: "#a89f88" }} className="text-[11px] mt-0.5">{sub}</div>}
@@ -90,7 +90,7 @@ export default function CrmDashboard({ unidadId }) {
       </div>
 
       {numerosPlan.puedeCalcular ? (
-        <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center justify-between mb-2">
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Objetivo de facturación del mes</span>
             <span style={{ color: "#6b6759" }} className="text-xs">{money(facturadoEsteMes)} / {money(numerosPlan.facturacionMensual)}</span>
@@ -101,7 +101,7 @@ export default function CrmDashboard({ unidadId }) {
           <p style={{ color: "#8a8578" }} className="text-xs mt-2">{progresoMeta}% de la meta, según tu Plan de negocio (Estrategia)</p>
         </div>
       ) : (
-        <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+        <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px dashed #d8d2c3" }}>
           <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Objetivo de facturación del mes</span>
           <p style={{ color: "#a89f88" }} className="text-xs mt-1">
             Completá tu Plan de negocio en Estrategia para ver acá la meta de facturación.
@@ -109,7 +109,7 @@ export default function CrmDashboard({ unidadId }) {
         </div>
       )}
 
-      <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Embudo del Pipeline</span>
         <p style={{ color: "#a89f88" }} className="text-xs mb-3">Foto actual de cuántos prospectos hay en cada etapa.</p>
         <div className="space-y-2.5">

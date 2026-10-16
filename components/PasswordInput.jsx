@@ -20,7 +20,7 @@ export default function PasswordInput({ value, onChange, placeholder, required, 
         className={className || "w-full rounded-lg px-4 py-3 pr-11 text-sm outline-none"}
         style={style || (dark
           ? { background: "#242440", color: BRAND.cream, border: "1px solid #35354f" }
-          : { border: "1px solid #e4dfd3" })}
+          : { border: "1px solid #d9d1bf" })}
       />
       <button
         type="button"

@@ -1,562 +1,287 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Plus, ShoppingCart, Trash2, X } from "lucide-react";
-import { BRAND } from "@/lib/constants";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Download, Search, Briefcase } from "lucide-react";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
-import { uid, isThisMonth, money } from "@/lib/helpers";
-import AudioAyuda from "@/components/AudioAyuda";
-import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
-import SearchableSelect from "@/components/SearchableSelect";
-import ClienteModal from "@/components/ClienteModal";
-import MoneyInput from "@/components/MoneyInput";
-import SeguimientoBoard from "@/components/ventas/SeguimientoBoard";
+import { useEmpresas } from "@/lib/empresas";
+import { C } from "@/lib/theme";
+import { mesSumar } from "@/lib/fechas";
+import { descargarCsv } from "@/lib/exportCsv";
+import { FiltroEmpresas } from "@/components/empresas/EmpresasUI";
+import AudioModal, { BotonAudio } from "@/components/audio/AudioModal";
+import { interpretarVentas, ejemploVentas } from "@/lib/audio/ventas";
+import { normalizar, entregado, movimientos, horasTot, modeloDe, ESTADOS_HITO } from "@/components/ventas/nuevo/calculos";
+import { EstilosVentas } from "@/components/ventas/nuevo/ui";
+import Operativa from "@/components/ventas/nuevo/Operativa";
+import Ganancias from "@/components/ventas/nuevo/Ganancias";
+import ProyectoDrawer from "@/components/ventas/nuevo/ProyectoDrawer";
+import RevisionAudio, { contarCambiosVentas } from "@/components/ventas/nuevo/RevisionAudio";
 
-const OTRO = "__otro__";
-const MESES_LABEL = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-];
+const NAVY = "#1A1A2E";
+const CREAM = "#F4F1EC";
+const TC_DEFAULT = 1450;
 
-// "2026-07-15" -> "2026-07"
-const mesKey = (fechaStr) => (fechaStr || "").slice(0, 7);
-
-function labelMes(clave) {
-  const [anio, mes] = clave.split("-").map(Number);
-  const anioActual = new Date().getFullYear();
-  const nombre = MESES_LABEL[mes - 1] || clave;
-  return anio === anioActual ? nombre : `${nombre} ${anio}`;
-}
-
-const FILTROS_VACIOS = {
-  desde: "", hasta: "", producto: "", cliente: "", mes: "", montoMin: "", montoMax: "",
+const SUBTITULOS = {
+  oper: "Lo que pasa después de cerrar: fechas de desarrollo, implementación y entrega, y horas ejecutadas.",
+  gan: "Lo que ganás vos en cada proyecto, según las reglas de cada empresa, y cuándo lo cobrás.",
 };
+
+const AUDIO_INTRO =
+  "Contá cómo avanzaron tus proyectos: qué hito terminaste, si se movió una fecha, cuántas horas trabajaste, qué se cobró o cuánto se ejecutó. Nombrá cada proyecto por su número o por el cliente. Antes de guardar, revisás todo.";
 
 export default function VentasSection({ business }) {
   const { loadData, saveData, unidadId } = useUnidadStorage();
-  const [ventas, setVentas] = useState([]);
-  const [loaded, setLoaded] = useState(false);
-  const [fechaActiva, setFechaActiva] = useState(new Date().toISOString().slice(0, 10));
-  const [fila, setFila] = useState({ productoId: "", productoLibre: "", cantidad: "1", precio: "", clienteId: "" });
-  const [catalogo, setCatalogo] = useState([]);
-  const [clientes, setClientes] = useState([]);
-  const [clienteModalAbierto, setClienteModalAbierto] = useState(false);
-  const [mesesAbiertos, setMesesAbiertos] = useState({});
-  const [vista, setVista] = useState("carga");
-  const [filtros, setFiltros] = useState(FILTROS_VACIOS);
-  const [orden, setOrden] = useState("recientes");
+  const { empresas, actualizar, porId } = useEmpresas();
 
-  const usaCatalogo = business?.tipoNegocio !== "servicios";
+  const [crudos, setCrudos] = useState([]);
+  const [cargado, setCargado] = useState(false);
+  const [tc, setTcState] = useState(TC_DEFAULT);
+  const crudosRef = useRef([]);
+
+  const [tab, setTab] = useState("oper");
+  const [filtro, setFiltro] = useState("todas");
+  const [estado, setEstado] = useState("curso");
+  const anio = new Date().getFullYear();
+  const [periodo, setPeriodo] = useState(String(anio));
+  const [busqueda, setBusqueda] = useState("");
+  const [abierto, setAbierto] = useState(null);
+  const [audioEmp, setAudioEmp] = useState(null); // null = cerrado · "todas" · id de empresa · "sin"
+  const [recien, setRecien] = useState(() => new Set());
+  const flashTimer = useRef(null);
 
   useEffect(() => {
     if (!unidadId) return;
-    setLoaded(false);
-    loadData("ventas-registro", []).then((d) => { setVentas(d); setLoaded(true); });
-    if (usaCatalogo) {
-      loadData("finanzas-costos", { productos: [], fijos: [] }).then((c) => setCatalogo(c.productos || []));
-    } else {
-      setCatalogo([]);
+    loadData("ventas-proyectos", []).then((d) => {
+      const lista = Array.isArray(d) ? d.filter((p) => p && p.num !== undefined && p.num !== null) : [];
+      crudosRef.current = lista;
+      setCrudos(lista);
+      setCargado(true);
+    });
+    loadData("ventas-tc", TC_DEFAULT).then((v) => setTcState(Number(v) > 0 ? Number(v) : TC_DEFAULT));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unidadId]);
+
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+
+  const empresaDe = (p) => porId(p.empresa);
+  const proyectos = useMemo(
+    () => crudos.map((p) => normalizar(p, empresas.find((e) => e.id === p.empresa) || null)),
+    [crudos, empresas]
+  );
+
+  const guardar = (lista) => {
+    crudosRef.current = lista;
+    setCrudos(lista);
+    saveData("ventas-proyectos", lista);
+  };
+  const cambiarProyecto = (nuevo) => guardar(crudosRef.current.map((p) => (p.num === nuevo.num ? nuevo : p)));
+  const eliminarProyecto = (n) => { setAbierto(null); guardar(crudosRef.current.filter((p) => p.num !== n)); };
+  const setTc = (v) => { setTcState(v); saveData("ventas-tc", v); };
+
+  const flashear = (nums) => {
+    setRecien(new Set(nums));
+    clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setRecien(new Set()), 2200);
+  };
+
+  // ---- Filtros ----
+  const conocida = (p) => !!empresaDe(p);
+  const pasaEmpresa = (p, f = filtro) => f === "todas" || (f === "sin" ? !conocida(p) : p.empresa === f);
+  const q = busqueda.trim().toLowerCase().replace(/^#/, "");
+  const lista = proyectos.filter((p) => {
+    if (!pasaEmpresa(p)) return false;
+    if (tab === "oper" && estado !== "todos") {
+      const ent = entregado(p, empresaDe(p));
+      if (estado === "curso" ? ent : !ent) return false;
     }
-    loadData("clientes-registro", []).then((c) => setClientes(c));
-  }, [usaCatalogo, unidadId]);
-
-  const productoElegido = catalogo.find((p) => p.id === fila.productoId);
-  const mostrarLibre = !usaCatalogo || fila.productoId === OTRO || catalogo.length === 0;
-
-  const agregar = async () => {
-    const nombreProducto = mostrarLibre ? fila.productoLibre.trim() : productoElegido?.nombre;
-    if (!nombreProducto || !fila.precio) return;
-    const nuevo = {
-      id: uid(),
-      fecha: fechaActiva,
-      producto: nombreProducto,
-      cantidad: Number(fila.cantidad) || 1,
-      precio: Number(fila.precio),
-      ...(productoElegido ? { costoUnitario: Number(productoElegido.costo) || 0 } : {}),
-      ...(fila.clienteId ? { clienteId: fila.clienteId } : {}),
-    };
-    const actualizado = [nuevo, ...ventas];
-    setVentas(actualizado);
-    await saveData("ventas-registro", actualizado);
-    setFila({ productoId: "", productoLibre: "", cantidad: "1", precio: "", clienteId: "" });
-  };
-
-  const eliminar = async (id) => {
-    const actualizado = ventas.filter((v) => v.id !== id);
-    setVentas(actualizado);
-    await saveData("ventas-registro", actualizado);
-  };
-
-  const clienteNombre = (id) => clientes.find((c) => c.id === id)?.nombre;
-
-  const guardarClienteNuevo = async (datos) => {
-    const nuevo = { ...datos, id: uid() };
-    const actualizado = [nuevo, ...clientes];
-    setClientes(actualizado);
-    await saveData("clientes-registro", actualizado);
-    setFila((f) => ({ ...f, clienteId: nuevo.id }));
-    setClienteModalAbierto(false);
-  };
-
-  const subtotalFila = (v) => Number(v.precio || 0) * Number(v.cantidad || 1);
-
-  const totalMes = ventas.filter((v) => isThisMonth(v.fecha)).reduce((s, v) => s + subtotalFila(v), 0);
-
-  // Margen real de este mes (solo cuenta las ventas ligadas a un producto con costo conocido).
-  const ventasConCosto = ventas.filter((v) => isThisMonth(v.fecha) && v.costoUnitario != null);
-  const margenMes = ventasConCosto.reduce((s, v) => s + (Number(v.precio || 0) - Number(v.costoUnitario || 0)) * Number(v.cantidad || 1), 0);
-
-  const mesActualKey = mesKey(new Date().toISOString().slice(0, 10));
-
-  // Mes en curso: se sigue mostrando día por día, como siempre.
-  const ventasMesActual = ventas.filter((v) => mesKey(v.fecha) === mesActualKey);
-  const porFecha = {};
-  ventasMesActual.forEach((v) => {
-    if (!porFecha[v.fecha]) porFecha[v.fecha] = [];
-    porFecha[v.fecha].push(v);
+    if (q && !(String(p.num) === q || p.cliente.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q))) return false;
+    return true;
   });
-  const fechasOrdenadas = Object.keys(porFecha).sort((a, b) => (a < b ? 1 : -1));
+  const conteo = (id) => proyectos.filter((p) => pasaEmpresa(p, id)).length;
 
-  const fechaLabel = (f) => new Date(f + "T00:00:00").toLocaleDateString("es-AR", { weekday: "short", day: "numeric", month: "short" });
+  const grupos = [
+    ...empresas.map((e) => ({ empresa: e, proyectos: lista.filter((p) => p.empresa === e.id) })),
+    { empresa: null, proyectos: lista.filter((p) => !conocida(p)) },
+  ]
+    .filter((g) => g.proyectos.length)
+    .map((g) => ({ ...g, proyectos: [...g.proyectos].sort((a, b) => Number(a.num) - Number(b.num)) }));
 
-  // Meses anteriores: se agrupan en un botón colapsable por mes.
-  const porMesAnterior = {};
-  ventas.forEach((v) => {
-    const clave = mesKey(v.fecha);
-    if (clave === mesActualKey) return;
-    if (!porMesAnterior[clave]) porMesAnterior[clave] = [];
-    porMesAnterior[clave].push(v);
-  });
-  const mesesAnterioresOrdenados = Object.keys(porMesAnterior).sort((a, b) => (a < b ? 1 : -1));
+  const cabecera = (e, extra) => (
+    <div className="flex flex-wrap items-center gap-2.5 mb-2 px-1">
+      <span className="rounded-full shrink-0" style={{ width: 11, height: 11, background: e?.color || C.soft }} />
+      <h3 className="text-[15px] font-bold m-0" style={{ color: C.ink }}>{e?.nombre || "Sin empresa"}</h3>
+      {extra}
+      <span className="ml-auto">
+        <BotonAudio color={e?.color || C.muted} onClick={(ev) => { ev?.stopPropagation?.(); setAudioEmp(e ? e.id : "sin"); }}>
+          Audio {e?.nombre || "sin empresa"}
+        </BotonAudio>
+      </span>
+    </div>
+  );
 
-  const toggleMes = (clave) => setMesesAbiertos((prev) => ({ ...prev, [clave]: !prev[clave] }));
-
-  // Agrupa las ventas de un mes por producto: cantidad y valor total por línea.
-  const agruparPorProducto = (items) => {
-    const porProducto = {};
-    items.forEach((v) => {
-      if (!porProducto[v.producto]) porProducto[v.producto] = { producto: v.producto, cantidad: 0, total: 0 };
-      porProducto[v.producto].cantidad += Number(v.cantidad || 1);
-      porProducto[v.producto].total += subtotalFila(v);
-    });
-    return Object.values(porProducto).sort((a, b) => b.total - a.total);
+  // ---- Exportar ----
+  const exportar = () => {
+    const nombreEmp = (p) => empresaDe(p)?.nombre || "Sin empresa";
+    if (tab === "oper") {
+      descargarCsv("ventas-operativa.csv", [
+        ["N°", "Empresa", "Cliente", "Descripción", "Hito", "Fecha", "Estado", "Horas totales del proyecto"],
+        ...lista.flatMap((p) => p.hitos.map((h) => [p.num, nombreEmp(p), p.cliente, p.desc, h.n, h.f, ESTADOS_HITO[h.estado], horasTot(p)])),
+      ]);
+    } else {
+      descargarCsv("ventas-ganancias.csv", [
+        ["N°", "Empresa", "Cliente", "Mes de cobro", "Concepto", "Tu ganancia", "Moneda", "Cobrado"],
+        ...lista.flatMap((p) =>
+          movimientos(p, empresaDe(p))
+            .filter((m) => periodo === "todo" || m.mes.startsWith(periodo))
+            .map((m) => [p.num, nombreEmp(p), p.cliente, m.mes, m.det, Math.round(m.monto), m.moneda, m.ok ? "Sí" : "No"])
+        ),
+      ]);
+    }
   };
 
-  // ---- Dashboard: todos los movimientos, con filtros ----
-  const productosUnicos = [...new Set(ventas.map((v) => v.producto))].filter(Boolean).sort((a, b) => a.localeCompare(b));
-  const mesesUnicos = [...new Set(ventas.map((v) => mesKey(v.fecha)))].filter(Boolean).sort((a, b) => (a < b ? 1 : -1));
+  // ---- Audio ----
+  const audioEmpresa = audioEmp && audioEmp !== "todas" && audioEmp !== "sin" ? porId(audioEmp) : null;
+  const proyectosAudio = proyectos.filter((p) =>
+    audioEmp === "todas" ? true : audioEmp === "sin" ? !conocida(p) : p.empresa === audioEmp
+  );
+  const datosAudio = {
+    proyectos: proyectosAudio.map((p) => {
+      const e = empresaDe(p);
+      const modelo = modeloDe(e);
+      return {
+        num: p.num,
+        cliente: p.cliente,
+        empresa: e?.nombre || "Sin empresa",
+        modelo,
+        hitos: p.hitos.map((h, i) => ({ i, n: h.n, f: h.f, estado: h.estado })),
+        ...(modelo === "cuotas" ? { cuotas: Array.from({ length: p.cuotas }, (_, i) => { const mes = mesSumar(p.inicio, i); return { mes, cobrada: p.cobradas.includes(mes) }; }) } : {}),
+        ...(modelo === "agencia" ? { ejecucion: p.ejecucion, pagadas: p.pagadas } : {}),
+        ...(modelo === "propio" ? { cobros: p.cobros.map((c, idx) => ({ idx, mes: c.mes, monto: c.monto, ok: c.ok })) } : {}),
+      };
+    }),
+  };
+  const ejemplo = audioEmpresa
+    ? ejemploVentas([modeloDe(audioEmpresa)])
+    : ejemploVentas(empresas.map((e) => modeloDe(e)));
 
-  const hayFiltrosActivos = Object.values(filtros).some((v) => v !== "");
-
-  const limpiarFiltros = () => setFiltros(FILTROS_VACIOS);
-
-  const movimientosFiltrados = ventas
-    .filter((v) => {
-      if (filtros.desde && v.fecha < filtros.desde) return false;
-      if (filtros.hasta && v.fecha > filtros.hasta) return false;
-      if (filtros.producto && v.producto !== filtros.producto) return false;
-      if (filtros.cliente && v.clienteId !== filtros.cliente) return false;
-      if (filtros.mes && mesKey(v.fecha) !== filtros.mes) return false;
-      const subtotal = subtotalFila(v);
-      if (filtros.montoMin && subtotal < Number(filtros.montoMin)) return false;
-      if (filtros.montoMax && subtotal > Number(filtros.montoMax)) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      if (orden === "antiguos") return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0;
-      if (orden === "mayor") return subtotalFila(b) - subtotalFila(a);
-      if (orden === "menor") return subtotalFila(a) - subtotalFila(b);
-      return a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0; // recientes
+  const aplicarAudio = (prop) => {
+    if (!Array.isArray(prop)) return;
+    const tocados = [];
+    let nueva = crudosRef.current;
+    prop.forEach((x) => {
+      const on = (x.cambios || []).filter((c) => c.on);
+      if (!on.length) return;
+      const base = proyectos.find((p) => Number(p.num) === Number(x.num));
+      if (!base) return;
+      const p = JSON.parse(JSON.stringify(base));
+      on.forEach((c) => {
+        if (c.tipo === "hito" && p.hitos[c.hi] && ESTADOS_HITO[c.e]) p.hitos[c.hi].estado = c.e;
+        if (c.tipo === "fecha" && p.hitos[c.hi] && c.f) p.hitos[c.hi].f = c.f;
+        if (c.tipo === "horas" && Number(c.h)) p.horas.push({ f: c.f || new Date().toISOString().slice(0, 10), h: +c.h, d: c.d || "" });
+        if (c.tipo === "cuota" && p.cobradas && c.mes && !p.cobradas.includes(c.mes)) p.cobradas.push(c.mes);
+        if (c.tipo === "pago" && p.pagadas && c.ejecMes) { const m = mesSumar(c.ejecMes, 1); if (!p.pagadas.includes(m)) p.pagadas.push(m); }
+        if (c.tipo === "ejec" && p.ejecucion && c.mes) {
+          const e = p.ejecucion.find((y) => y.mes === c.mes);
+          if (e) e.monto = +c.monto || 0; else p.ejecucion.push({ mes: c.mes, monto: +c.monto || 0 });
+          p.ejecucion.sort((a, b) => a.mes.localeCompare(b.mes));
+        }
+        if (c.tipo === "cobro" && p.cobros && p.cobros[c.idx]) p.cobros[c.idx].ok = true;
+      });
+      nueva = nueva.map((y) => (Number(y.num) === Number(p.num) ? p : y));
+      tocados.push(p.num);
     });
+    if (!tocados.length) return;
+    guardar(nueva);
+    flashear(tocados);
+  };
 
-  const totalFiltrado = movimientosFiltrados.reduce((s, v) => s + subtotalFila(v), 0);
-  const unidadesFiltradas = movimientosFiltrados.reduce((s, v) => s + Number(v.cantidad || 1), 0);
-  const cantidadFiltrada = movimientosFiltrados.length;
-  const promedioFiltrado = cantidadFiltrada > 0 ? totalFiltrado / cantidadFiltrada : 0;
-  const movimientosConCosto = movimientosFiltrados.filter((v) => v.costoUnitario != null);
-  const margenFiltrado = movimientosConCosto.reduce((s, v) => s + (Number(v.precio || 0) - Number(v.costoUnitario || 0)) * Number(v.cantidad || 1), 0);
-
-  const inputCls = "rounded-lg px-3 py-2 text-sm outline-none";
-  const inputStyle = { border: "1px solid #e4dfd3" };
+  const proyectoAbierto = abierto !== null ? proyectos.find((p) => p.num === abierto) : null;
+  const tabStyle = (activo) => (activo ? { background: NAVY, color: CREAM } : { background: C.chip, color: C.muted });
+  const selStyle = { background: C.card, border: `1px solid ${C.line}`, outline: "none", color: C.ink };
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-1">
-        <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Ventas</h2>
-        <AudioAyuda texto={AUDIO_GUIONES[`ventas:${vista}`]} audioSrc={AUDIO_ARCHIVOS.ventas} />
-      </div>
-      <p style={{ color: "#6b6759" }} className="text-sm mb-4">
-        {vista === "carga" ? "Cargá cada producto vendido, día por día."
-          : vista === "dashboard" ? "Filtrá y explorá todos tus movimientos de venta."
-          : "Proyectos ganados en el CRM, desde el contrato hasta el cobro."}
-      </p>
+      <EstilosVentas />
 
-      <div className="flex gap-1.5 mb-5 flex-wrap">
-        <button onClick={() => setVista("carga")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "carga" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
-          Carga diaria
-        </button>
-        <button onClick={() => setVista("dashboard")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "dashboard" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
-          Dashboard
-        </button>
-        <button onClick={() => setVista("seguimiento")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "seguimiento" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
-          Seguimiento
-        </button>
+      <div className="flex flex-wrap justify-between items-start gap-3">
+        <div>
+          <h2 style={{ color: C.ink }} className="text-xl font-semibold mb-1">Ventas</h2>
+          <p style={{ color: C.muted }} className="text-sm mb-4">{SUBTITULOS[tab]}</p>
+        </div>
+        <BotonAudio onClick={() => setAudioEmp("todas")} />
       </div>
 
-      {vista === "carga" && (
-        <>
-          <div className={`grid ${usaCatalogo && ventasConCosto.length > 0 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"} gap-3 mb-5`}>
-            <div className="rounded-xl p-4" style={{ background: BRAND.navy }}>
-              <span style={{ color: "#8b8b9a" }} className="text-xs">Total vendido este mes</span>
-              <div style={{ color: BRAND.teal }} className="text-2xl font-semibold">{money(totalMes)}</div>
-            </div>
-            {usaCatalogo && ventasConCosto.length > 0 && (
-              <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-                <span style={{ color: "#8a8578" }} className="text-xs">Margen real del mes (sobre productos con costo cargado)</span>
-                <div style={{ color: margenMes >= 0 ? "#127a79" : "#b3453f" }} className="text-2xl font-semibold">{money(margenMes)}</div>
-              </div>
-            )}
-          </div>
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        <button onClick={() => setTab("oper")} className="px-3 py-1.5 rounded-md text-xs font-medium" style={tabStyle(tab === "oper")}>Operativa</button>
+        <button onClick={() => setTab("gan")} className="px-3 py-1.5 rounded-md text-xs font-medium" style={tabStyle(tab === "gan")}>Ganancias</button>
+      </div>
 
-          <div className="rounded-xl p-4 mb-6" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-            <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Fecha de la venta</span>
-            <input type="date" value={fechaActiva} onChange={(e) => setFechaActiva(e.target.value)}
-              className="rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
-            <div className="flex flex-col sm:flex-row gap-2 mb-2">
-              {usaCatalogo && catalogo.length > 0 ? (
-                <SearchableSelect
-                  options={catalogo}
-                  getId={(p) => p.id}
-                  getLabel={(p) => p.nombre}
-                  value={fila.productoId === OTRO ? "" : fila.productoId}
-                  placeholder="Elegí un producto..."
-                  onSelect={(p) => setFila({ ...fila, productoId: p ? p.id : "" })}
-                  createLabel="Otro (escribir)..."
-                  onCreateNew={() => setFila({ ...fila, productoId: OTRO, productoLibre: "" })}
-                />
-              ) : null}
-              {mostrarLibre && (
-                <input value={fila.productoLibre} onChange={(e) => setFila({ ...fila, productoLibre: e.target.value })}
-                  onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Producto"
-                  className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 mb-2">
-              <SearchableSelect
-                options={clientes}
-                getId={(c) => c.id}
-                getLabel={(c) => c.nombre}
-                getSub={(c) => c.telefono || c.correo}
-                value={fila.clienteId}
-                placeholder="Cliente (opcional)"
-                onSelect={(c) => setFila({ ...fila, clienteId: c ? c.id : "" })}
-                clearLabel="Sin cliente asignado"
-                createLabel="+ Crear cliente nuevo"
-                onCreateNew={() => setClienteModalAbierto(true)}
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input type="number" min="1" value={fila.cantidad} onChange={(e) => setFila({ ...fila, cantidad: e.target.value })}
-                onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Unidades"
-                className="rounded-lg px-3 py-2 text-sm outline-none sm:w-24" style={{ border: "1px solid #e4dfd3" }} />
-              <MoneyInput value={fila.precio} onChange={(n) => setFila({ ...fila, precio: n })}
-                onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Precio unitario"
-                className="rounded-lg px-3 py-2 text-sm outline-none sm:w-32" style={{ border: "1px solid #e4dfd3" }} />
-              <button onClick={agregar} className="rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-1.5 justify-center"
-                style={{ background: BRAND.teal, color: BRAND.navy }}>
-                <Plus size={14} /> Agregar
-              </button>
-            </div>
-            {productoElegido && (
-              <p style={{ color: "#a89f88" }} className="text-[11px] mt-2">
-                Costo cargado en Finanzas para este producto: {money(productoElegido.costo)}. El precio de venta lo elegís vos, libremente.
-              </p>
-            )}
-          </div>
+      <div className="mb-3">
+        <FiltroEmpresas empresas={empresas} filtro={filtro} onChange={setFiltro} conteo={conteo} mostrarSin titulo="Ver proyectos de" />
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        {tab === "oper" ? (
+          <select value={estado} onChange={(e) => setEstado(e.target.value)} className="rounded-lg px-2.5 py-1.5 text-[12.5px] font-semibold" style={selStyle}>
+            <option value="curso">En curso</option>
+            <option value="entregado">Entregados</option>
+            <option value="todos">Todos</option>
+          </select>
+        ) : (
+          <select value={periodo} onChange={(e) => setPeriodo(e.target.value)} className="rounded-lg px-2.5 py-1.5 text-[12.5px] font-semibold" style={selStyle}>
+            <option value={String(anio)}>Año {anio}</option>
+            <option value={String(anio + 1)}>Año {anio + 1}</option>
+            <option value="todo">Todo</option>
+          </select>
+        )}
+        <div className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 flex-1 sm:flex-none" style={{ ...selStyle, minWidth: 200 }}>
+          <Search size={13} style={{ color: C.soft }} />
+          <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar por número o cliente…"
+            className="bg-transparent outline-none text-[12.5px] w-full" style={{ color: C.ink }} />
+        </div>
+        <span className="flex-1 hidden sm:block" />
+        <button onClick={exportar} disabled={!lista.length} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-bold disabled:opacity-50"
+          style={{ border: "1.5px solid #1AABAA", color: C.tealDark }}>
+          <Download size={13} /> Descargar Excel
+        </button>
+      </div>
 
-          {loaded && ventas.length === 0 && (
-            <div className="rounded-xl p-6 text-center mb-4" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
-              <ShoppingCart size={20} color="#b3ab98" className="mx-auto mb-2" />
-              <p style={{ color: "#8a8578" }} className="text-sm">Todavía no cargaste ventas.</p>
-            </div>
-          )}
-
-          {loaded && ventas.length > 0 && fechasOrdenadas.length === 0 && (
-            <p style={{ color: "#a89f88" }} className="text-sm mb-4">Todavía no cargaste ventas este mes.</p>
-          )}
-
-          <div className="space-y-4 mb-4">
-            {fechasOrdenadas.map((fecha) => {
-              const items = porFecha[fecha];
-              const totalUnidades = items.reduce((s, v) => s + Number(v.cantidad || 1), 0);
-              const totalDia = items.reduce((s, v) => s + subtotalFila(v), 0);
-              return (
-                <div key={fecha} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-                  <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: "#f0ece2" }}>
-                    <span style={{ color: BRAND.navy }} className="text-sm font-semibold capitalize">{fechaLabel(fecha)}</span>
-                    <span style={{ color: "#6b6759" }} className="text-xs">{fecha}</span>
-                  </div>
-                  <div>
-                    {items.map((v) => (
-                      <div key={v.id} className="flex items-center justify-between px-4 py-2.5" style={{ borderTop: "1px solid #f0ece2" }}>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span style={{ color: BRAND.navy }} className="text-sm">{v.producto}</span>
-                          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#f0ece2", color: "#6b6759" }}>×{v.cantidad || 1}</span>
-                          {v.clienteId && clienteNombre(v.clienteId) && (
-                            <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#eef2fb", color: "#3a4b8f" }}>
-                              {clienteNombre(v.clienteId)}
-                            </span>
-                          )}
-                          {v.costoUnitario != null && (
-                            <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#eef7f6", color: "#127a79" }}>
-                              margen {money((v.precio - v.costoUnitario) * (v.cantidad || 1))}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span style={{ color: "#8a8578" }} className="text-xs">{money(v.precio)} c/u</span>
-                          <span style={{ color: BRAND.navy }} className="text-sm font-medium w-20 text-right">{money(subtotalFila(v))}</span>
-                          <button onClick={() => eliminar(v.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: BRAND.navy }}>
-                    <span style={{ color: "#8b8b9a" }} className="text-xs">{totalUnidades} {totalUnidades === 1 ? "unidad" : "unidades"}</span>
-                    <span style={{ color: BRAND.teal }} className="text-sm font-semibold">{money(totalDia)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {mesesAnterioresOrdenados.length > 0 && (
-            <div>
-              <div style={{ color: "#8a8578" }} className="text-xs font-semibold uppercase tracking-wide mb-2">Meses anteriores</div>
-              <div className="space-y-2">
-                {mesesAnterioresOrdenados.map((clave) => {
-                  const items = porMesAnterior[clave];
-                  const abierto = !!mesesAbiertos[clave];
-                  const totalUnidadesMes = items.reduce((s, v) => s + Number(v.cantidad || 1), 0);
-                  const totalMesAnterior = items.reduce((s, v) => s + subtotalFila(v), 0);
-
-                  // Dentro del mes, agrupado por día (más reciente primero) y,
-                  // dentro de cada día, por producto.
-                  const porDiaDelMes = {};
-                  items.forEach((v) => {
-                    if (!porDiaDelMes[v.fecha]) porDiaDelMes[v.fecha] = [];
-                    porDiaDelMes[v.fecha].push(v);
-                  });
-                  const diasDelMes = Object.keys(porDiaDelMes).sort((a, b) => (a < b ? 1 : -1));
-
-                  return (
-                    <div key={clave} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-                      <button onClick={() => toggleMes(clave)}
-                        className="w-full flex items-center justify-between px-4 py-3" style={{ background: "#f0ece2" }}>
-                        <div className="flex items-center gap-2">
-                          {abierto ? <ChevronUp size={15} color={BRAND.navy} /> : <ChevronDown size={15} color={BRAND.navy} />}
-                          <span style={{ color: BRAND.navy }} className="text-sm font-semibold capitalize">{labelMes(clave)}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span style={{ color: "#6b6759" }} className="text-xs">{totalUnidadesMes} {totalUnidadesMes === 1 ? "unidad" : "unidades"}</span>
-                          <span style={{ color: BRAND.navy }} className="text-sm font-semibold">{money(totalMesAnterior)}</span>
-                        </div>
-                      </button>
-                      {abierto && (
-                        <div className="p-3 space-y-3" style={{ background: "#faf8f4" }}>
-                          {diasDelMes.map((fecha) => {
-                            const itemsDia = porDiaDelMes[fecha];
-                            const lineasDia = agruparPorProducto(itemsDia);
-                            const totalUnidadesDia = itemsDia.reduce((s, v) => s + Number(v.cantidad || 1), 0);
-                            const totalDia = itemsDia.reduce((s, v) => s + subtotalFila(v), 0);
-                            return (
-                              <div key={fecha} className="rounded-lg overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-                                <div className="px-3 py-2 flex items-center justify-between" style={{ background: "#f0ece2" }}>
-                                  <span style={{ color: BRAND.navy }} className="text-xs font-semibold capitalize">{fechaLabel(fecha)}</span>
-                                  <span style={{ color: "#6b6759" }} className="text-xs">{fecha}</span>
-                                </div>
-                                {lineasDia.map((l) => (
-                                  <div key={l.producto} className="flex items-center justify-between px-3 py-1.5" style={{ borderTop: "1px solid #f0ece2" }}>
-                                    <div className="flex items-center gap-2 min-w-0">
-                                      <span style={{ color: BRAND.navy }} className="text-xs truncate">{l.producto}</span>
-                                      <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0" style={{ background: "#f0ece2", color: "#6b6759" }}>×{l.cantidad}</span>
-                                    </div>
-                                    <span style={{ color: "#4a4740" }} className="text-xs shrink-0">{money(l.total)}</span>
-                                  </div>
-                                ))}
-                                <div className="flex items-center justify-between px-3 py-1.5" style={{ borderTop: "1px solid #f0ece2" }}>
-                                  <span style={{ color: "#8a8578" }} className="text-[11px]">{totalUnidadesDia} {totalUnidadesDia === 1 ? "unidad" : "unidades"}</span>
-                                  <span style={{ color: BRAND.navy }} className="text-xs font-semibold">{money(totalDia)}</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                          <div className="flex items-center justify-between rounded-lg px-3 py-2.5" style={{ background: BRAND.navy }}>
-                            <span style={{ color: "#8b8b9a" }} className="text-xs">Total del mes ({totalUnidadesMes} {totalUnidadesMes === 1 ? "unidad" : "unidades"})</span>
-                            <span style={{ color: BRAND.teal }} className="text-sm font-semibold">{money(totalMesAnterior)}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </>
+      {cargado && proyectos.length === 0 ? (
+        <div className="rounded-xl px-5 py-10 text-center" style={{ background: C.card, border: `1px dashed ${C.line}` }}>
+          <Briefcase size={28} className="mx-auto mb-2" style={{ color: C.soft }} />
+          <div className="text-sm font-semibold mb-1" style={{ color: C.ink }}>Todavía no hay proyectos</div>
+          <p className="text-xs max-w-md mx-auto leading-relaxed" style={{ color: C.muted }}>
+            Cuando en el CRM marcás una oportunidad como <b>Ganada</b>, aparece acá con el mismo número y los hitos típicos de su empresa ya cargados,
+            para que ajustes las fechas, cargues horas y sigas lo que vas a cobrar.
+          </p>
+        </div>
+      ) : cargado && lista.length === 0 ? (
+        <div className="rounded-xl px-5 py-6 text-center text-sm" style={{ background: C.card, border: `1px solid ${C.line}`, color: C.muted }}>
+          No hay proyectos con estos filtros.
+        </div>
+      ) : tab === "oper" ? (
+        <Operativa grupos={grupos} lista={lista} recien={recien} onAbrir={setAbierto} cabecera={cabecera} />
+      ) : (
+        <Ganancias grupos={grupos} lista={lista} empresas={empresas} porId={porId} periodo={periodo} tc={tc} setTc={setTc}
+          recien={recien} onAbrir={setAbierto} cabecera={cabecera} actualizar={actualizar} filtro={filtro} />
       )}
 
-      {vista === "dashboard" && (
-        <>
-          <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-            <div className="flex items-center justify-between mb-3">
-              <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Filtros</span>
-              {hayFiltrosActivos && (
-                <button onClick={limpiarFiltros} className="flex items-center gap-1 text-xs" style={{ color: "#b3453f" }}>
-                  <X size={12} /> Limpiar filtros
-                </button>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-2">
-              <div>
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Desde</span>
-                <input type="date" value={filtros.desde} onChange={(e) => setFiltros({ ...filtros, desde: e.target.value })}
-                  className={inputCls + " w-full"} style={inputStyle} />
-              </div>
-              <div>
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Hasta</span>
-                <input type="date" value={filtros.hasta} onChange={(e) => setFiltros({ ...filtros, hasta: e.target.value })}
-                  className={inputCls + " w-full"} style={inputStyle} />
-              </div>
-              <div>
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Mes</span>
-                <select value={filtros.mes} onChange={(e) => setFiltros({ ...filtros, mes: e.target.value })}
-                  className={inputCls + " w-full"} style={inputStyle}>
-                  <option value="">Todos</option>
-                  {mesesUnicos.map((m) => <option key={m} value={m} className="capitalize">{labelMes(m)}</option>)}
-                </select>
-              </div>
-              <div>
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Producto</span>
-                <select value={filtros.producto} onChange={(e) => setFiltros({ ...filtros, producto: e.target.value })}
-                  className={inputCls + " w-full"} style={inputStyle}>
-                  <option value="">Todos</option>
-                  {productosUnicos.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
-              <div>
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Cliente</span>
-                <select value={filtros.cliente} onChange={(e) => setFiltros({ ...filtros, cliente: e.target.value })}
-                  className={inputCls + " w-full"} style={inputStyle}>
-                  <option value="">Todos</option>
-                  {clientes.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div>
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Facturación mínima</span>
-                <MoneyInput placeholder="$ mín" value={filtros.montoMin} onChange={(n) => setFiltros({ ...filtros, montoMin: n })}
-                  className={inputCls + " w-full"} style={inputStyle} />
-              </div>
-              <div>
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Facturación máxima</span>
-                <MoneyInput placeholder="$ máx" value={filtros.montoMax} onChange={(n) => setFiltros({ ...filtros, montoMax: n })}
-                  className={inputCls + " w-full"} style={inputStyle} />
-              </div>
-              <div className="col-span-2 sm:col-span-2">
-                <span style={{ color: "#a89f88" }} className="text-[11px] block mb-1">Ordenar por</span>
-                <select value={orden} onChange={(e) => setOrden(e.target.value)} className={inputCls + " w-full"} style={inputStyle}>
-                  <option value="recientes">Más recientes primero</option>
-                  <option value="antiguos">Más antiguos primero</option>
-                  <option value="mayor">Mayor facturación primero</option>
-                  <option value="menor">Menor facturación primero</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className={`grid ${usaCatalogo && movimientosConCosto.length > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"} gap-3 mb-5`}>
-            <div className="rounded-xl p-4" style={{ background: BRAND.navy }}>
-              <span style={{ color: "#8b8b9a" }} className="text-xs">Total filtrado</span>
-              <div style={{ color: BRAND.teal }} className="text-xl font-semibold">{money(totalFiltrado)}</div>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-              <span style={{ color: "#8a8578" }} className="text-xs">Movimientos</span>
-              <div style={{ color: BRAND.navy }} className="text-xl font-semibold">{cantidadFiltrada}</div>
-            </div>
-            <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-              <span style={{ color: "#8a8578" }} className="text-xs">Unidades</span>
-              <div style={{ color: BRAND.navy }} className="text-xl font-semibold">{unidadesFiltradas}</div>
-            </div>
-            {usaCatalogo && movimientosConCosto.length > 0 ? (
-              <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-                <span style={{ color: "#8a8578" }} className="text-xs">Margen (con costo cargado)</span>
-                <div style={{ color: margenFiltrado >= 0 ? "#127a79" : "#b3453f" }} className="text-xl font-semibold">{money(margenFiltrado)}</div>
-              </div>
-            ) : (
-              <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-                <span style={{ color: "#8a8578" }} className="text-xs">Promedio por venta</span>
-                <div style={{ color: BRAND.navy }} className="text-xl font-semibold">{money(promedioFiltrado)}</div>
-              </div>
-            )}
-          </div>
-
-          {loaded && ventas.length === 0 && (
-            <div className="rounded-xl p-6 text-center mb-4" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
-              <ShoppingCart size={20} color="#b3ab98" className="mx-auto mb-2" />
-              <p style={{ color: "#8a8578" }} className="text-sm">Todavía no cargaste ventas.</p>
-            </div>
-          )}
-
-          {loaded && ventas.length > 0 && movimientosFiltrados.length === 0 && (
-            <p style={{ color: "#a89f88" }} className="text-sm mb-4">No hay movimientos que coincidan con estos filtros.</p>
-          )}
-
-          {movimientosFiltrados.length > 0 && (
-            <div className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
-              {movimientosFiltrados.map((v) => (
-                <div key={v.id} className="flex items-center justify-between px-4 py-2.5" style={{ borderTop: "1px solid #f0ece2" }}>
-                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                    <span style={{ color: "#8a8578" }} className="text-xs shrink-0">{v.fecha}</span>
-                    <span style={{ color: BRAND.navy }} className="text-sm truncate">{v.producto}</span>
-                    <span className="text-xs px-1.5 py-0.5 rounded shrink-0" style={{ background: "#f0ece2", color: "#6b6759" }}>×{v.cantidad || 1}</span>
-                    {v.clienteId && clienteNombre(v.clienteId) && (
-                      <span className="text-xs px-1.5 py-0.5 rounded shrink-0 hidden sm:inline-block" style={{ background: "#eef2fb", color: "#3a4b8f" }}>
-                        {clienteNombre(v.clienteId)}
-                      </span>
-                    )}
-                    {v.costoUnitario != null && (
-                      <span className="text-xs px-1.5 py-0.5 rounded shrink-0 hidden sm:inline-block" style={{ background: "#eef7f6", color: "#127a79" }}>
-                        margen {money((v.precio - v.costoUnitario) * (v.cantidad || 1))}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span style={{ color: "#8a8578" }} className="text-xs hidden sm:inline">{money(v.precio)} c/u</span>
-                    <span style={{ color: BRAND.navy }} className="text-sm font-medium w-20 text-right">{money(subtotalFila(v))}</span>
-                    <button onClick={() => eliminar(v.id)} style={{ color: "#b3453f" }}><Trash2 size={13} /></button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
+      {proyectoAbierto && (
+        <ProyectoDrawer key={proyectoAbierto.num} proyecto={proyectoAbierto} empresa={empresaDe(proyectoAbierto)}
+          onCambiar={cambiarProyecto} onEliminar={() => eliminarProyecto(proyectoAbierto.num)} onCerrar={() => setAbierto(null)} />
       )}
 
-      {vista === "seguimiento" && <SeguimientoBoard unidadId={unidadId} />}
-
-      <ClienteModal
-        open={clienteModalAbierto}
-        initial={null}
-        onClose={() => setClienteModalAbierto(false)}
-        onSave={guardarClienteNuevo}
-      />
+      <AudioModal open={audioEmp !== null} onClose={() => setAudioEmp(null)}
+        titulo={audioEmpresa ? `Audio ${audioEmpresa.nombre}` : audioEmp === "sin" ? "Audio · sin empresa" : "Actualizar por audio"}
+        intro={AUDIO_INTRO}
+        ejemplo={ejemplo}
+        contexto="ventas"
+        datos={datosAudio}
+        respaldo={(texto) => interpretarVentas(texto, proyectosAudio, empresas)}
+        renderRevision={({ propuesta, setPropuesta }) => (
+          <RevisionAudio propuesta={propuesta} setPropuesta={setPropuesta} proyectos={proyectos} porId={porId} />
+        )}
+        contarCambios={contarCambiosVentas}
+        onAplicar={aplicarAudio} />
     </div>
   );
 }

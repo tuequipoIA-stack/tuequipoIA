@@ -116,11 +116,11 @@ export default function DashboardSection({ business }) {
       <p style={{ color: "#6b6759" }} className="text-sm mb-5">Todo lo importante de tu negocio, de un vistazo.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <span style={{ color: "#8a8578" }} className="text-xs">Ventas del mes</span>
           <div style={{ color: BRAND.navy }} className="text-lg font-semibold">{money(ventasMes)}</div>
         </div>
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <span style={{ color: "#8a8578" }} className="text-xs">Gastos del mes</span>
           <div style={{ color: "#b3453f" }} className="text-lg font-semibold">{money(gastosMes)}</div>
         </div>
@@ -157,7 +157,7 @@ export default function DashboardSection({ business }) {
           <p style={{ color: "#0b2a24" }} className="text-xs mt-1.5 opacity-80">{money(vendidoHoy)} vendido hasta ahora</p>
         </div>
       ) : (
-        <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+        <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px dashed #d8d2c3" }}>
           <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Meta de venta de hoy</span>
           <p style={{ color: "#a89f88" }} className="text-xs mt-1">
             Completá costo, margen y sueldo objetivo en Estrategia → Plan de negocio para ver acá cuánto tenés que vender hoy.
@@ -167,7 +167,7 @@ export default function DashboardSection({ business }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
         {/* Ranking top 3 */}
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-0.5">
             <Trophy size={15} color="#c98a1f" />
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Top 3 más vendidos</span>
@@ -189,7 +189,7 @@ export default function DashboardSection({ business }) {
         </div>
 
         {/* Último hack publicado */}
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-0.5">
             <Lightbulb size={15} color={BRAND.teal} />
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Último hack</span>
@@ -208,7 +208,7 @@ export default function DashboardSection({ business }) {
       </div>
 
       {puedeCalcular && (
-        <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center justify-between mb-2">
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Progreso hacia tu objetivo de sueldo</span>
             <span style={{ color: "#6b6759" }} className="text-xs">{unidadesVendidasMes} / {unidadesPorMesObjetivo} unidades</span>
@@ -222,7 +222,7 @@ export default function DashboardSection({ business }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
         {/* Tareas */}
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-3">
             <ListChecks size={15} color={BRAND.navy} />
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Tareas de hoy ({tareasHoy.length})</span>
@@ -237,7 +237,7 @@ export default function DashboardSection({ business }) {
         </div>
 
         {/* Marketing */}
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-3">
             <Megaphone size={15} color={BRAND.navy} />
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Próximas publicaciones</span>
@@ -255,7 +255,7 @@ export default function DashboardSection({ business }) {
       </div>
 
       {/* Objetivos */}
-      <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div className="flex items-center gap-2 mb-3">
           <Compass size={15} color={BRAND.navy} />
           <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Objetivos activos</span>

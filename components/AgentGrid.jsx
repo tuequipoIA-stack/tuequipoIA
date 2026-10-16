@@ -10,7 +10,7 @@ export default function AgentGrid({ onPick }) {
         return (
           <button key={a.id} onClick={() => onPick(a)}
             className="text-left rounded-xl p-5 transition-transform hover:-translate-y-0.5"
-            style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+            style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
             <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: a.color }}>
               <Icon size={20} color={a.id === "marketing" ? BRAND.navy : BRAND.cream} />
             </div>

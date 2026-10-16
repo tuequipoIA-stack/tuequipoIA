@@ -190,7 +190,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
       </p>
 
       {/* Punto de partida */}
-      <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div className="flex items-center justify-between mb-3">
           <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Punto de partida</span>
           {onIrAOferta && (
@@ -217,7 +217,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
           <div className="flex gap-1.5 mb-2">
             {HORIZONTES_REFERENCIA.map((h) => (
               <button key={h.key} onClick={() => cambiarHorizonte(h.key)} className="px-3 py-1.5 rounded-md text-xs font-medium"
-                style={horizonte === h.key ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+                style={horizonte === h.key ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
                 {h.label}
               </button>
             ))}
@@ -228,27 +228,27 @@ export default function PlanNegocio({ business, onIrAOferta }) {
         </div>
       </div>
 
-      <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Tu visión, en una frase</span>
         <input value={form.vision} onChange={(e) => guardarForm({ ...form, vision: e.target.value })}
           placeholder='Ej: "Quiero ser la mejor sanguchería de Mendoza"'
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
 
         <span style={{ color: "#8a8578" }} className="text-xs block mb-2">¿Qué vas a vender para lograrlo?</span>
         <input value={form.productoPrincipal} onChange={(e) => guardarForm({ ...form, productoPrincipal: e.target.value })}
           placeholder="Ej: Sánguches gourmet"
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
 
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Costo por unidad</span>
             <input type="number" value={form.costoUnitario} onChange={(e) => guardarForm({ ...form, costoUnitario: e.target.value })}
-              placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+              placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
           </div>
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Margen que querés ganar</span>
             <input type="number" value={form.margenDeseado} onChange={(e) => guardarForm({ ...form, margenDeseado: e.target.value })}
-              placeholder="%" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+              placeholder="%" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
           </div>
         </div>
 
@@ -256,12 +256,12 @@ export default function PlanNegocio({ business, onIrAOferta }) {
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Sueldo mensual que querés sacar</span>
             <input type="number" value={form.sueldoObjetivo} onChange={(e) => guardarForm({ ...form, sueldoObjetivo: e.target.value })}
-              placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+              placeholder="$" className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
           </div>
           <div>
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">Días hábiles al mes</span>
             <input type="number" value={form.diasHabiles} onChange={(e) => guardarForm({ ...form, diasHabiles: e.target.value })}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
           </div>
         </div>
       </div>
@@ -322,7 +322,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {CADENCIAS.map((c) => (
-              <div key={c.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+              <div key={c.id} className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                 <div className="flex items-center justify-between mb-2">
                   <span style={{ color: BRAND.navy }} className="text-sm font-semibold">{c.label}</span>
                   {puedeCalcular && (
@@ -392,7 +392,7 @@ export default function PlanNegocio({ business, onIrAOferta }) {
                     onKeyDown={(e) => e.key === "Enter" && agregarTareaManual(c.id)}
                     placeholder="Agregar tarea..."
                     className="flex-1 text-xs rounded-lg px-2.5 py-1.5 outline-none"
-                    style={{ border: "1px solid #e4dfd3" }}
+                    style={{ border: "1px solid #d9d1bf" }}
                   />
                   <button onClick={() => agregarTareaManual(c.id)} style={{ color: "#127a79" }}>
                     <Plus size={15} />

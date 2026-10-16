@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronDown, LogOut, Shield, LayoutGrid, Handshake } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, LogOut, Shield, LayoutGrid } from "lucide-react";
 import { BRAND, NAV_GROUPS } from "@/lib/constants";
+
+const ID_SECCIONES_EM = ["estrategia", "marketing", "recursos"];
 import { createClient } from "@/lib/supabase/client";
 import LogoMark from "@/components/LogoMark";
 import UnidadSwitcher from "@/components/UnidadSwitcher";
@@ -59,7 +61,75 @@ function GroupButton({ label, icon: Icon, collapsed, open, onToggle, activeInsid
   );
 }
 
-export default function Sidebar({ active, onChange, isAdmin, mostrarCrm = false, mobileOpen = false, onCloseMobile }) {
+// Botón unificado "Estrategia y marketing": despliega Estrategia, Marketing y
+// Recursos, y cada una sus subsecciones (cada subsección abre esa pantalla).
+function ArbolEstrategiaMarketing({ item, active, subvista, collapsed, onSelect }) {
+  const enRama = ID_SECCIONES_EM.includes(active);
+  const [abierto, setAbierto] = useState(enRama);
+  const [abiertas, setAbiertas] = useState(() => new Set(enRama ? [active] : []));
+  useEffect(() => {
+    if (enRama) { setAbierto(true); setAbiertas((prev) => new Set([...prev, active])); }
+  }, [active]);
+  const Icon = item.icon;
+
+  if (collapsed) {
+    return (
+      <button onClick={() => onSelect("estrategia")} title={item.label}
+        className="flex items-center justify-center rounded-xl py-3 transition-all"
+        style={enRama ? { background: BRAND.teal, color: BRAND.navy } : { color: "#b4b4c4" }}>
+        <Icon size={15} />
+      </button>
+    );
+  }
+  const toggleSec = (id) => setAbiertas((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  return (
+    <div>
+      <button onClick={() => setAbierto((v) => !v)}
+        className="w-full flex items-center gap-2.5 pl-6 pr-3 py-2.5 rounded-xl text-[13px] font-bold text-left"
+        style={{ background: "#22223c", color: enRama && !abierto ? BRAND.teal : "#e3e3ee" }}>
+        <Icon size={15} className="shrink-0" />
+        <span className="flex-1 leading-tight">{item.label}</span>
+        <ChevronDown size={14} className="shrink-0 transition-transform" style={{ transform: abierto ? "rotate(180deg)" : "none" }} />
+      </button>
+      {abierto && (
+        <div className="ml-8 pl-2 mt-1 mb-1 flex flex-col gap-0.5" style={{ borderLeft: "1px solid #34345a" }}>
+          {item.secciones.map((sec) => {
+            const SIcon = sec.icon;
+            const secAbierta = abiertas.has(sec.id);
+            return (
+              <div key={sec.id}>
+                <button onClick={() => toggleSec(sec.id)}
+                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[12.5px] font-semibold text-left"
+                  style={{ color: active === sec.id && !secAbierta ? BRAND.teal : "#c9c9d8" }}>
+                  <SIcon size={14} className="shrink-0" />
+                  <span className="flex-1 truncate">{sec.label}</span>
+                  <ChevronDown size={13} className="shrink-0 transition-transform opacity-80" style={{ transform: secAbierta ? "rotate(180deg)" : "none" }} />
+                </button>
+                {secAbierta && (
+                  <div className="ml-3.5 pl-1.5 mb-1.5 flex flex-col gap-0.5" style={{ borderLeft: "1px dashed #34345a" }}>
+                    {sec.subs.map((sub) => {
+                      const on = active === sec.id && subvista === sub.id;
+                      return (
+                        <button key={sub.id} onClick={() => onSelect(sec.id, sub.id)}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-[12px]"
+                          style={on ? { background: BRAND.teal, color: BRAND.navy, fontWeight: 700 } : { color: "#9898ad" }}>
+                          {sub.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Sidebar({ active, subvista, onChange, isAdmin, mobileOpen = false, onCloseMobile }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [hidratado, setHidratado] = useState(false);
@@ -79,11 +149,6 @@ export default function Sidebar({ active, onChange, isAdmin, mostrarCrm = false,
   const grupos = NAV_GROUPS.map((g) => {
     if (g.id !== "tuequipoia") return g;
     let items = g.items;
-    if (mostrarCrm) {
-      const idxVentas = items.findIndex((it) => it.id === "ventas");
-      const item = { id: "crm", label: "CRM", icon: Handshake };
-      items = idxVentas === -1 ? [...items, item] : [...items.slice(0, idxVentas + 1), item, ...items.slice(idxVentas + 1)];
-    }
     if (isAdmin) items = [...items, { id: "admin", label: "Admin", icon: Shield }];
     return { ...g, items };
   }).filter((g) => !g.adminOnly || isAdmin);
@@ -100,7 +165,7 @@ export default function Sidebar({ active, onChange, isAdmin, mostrarCrm = false,
   // plegado, aunque la sección activa por defecto viva dentro de un grupo.
   useEffect(() => {
     if (!montado.current) { montado.current = true; return; }
-    const grupoDeActivo = grupos.find((g) => g.items.some((it) => it.id === active));
+    const grupoDeActivo = grupos.find((g) => g.items.some((it) => it.id === active || it.secciones?.some((s) => s.id === active)));
     if (grupoDeActivo) setGrupoAbierto(grupoDeActivo.id);
   }, [active]);
 
@@ -131,8 +196,8 @@ export default function Sidebar({ active, onChange, isAdmin, mostrarCrm = false,
     router.refresh();
   };
 
-  const seleccionar = (id) => {
-    onChange(id);
+  const seleccionar = (id, sub) => {
+    onChange(id, sub);
     onCloseMobile?.();
   };
 
@@ -186,7 +251,7 @@ export default function Sidebar({ active, onChange, isAdmin, mostrarCrm = false,
         <div className="flex flex-col gap-2 mt-1 flex-1 overflow-y-auto">
           {grupos.map((grupo, i) => {
             const abierto = grupoAbierto === grupo.id;
-            const activeInside = grupo.items.some((it) => it.id === active);
+            const activeInside = grupo.items.some((it) => it.id === active || it.secciones?.some((s) => s.id === active));
             return (
               <div key={grupo.id} className={i > 0 ? "pt-2" : undefined} style={i > 0 ? { borderTop: "1px solid #2a2a45" } : undefined}>
                 <GroupButton
@@ -199,7 +264,10 @@ export default function Sidebar({ active, onChange, isAdmin, mostrarCrm = false,
                 />
                 {abierto && (
                   <div className="flex flex-col gap-1 mt-1.5">
-                    {grupo.items.map((item) => (
+                    {grupo.items.map((item) => item.secciones ? (
+                      <ArbolEstrategiaMarketing key={item.id} item={item} active={active} subvista={subvista}
+                        collapsed={collapsed && isDesktop} onSelect={seleccionar} />
+                    ) : (
                       <NavButton key={item.id} active={active === item.id} collapsed={collapsed && isDesktop}
                         onClick={() => seleccionar(item.id)} icon={item.icon} label={item.label} sub />
                     ))}

@@ -73,7 +73,7 @@ export default function PacientesBoard({ unidadId }) {
 
   return (
     <div>
-      <div className="rounded-xl p-4 mb-5 inline-block" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5 inline-block" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div style={{ color: "#8a8578" }} className="text-xs mb-1">Pacientes activos</div>
         <div style={{ color: BRAND.navy }} className="text-xl font-semibold">{activos}</div>
       </div>
@@ -95,7 +95,7 @@ export default function PacientesBoard({ unidadId }) {
               <div key={col.id}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => arrastrando && mover(arrastrando, col.id)}
-                className="rounded-xl p-3 shrink-0" style={{ background: "#f0ece2", border: "1px solid #e4dfd3", width: "260px" }}>
+                className="rounded-xl p-3 shrink-0" style={{ background: "#f0ece2", border: "1px solid #d9d1bf", width: "260px" }}>
                 <div className="flex items-center justify-between mb-2 px-1">
                   <span style={{ color: "#6b6759" }} className="text-xs font-semibold uppercase tracking-wide">
                     {col.label} ({items.length})
@@ -110,7 +110,7 @@ export default function PacientesBoard({ unidadId }) {
                         onDragEnd={() => setArrastrando(null)}
                         onClick={() => abrirEditar(p)}
                         className="rounded-lg p-3 cursor-grab active:cursor-grabbing"
-                        style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                        style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                         <div style={{ color: BRAND.navy }} className="text-sm font-semibold">{p.nombre}</div>
                         {p.motivo && <div style={{ color: "#8a8578" }} className="text-xs">{p.motivo}</div>}
                         {p.frecuencia && <div style={{ color: "#a89f88" }} className="text-[11px]">{p.frecuencia}</div>}
@@ -122,7 +122,7 @@ export default function PacientesBoard({ unidadId }) {
                         <select value={p.fase}
                           onClick={(e) => e.stopPropagation()}
                           onChange={(e) => mover(p.id, e.target.value)}
-                          className="mt-2 text-[10px] px-1.5 py-1 rounded-md font-medium outline-none w-full" style={{ background: "#eee9dd", color: "#6b6759", border: "none" }}>
+                          className="mt-2 text-[10px] px-1.5 py-1 rounded-md font-medium outline-none w-full" style={{ background: "#e2dbcc", color: "#6b6759", border: "none" }}>
                           {CRM_FASES_PACIENTE.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
                         </select>
                       </div>

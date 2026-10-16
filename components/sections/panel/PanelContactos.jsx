@@ -121,7 +121,7 @@ function ImportarCSV({ marca, setMarca, onImportado, showToast }) {
   };
 
   return (
-    <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
       <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold mb-2">Cargar contactos (CSV o Excel)</h3>
       <div className="flex items-center gap-3 flex-wrap mb-2">
         <label className="cursor-pointer text-sm font-semibold px-4 py-2 rounded-md text-white" style={{ background: BRAND.navy }}>
@@ -243,14 +243,14 @@ function NuevoContactoManual({ marca, setMarca, onCreado, showToast }) {
 
   if (!abierto) {
     return (
-      <button onClick={() => setAbierto(true)} className="text-sm font-semibold px-4 py-2 rounded-md mb-5" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+      <button onClick={() => setAbierto(true)} className="text-sm font-semibold px-4 py-2 rounded-md mb-5" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#f6f2ea" }}>
         + Cargar un cliente a mano
       </button>
     );
   }
 
   return (
-    <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold">Cargar un cliente a mano</h3>
         <label className="flex items-center gap-1.5 text-xs" style={{ color: "#8a8578" }}>
@@ -350,13 +350,13 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
       style={{ background: "rgba(20, 20, 30, 0.45)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
     >
-    <div className="rounded-xl p-4 w-full max-w-2xl my-4" style={{ background: "#faf9f6", border: "1px solid #e4dfd3", boxShadow: "0 10px 40px rgba(0,0,0,0.25)" }}>
+    <div className="rounded-xl p-4 w-full max-w-2xl my-4" style={{ background: "#faf9f6", border: "1px solid #d9d1bf", boxShadow: "0 10px 40px rgba(0,0,0,0.25)" }}>
       <div className="flex items-center justify-between mb-3">
         <h3 style={{ color: BRAND.navy }} className="text-base font-semibold">{contacto.nombre}</h3>
         <button onClick={onCerrar} className="text-xs px-2 py-1 rounded-md" style={{ color: "#4a4740", background: "#f1efe8" }}>Cerrar ✕</button>
       </div>
 
-      <div className="rounded-lg p-3 mb-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+      <div className="rounded-lg p-3 mb-3" style={{ background: "#f6f2ea", border: "1px solid #eee7d8" }}>
         <strong className="text-xs" style={{ color: "#8a8578" }}>Datos del contacto</strong>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
           <CampoEditable label="Nombre" value={nombre} onChange={setNombre} />
@@ -385,7 +385,7 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
         <input type="datetime-local" value={proximo} onChange={(e) => setProximo(e.target.value)} className="text-sm rounded-md p-1.5" style={{ border: "1px solid #ddd" }} />
       </div>
 
-      <div className="rounded-lg p-3 mb-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+      <div className="rounded-lg p-3 mb-3" style={{ background: "#f6f2ea", border: "1px solid #eee7d8" }}>
         <label className="flex flex-col gap-0.5">
           <span className="text-xs" style={{ color: "#8a8578" }}>Observaciones</span>
           <textarea
@@ -403,7 +403,7 @@ function DetalleContacto({ contacto, segmentos, onCerrar, onActualizado, showToa
         {guardando ? "Guardando..." : "Guardar cambios"}
       </button>
 
-      <div className="rounded-lg p-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+      <div className="rounded-lg p-3" style={{ background: "#f6f2ea", border: "1px solid #eee7d8" }}>
         <strong className="text-xs" style={{ color: "#8a8578" }}>Historial de interacciones</strong>
         <div className="mt-2 space-y-2">
           {(interacciones || []).length === 0 && <p className="text-xs" style={{ color: "#8a8578" }}>Sin interacciones todavía.</p>}
@@ -495,7 +495,7 @@ function GeneradorGrupoIA({ contactos, onCerrar, showToast }) {
   };
 
   return (
-    <div className="rounded-xl p-4 mb-3" style={{ background: "#faf9f6", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4 mb-3" style={{ background: "#faf9f6", border: "1px solid #d9d1bf" }}>
       <div className="flex items-center justify-between mb-2">
         <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold">Generar email con IA para el grupo ({contactos.length})</h3>
         <button onClick={onCerrar} className="text-xs px-2 py-1 rounded-md" style={{ color: "#4a4740", background: "#f1efe8" }}>Cerrar ✕</button>
@@ -510,7 +510,7 @@ function GeneradorGrupoIA({ contactos, onCerrar, showToast }) {
       {marcasDistintas ? (
         <p className="text-sm" style={{ color: "#791f1f" }}>Los contactos seleccionados son de marcas distintas. Elegí contactos de una sola marca para generar el email en grupo.</p>
       ) : !resultado ? (
-        <div className="rounded-lg p-3" style={{ background: "#ffffff", border: "1px solid #cfe0f5" }}>
+        <div className="rounded-lg p-3" style={{ background: "#f6f2ea", border: "1px solid #cfe0f5" }}>
           <p className="text-xs mb-2" style={{ color: "#8a8578" }}>Comparten marca <strong style={{ color: "#4a4740" }}>{marca}</strong>. La IA arma una sola plantilla con variables por nombre y empresa, y un preview personalizado por cada contacto.</p>
           {dolorPreview && (
             <div className="mb-3">
@@ -532,7 +532,7 @@ function GeneradorGrupoIA({ contactos, onCerrar, showToast }) {
         </div>
       ) : (
         <div>
-          <div className="rounded-lg p-3 mb-3" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+          <div className="rounded-lg p-3 mb-3" style={{ background: "#f6f2ea", border: "1px solid #eee7d8" }}>
             <strong className="text-xs" style={{ color: "#8a8578" }}>Plantilla base</strong>
             <p className="text-sm mt-1" style={{ color: "#4a4740" }}><strong>Asunto A:</strong> {resultado.asunto_a}</p>
             <p className="text-sm" style={{ color: "#4a4740" }}><strong>Asunto B:</strong> {resultado.asunto_b}</p>
@@ -548,7 +548,7 @@ function GeneradorGrupoIA({ contactos, onCerrar, showToast }) {
               const href = gmailLink(c.email, asunto, mensaje, gmailAuthUser());
               const ya = !!enviados[c.id];
               return (
-                <div key={c.id} className="flex items-start justify-between gap-3 rounded-lg p-2.5" style={{ background: "#ffffff", border: "1px solid #eee7d8" }}>
+                <div key={c.id} className="flex items-start justify-between gap-3 rounded-lg p-2.5" style={{ background: "#f6f2ea", border: "1px solid #eee7d8" }}>
                   <div className="text-sm flex-1">
                     <strong style={{ color: BRAND.navy }}>{c.nombre}</strong> <span style={{ color: "#8a8578" }}>{c.empresa}</span>
                     <p className="text-xs mt-1" style={{ color: "#6b6759" }}>{asunto}</p>
@@ -676,7 +676,7 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
     <div>
       <div className="flex items-center justify-between gap-2 mb-1">
         <h2 style={{ color: BRAND.navy }} className="text-xl font-semibold">Contactos</h2>
-        <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}>
+        <button onClick={recargar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md" style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#f6f2ea" }}>
           <RefreshCw size={13} />
           Actualizar
         </button>
@@ -715,7 +715,7 @@ export default function PanelContactos({ contactos, segmentos, marcaFiltro, reca
         />
       )}
 
-      <div className="overflow-auto rounded-xl" style={{ border: "1px solid #e4dfd3" }}>
+      <div className="overflow-auto rounded-xl" style={{ border: "1px solid #d9d1bf" }}>
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: "#faf9f6" }}>
