@@ -122,7 +122,7 @@ function AppShell({ isAdmin, bloqueado }) {
             {section === "clientes" && <ClientesSection />}
             {section === "crm" && <CrmSection business={business} />}
             {section === "estrategia" && <EstrategiaSection business={business} vista={subvista} onVista={setSubvista} />}
-            {section === "dashboard" && <DashboardSection business={business} />}
+            {section === "dashboard" && <DashboardSection business={business} onNavigate={(id, sub) => setSection(id, sub)} />}
             {section === "tablero" && <TableroSection />}
             {section === "perfil" && <PerfilSection business={business} onBusinessUpdate={setBusiness} />}
             {section === "admin" && isAdmin && <AdminSection />}
