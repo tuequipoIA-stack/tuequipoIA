@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import PlanNegocio from "@/components/estrategia/PlanNegocio";
 import DefinirOfertaTab from "@/components/estrategia/DefinirOfertaTab";
@@ -8,8 +8,10 @@ import TuGuiaTab from "@/components/estrategia/TuGuiaTab";
 import AudioAyuda from "@/components/AudioAyuda";
 import { AUDIO_GUIONES, AUDIO_ARCHIVOS } from "@/lib/audioGuiones";
 
-export default function EstrategiaSection({ business }) {
-  const [vista, setVista] = useState("guia");
+export default function EstrategiaSection({ business, vista: vistaProp, onVista }) {
+  const [vista, setVistaInterna] = useState(vistaProp || "guia");
+  useEffect(() => { if (vistaProp) setVistaInterna(vistaProp); }, [vistaProp]);
+  const setVista = (v) => { setVistaInterna(v); onVista?.(v); };
 
   return (
     <div>
@@ -21,15 +23,15 @@ export default function EstrategiaSection({ business }) {
 
       <div className="flex gap-1.5 mb-5 flex-wrap">
         <button onClick={() => setVista("guia")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "guia" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={vista === "guia" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           Tu guía
         </button>
         <button onClick={() => setVista("oferta")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "oferta" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={vista === "oferta" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           Definir oferta de negocio
         </button>
         <button onClick={() => setVista("plan")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "plan" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={vista === "plan" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           Plan de negocio
         </button>
       </div>

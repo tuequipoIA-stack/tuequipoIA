@@ -48,7 +48,7 @@ export default function PropuestaValorTab() {
         </span>
         <textarea value={data.propuesta} onChange={(e) => setData({ ...data, propuesta: e.target.value })} rows={4}
           placeholder="Ej: le ofrezco tranquilidad de saber que come sano sin esfuerzo, y trato cercano tipo casa de familia..."
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" style={{ border: "1px solid #e4dfd3" }} />
+          className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" style={{ border: "1px solid #d9d1bf" }} />
         <button onClick={guardarPropuesta} className="mt-2 rounded-lg px-4 py-2 text-sm font-semibold"
           style={{ background: BRAND.teal, color: BRAND.navy }}>
           {guardado ? "Guardado ✓" : "Guardar propuesta de valor"}
@@ -60,7 +60,7 @@ export default function PropuestaValorTab() {
         <div className="flex gap-2 mb-3">
           <input value={nuevoDiferenciador} onChange={(e) => setNuevoDiferenciador(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && agregarDiferenciador()} placeholder="Ej: entrega en el día"
-            className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
           <button onClick={agregarDiferenciador} className="rounded-lg px-3 py-2 text-sm font-semibold"
             style={{ background: BRAND.navy, color: BRAND.cream }}>
             <Plus size={14} />

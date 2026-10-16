@@ -43,10 +43,13 @@ function labelSemana(mondayISO) {
   return `Semana del ${d.toLocaleDateString("es-AR", { day: "numeric", month: "long" })}`;
 }
 
-export default function RecursosSection({ isAdmin }) {
+export default function RecursosSection({ isAdmin, vista, onVista }) {
   const [recursos, setRecursos] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [filtro, setFiltro] = useState("todos");
+  const [vistaR, setVistaR] = useState(vista || "documentos");
+  useEffect(() => { if (vista) setVistaR(vista); }, [vista]);
+  const cambiarVista = (v) => { setVistaR(v); onVista?.(v); };
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(FORM_VACIO);
   const [links, setLinks] = useState([""]);
@@ -193,33 +196,33 @@ export default function RecursosSection({ isAdmin }) {
       {error && <p className="text-xs mb-4" style={{ color: "#b3453f" }}>{error}</p>}
 
       {isAdmin && showForm && (
-        <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
               <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Categoría</span>
               <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }}>
                 {RECURSO_CATEGORIAS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
               </select>
             </div>
             <div>
               <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Tipo de recurso</span>
               <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }}>
                 {TIPOS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
             </div>
           </div>
 
           <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título"
-            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" style={{ border: "1px solid #d9d1bf" }} />
 
           <div className="mb-2">
             <span style={{ color: "#8a8578" }} className="text-xs flex items-center gap-1 mb-1">
               <Clock size={11} /> Publicar el
             </span>
             <input type="datetime-local" value={form.publicarEn} onChange={(e) => setForm({ ...form, publicarEn: e.target.value })}
-              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
             <p style={{ color: "#a89f88" }} className="text-[11px] mt-1">Dejalo en el momento actual para publicarlo ya, o elegí una fecha futura para programarlo.</p>
           </div>
 
@@ -227,7 +230,7 @@ export default function RecursosSection({ isAdmin }) {
             <div className="mb-2">
               <span style={{ color: "#8a8578" }} className="text-xs block mb-1">Semana a la que corresponde</span>
               <input type="date" value={form.fechaSemana} onChange={(e) => setForm({ ...form, fechaSemana: e.target.value })}
-                className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+                className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
             </div>
           )}
 
@@ -237,7 +240,7 @@ export default function RecursosSection({ isAdmin }) {
                 <div key={i} className="flex items-center gap-1.5 mb-1.5">
                   <input value={l} onChange={(e) => actualizarLink(i, e.target.value)}
                     placeholder="https://..."
-                    className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+                    className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
                   {links.length > 1 && (
                     <button onClick={() => quitarLink(i)} style={{ color: "#b3453f" }}><X size={14} /></button>
                   )}
@@ -255,7 +258,7 @@ export default function RecursosSection({ isAdmin }) {
                 style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} tabIndex={-1} />
               <button type="button" onClick={() => fileInputRef.current?.click()}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer mb-2"
-                style={{ background: "#eee9dd", color: BRAND.navy }}>
+                style={{ background: "#e2dbcc", color: BRAND.navy }}>
                 <Upload size={13} /> {archivos.length > 0 ? "Agregar otro archivo" : "Elegir archivo(s)"}
               </button>
               {archivos.length > 0 && (
@@ -274,7 +277,7 @@ export default function RecursosSection({ isAdmin }) {
           <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
             placeholder={form.tipo === "nota" ? "Contenido" : form.tipo === "hack" ? "El accionable: qué tiene que hacer esta semana" : "Descripción (opcional)"}
             rows={form.tipo === "nota" || form.tipo === "hack" ? 5 : 3}
-            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" style={{ border: "1px solid #d9d1bf" }} />
 
           <div className="mb-3">
             <span style={{ color: "#8a8578" }} className="text-xs flex items-center gap-1 mb-1">
@@ -285,7 +288,7 @@ export default function RecursosSection({ isAdmin }) {
               style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} tabIndex={-1} />
             <button type="button" onClick={() => imagenInputRef.current?.click()}
               className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer"
-              style={{ background: "#eee9dd", color: BRAND.navy }}>
+              style={{ background: "#e2dbcc", color: BRAND.navy }}>
               <Upload size={13} /> {imagen ? imagen.name : "Elegir imagen"}
             </button>
             {imagen && (
@@ -307,23 +310,29 @@ export default function RecursosSection({ isAdmin }) {
 
       <div className="flex gap-1.5 mb-5 flex-wrap">
         <button onClick={() => setFiltro("todos")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={filtro === "todos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>Todos</button>
+          style={filtro === "todos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>Todos</button>
         {RECURSO_CATEGORIAS.map((c) => (
           <button key={c.id} onClick={() => setFiltro(c.id)} className="px-3 py-1.5 rounded-md text-xs font-medium"
-            style={filtro === c.id ? { background: c.color, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>{c.label}</button>
+            style={filtro === c.id ? { background: c.color, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>{c.label}</button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex gap-1.5 mb-5 flex-wrap">
+        {[["documentos", "Documentos y links"], ["hacks", "Hacks de la semana"]].map(([id, label]) => (
+          <button key={id} onClick={() => cambiarVista(id)} className="px-3 py-1.5 rounded-md text-xs font-medium"
+            style={vistaR === id ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>{label}</button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-6">
         {/* Columna izquierda: documentos y links */}
-        <div>
+        {vistaR === "documentos" && <div>
           <div className="flex items-center gap-1.5 mb-3">
             <BookOpen size={15} color={BRAND.navy} />
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Documentos y links ({documentos.length})</span>
           </div>
 
           {loaded && documentos.length === 0 && (
-            <div className="rounded-xl p-6 text-center" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+            <div className="rounded-xl p-6 text-center" style={{ background: "#f6f2ea", border: "1px dashed #d8d2c3" }}>
               <p style={{ color: "#8a8578" }} className="text-sm">Todavía no hay recursos en esta categoría.</p>
             </div>
           )}
@@ -334,7 +343,7 @@ export default function RecursosSection({ isAdmin }) {
               // Compatibilidad: recursos viejos guardaban un solo link/archivo en "url".
               const adjuntos = r.adjuntos?.length ? r.adjuntos : (r.url ? [{ url: r.url, nombre: r.nombre_archivo }] : []);
               return (
-                <div key={r.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                <div key={r.id} className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: cat?.color, color: BRAND.cream }}>
                       {cat?.label}
@@ -394,17 +403,17 @@ export default function RecursosSection({ isAdmin }) {
               );
             })}
           </div>
-        </div>
+        </div>}
 
         {/* Columna derecha: hacks accionables, agrupados por semana */}
-        <div>
+        {vistaR === "hacks" && <div>
           <div className="flex items-center gap-1.5 mb-3">
             <Lightbulb size={15} color={BRAND.navy} />
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Hacks de la semana ({hacks.length})</span>
           </div>
 
           {loaded && hacks.length === 0 && (
-            <div className="rounded-xl p-6 text-center" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+            <div className="rounded-xl p-6 text-center" style={{ background: "#f6f2ea", border: "1px dashed #d8d2c3" }}>
               <p style={{ color: "#8a8578" }} className="text-sm">Todavía no hay hacks en esta categoría.</p>
             </div>
           )}
@@ -443,7 +452,7 @@ export default function RecursosSection({ isAdmin }) {
               </div>
             </div>
           ))}
-        </div>
+        </div>}
       </div>
     </div>
   );

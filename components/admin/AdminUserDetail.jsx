@@ -8,7 +8,7 @@ import PasswordInput from "@/components/PasswordInput";
 
 function Bloque({ titulo, children }) {
   return (
-    <div className="rounded-xl p-4 mb-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4 mb-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
       <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-2">{titulo}</div>
       {children}
     </div>
@@ -296,7 +296,7 @@ export default function AdminUserDetail({ userId, onBack }) {
             </p>
             <div className="mb-2 max-w-xs">
               <PasswordInput dark={false} value={passwordBorrado} onChange={(e) => setPasswordBorrado(e.target.value)}
-                className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #e4dfd3", background: "#ffffff" }} />
+                className="w-full rounded-lg px-3 py-2 pr-11 text-sm outline-none" style={{ border: "1px solid #d9d1bf", background: "#f6f2ea" }} />
             </div>
             {errorBorrado && <p className="text-xs mb-2" style={{ color: "#b3453f" }}>{errorBorrado}</p>}
             <div className="flex gap-2">

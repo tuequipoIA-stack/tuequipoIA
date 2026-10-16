@@ -9,7 +9,7 @@ import MoneyInput from "@/components/MoneyInput";
 import InsumosTab from "./InsumosTab";
 
 const RECETA_VACIA = { insumoId: "", cantidad: "1" };
-const inputStyle = { border: "1px solid #e4dfd3" };
+const inputStyle = { border: "1px solid #d9d1bf" };
 const inputCls = "rounded-lg px-3 py-2 text-sm outline-none";
 
 function simboloMoneda(id) {
@@ -40,16 +40,16 @@ function ArmadorDeReceta({ insumos, ingredientes, onChange }) {
   }
 
   return (
-    <div className="rounded-lg p-2.5" style={{ background: "#faf8f4", border: "1px dashed #e4dfd3" }}>
+    <div className="rounded-lg p-2.5" style={{ background: "#faf8f4", border: "1px dashed #d9d1bf" }}>
       <div className="flex gap-2 mb-2">
         <select value={nuevoIngrediente.insumoId} onChange={(e) => setNuevoIngrediente({ ...nuevoIngrediente, insumoId: e.target.value })}
-          className="rounded-lg px-2 py-1.5 text-xs outline-none flex-1" style={{ border: "1px solid #e4dfd3" }}>
+          className="rounded-lg px-2 py-1.5 text-xs outline-none flex-1" style={{ border: "1px solid #d9d1bf" }}>
           <option value="">Elegí un insumo...</option>
           {insumos.map((i) => <option key={i.id} value={i.id}>{i.nombre} ({money(i.costoUnitario)}/{i.unidad})</option>)}
         </select>
         <input type="number" min="0" value={nuevoIngrediente.cantidad}
           onChange={(e) => setNuevoIngrediente({ ...nuevoIngrediente, cantidad: e.target.value })}
-          placeholder="Cant." className="rounded-lg px-2 py-1.5 text-xs outline-none w-16" style={{ border: "1px solid #e4dfd3" }} />
+          placeholder="Cant." className="rounded-lg px-2 py-1.5 text-xs outline-none w-16" style={{ border: "1px solid #d9d1bf" }} />
         <button onClick={agregarIngrediente} className="rounded-lg px-2 text-xs font-semibold" style={{ background: BRAND.teal, color: BRAND.navy }}>
           <Plus size={13} />
         </button>
@@ -70,7 +70,7 @@ function ArmadorDeReceta({ insumos, ingredientes, onChange }) {
       )}
 
       {ingredientes.length > 0 && (
-        <div className="flex items-center justify-between pt-1.5 text-xs font-semibold" style={{ borderTop: "1px solid #e4dfd3", color: BRAND.navy }}>
+        <div className="flex items-center justify-between pt-1.5 text-xs font-semibold" style={{ borderTop: "1px solid #d9d1bf", color: BRAND.navy }}>
           <span>Costo de la receta</span>
           <span>{money(total)}</span>
         </div>
@@ -148,30 +148,30 @@ function ProductosTab({ business }) {
 
   return (
     <div>
-      <div className="rounded-xl p-3 mb-3 flex flex-col gap-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-3 mb-3 flex flex-col gap-2" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <input value={nuevoProducto.nombre} onChange={(e) => setNuevoProducto({ ...nuevoProducto, nombre: e.target.value })}
-          placeholder="Ej: Budín de limón" className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+          placeholder="Ej: Budín de limón" className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
 
         <span style={{ color: "#8a8578" }} className="text-xs">Armá la receta (opcional) para calcular el costo solo:</span>
         <ArmadorDeReceta insumos={insumos} ingredientes={nuevosIngredientes} onChange={setNuevosIngredientes} />
 
         <div className="flex gap-2">
           <select value={nuevoProducto.moneda} onChange={(e) => setNuevoProducto({ ...nuevoProducto, moneda: e.target.value })}
-            className="rounded-lg px-2 py-2 text-sm outline-none w-24 shrink-0" style={{ border: "1px solid #e4dfd3" }}>
+            className="rounded-lg px-2 py-2 text-sm outline-none w-24 shrink-0" style={{ border: "1px solid #d9d1bf" }}>
             {MONEDAS.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
           </select>
           <MoneyInput value={nuevoProducto.costo} onChange={(n) => setNuevoProducto({ ...nuevoProducto, costo: n })}
             placeholder={totalReceta ? `Costo (sugerido: ${money(totalReceta)})` : "Costo"}
-            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
+            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }} />
           <input type="number" min="0" value={nuevoProducto.cantidad} onChange={(e) => setNuevoProducto({ ...nuevoProducto, cantidad: e.target.value })}
-            placeholder="Cantidad" className="rounded-lg px-3 py-2 text-sm outline-none w-24" style={{ border: "1px solid #e4dfd3" }} />
+            placeholder="Cantidad" className="rounded-lg px-3 py-2 text-sm outline-none w-24" style={{ border: "1px solid #d9d1bf" }} />
         </div>
         {totalReceta > 0 && !nuevoProducto.costo && (
           <p style={{ color: "#8a8578" }} className="text-[11px]">Si dejás el costo vacío, se usa el de la receta ({money(totalReceta)}). Podés escribir otro número si preferís uno distinto.</p>
         )}
         <div className="flex gap-2">
           <input type="date" value={nuevoProducto.fecha} onChange={(e) => setNuevoProducto({ ...nuevoProducto, fecha: e.target.value })}
-            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
+            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }} />
           <button onClick={agregarProducto} className="rounded-lg px-3 py-2 text-sm font-semibold flex items-center gap-1"
             style={{ background: BRAND.teal, color: BRAND.navy }}>
             <Plus size={14} /> Agregar producto
@@ -184,14 +184,14 @@ function ProductosTab({ business }) {
           const abierto = expandido === p.id;
           const costoReceta = (p.ingredientes || []).reduce((s, ing) => s + Number(ing.costoUnitario || 0) * Number(ing.cantidad || 0), 0);
           return (
-            <div key={p.id} className="rounded-lg overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+            <div key={p.id} className="rounded-lg overflow-hidden" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
               <div className="flex items-center justify-between px-3 py-2">
                 <div className="flex-1 min-w-0">
                   <div style={{ color: BRAND.navy }} className="text-sm truncate">{p.nombre}</div>
                   <div className="flex items-center gap-1.5">
                     <span style={{ color: "#8a8578" }} className="text-xs">Costo ({p.moneda || "ARS"}):</span>
                     <MoneyInput value={p.costo} onChange={(n) => editarCosto(p.id, n)}
-                      className="text-xs rounded px-1.5 py-0.5 w-20 outline-none" style={{ border: "1px solid #e4dfd3", color: BRAND.navy }} />
+                      className="text-xs rounded px-1.5 py-0.5 w-20 outline-none" style={{ border: "1px solid #d9d1bf", color: BRAND.navy }} />
                     <span style={{ color: "#a89f88" }} className="text-xs">· {p.fecha || "sin fecha"}</span>
                   </div>
                 </div>
@@ -218,7 +218,7 @@ function ProductosTab({ business }) {
                       <span>{money(ing.costoUnitario * ing.cantidad)}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between font-semibold pt-1 mt-1" style={{ borderTop: "1px solid #e4dfd3" }}>
+                  <div className="flex justify-between font-semibold pt-1 mt-1" style={{ borderTop: "1px solid #d9d1bf" }}>
                     <span>Costo calculado de la receta</span>
                     <span>{money(costoReceta)}</span>
                   </div>
@@ -269,16 +269,16 @@ function FijosTab() {
 
   return (
     <div>
-      <div className="rounded-xl p-3 mb-3 flex flex-col gap-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-3 mb-3 flex flex-col gap-2" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <input value={nuevoFijo.concepto} onChange={(e) => setNuevoFijo({ ...nuevoFijo, concepto: e.target.value })}
           onKeyDown={(e) => e.key === "Enter" && agregarFijo()} placeholder="Ej: Alquiler, Luz, Internet"
-          className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+          className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
         <div className="flex gap-2">
           <MoneyInput value={nuevoFijo.monto} onChange={(n) => setNuevoFijo({ ...nuevoFijo, monto: n })}
             onKeyDown={(e) => e.key === "Enter" && agregarFijo()} placeholder="Monto mensual"
-            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
+            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }} />
           <input type="date" value={nuevoFijo.fecha} onChange={(e) => setNuevoFijo({ ...nuevoFijo, fecha: e.target.value })}
-            className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+            className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
         </div>
         <button onClick={agregarFijo} className="rounded-lg px-3 py-2 text-sm font-semibold flex items-center gap-1 justify-center"
           style={{ background: BRAND.navy, color: BRAND.cream }}>
@@ -287,7 +287,7 @@ function FijosTab() {
       </div>
       <div className="space-y-2">
         {costos.fijos.map((f) => (
-          <div key={f.id} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+          <div key={f.id} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
             <div>
               <div style={{ color: BRAND.navy }} className="text-sm">{f.concepto}</div>
               <div style={{ color: "#8a8578" }} className="text-xs">desde {f.fecha || "sin fecha"}</div>
@@ -349,15 +349,15 @@ export default function CostosSection({ business }) {
         <>
           <div className="flex gap-1.5 mb-4">
             <button onClick={() => setVista("fijos")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-              style={vista === "fijos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+              style={vista === "fijos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
               Costos fijos
             </button>
             <button onClick={() => setVista("productos")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-              style={vista === "productos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+              style={vista === "productos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
               Productos
             </button>
             <button onClick={() => setVista("insumos")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-              style={vista === "insumos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+              style={vista === "insumos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
               Insumos
             </button>
           </div>

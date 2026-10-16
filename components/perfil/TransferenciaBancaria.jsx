@@ -18,7 +18,7 @@ export default function TransferenciaBancaria({ dark = false }) {
 
   const colorLabel = dark ? "#8b8b9a" : "#8a8578";
   const colorValor = dark ? BRAND.cream : "#1A1A2E";
-  const colorBorde = dark ? "#35354f" : "#e4dfd3";
+  const colorBorde = dark ? "#35354f" : "#d9d1bf";
 
   return (
     <div>

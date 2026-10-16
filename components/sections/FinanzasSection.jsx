@@ -102,11 +102,11 @@ export default function FinanzasSection({ business }) {
 
       <div className="flex gap-1.5 mb-5">
         <button onClick={() => setVista("movimientos")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "movimientos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={vista === "movimientos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           Movimientos
         </button>
         <button onClick={() => setVista("costos")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={vista === "costos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={vista === "costos" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           Costos
         </button>
       </div>
@@ -116,11 +116,11 @@ export default function FinanzasSection({ business }) {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-            <div className="rounded-xl p-3" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+            <div className="rounded-xl p-3" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
               <span style={{ color: "#8a8578" }} className="text-xs">Ventas</span>
               <div style={{ color: BRAND.navy }} className="text-lg font-semibold">{money(ventasMes)}</div>
             </div>
-            <div className="rounded-xl p-3" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+            <div className="rounded-xl p-3" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
               <span style={{ color: "#8a8578" }} className="text-xs">Gastos</span>
               <div style={{ color: "#b3453f" }} className="text-lg font-semibold">{money(gastosMes)}</div>
             </div>
@@ -141,26 +141,26 @@ export default function FinanzasSection({ business }) {
             </div>
           </div>
 
-          <div className="rounded-xl p-4 mb-5 flex flex-col sm:flex-row gap-2 flex-wrap" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+          <div className="rounded-xl p-4 mb-5 flex flex-col sm:flex-row gap-2 flex-wrap" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
             <input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })}
-              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
             <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
+              className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }}>
               {GASTO_CATEGORIAS.map((c) => <option key={c}>{c}</option>)}
             </select>
             <div className="flex gap-1.5">
               {GASTO_TIPOS.map((t) => (
                 <button key={t.id} type="button" onClick={() => setForm({ ...form, tipo: t.id })}
                   className="rounded-lg px-3 py-2 text-xs font-semibold"
-                  style={form.tipo === t.id ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+                  style={form.tipo === t.id ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
                   {t.label}
                 </button>
               ))}
             </div>
             <MoneyInput value={form.monto} onChange={(n) => setForm({ ...form, monto: n })} placeholder="Monto"
-              className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
+              className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }} />
             <input value={form.nota} onChange={(e) => setForm({ ...form, nota: e.target.value })} placeholder="Nota (opcional)"
-              className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
+              className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }} />
             <button onClick={agregar} className="rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-1.5 justify-center"
               style={{ background: BRAND.navy, color: BRAND.cream }}>
               <Plus size={14} /> Agregar gasto
@@ -178,7 +178,7 @@ export default function FinanzasSection({ business }) {
               const items = porFecha[fecha];
               const totalDia = items.reduce((s, g) => s + Number(g.monto || 0), 0);
               return (
-                <div key={fecha} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                <div key={fecha} className="rounded-xl overflow-hidden" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                   <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: "#f0ece2" }}>
                     <span style={{ color: BRAND.navy }} className="text-sm font-semibold capitalize">{fechaLabel(fecha)}</span>
                     <span style={{ color: "#6b6759" }} className="text-xs">{fecha}</span>
@@ -228,7 +228,7 @@ export default function FinanzasSection({ business }) {
                   const diasDelMes = Object.keys(porDiaDelMes).sort((a, b) => (a < b ? 1 : -1));
 
                   return (
-                    <div key={clave} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                    <div key={clave} className="rounded-xl overflow-hidden" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                       <button onClick={() => toggleMes(clave)}
                         className="w-full flex items-center justify-between px-4 py-3" style={{ background: "#f0ece2" }}>
                         <div className="flex items-center gap-2">
@@ -244,7 +244,7 @@ export default function FinanzasSection({ business }) {
                             const lineasDia = agruparPorCategoria(itemsDia);
                             const totalDia = itemsDia.reduce((s, g) => s + Number(g.monto || 0), 0);
                             return (
-                              <div key={fecha} className="rounded-lg overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                              <div key={fecha} className="rounded-lg overflow-hidden" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                                 <div className="px-3 py-2 flex items-center justify-between" style={{ background: "#f0ece2" }}>
                                   <span style={{ color: BRAND.navy }} className="text-xs font-semibold capitalize">{fechaLabel(fecha)}</span>
                                   <span style={{ color: "#6b6759" }} className="text-xs">{fecha}</span>

@@ -58,7 +58,7 @@ export default function HelpButton() {
 
       {abierto && (
         <div className="absolute right-0 mt-2 w-72 rounded-xl p-4 z-30"
-          style={{ background: "#ffffff", border: "1px solid #e4dfd3", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
+          style={{ background: "#f6f2ea", border: "1px solid #d9d1bf", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
           <div className="flex items-center justify-between mb-3">
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">¿Necesitás una mano?</span>
             <button onClick={() => setAbierto(false)} style={{ color: "#a89f88" }}><X size={14} /></button>
@@ -79,7 +79,7 @@ export default function HelpButton() {
             <span style={{ color: "#8a8578" }} className="text-xs block mb-2">¿Sugerencias o pedidos? Escribinos:</span>
             <textarea value={mensaje} onChange={(e) => setMensaje(e.target.value)} rows={3}
               placeholder="Contanos qué necesitás o qué te gustaría que agreguemos..."
-              className="w-full rounded-lg px-2.5 py-2 text-xs outline-none resize-none mb-2" style={{ border: "1px solid #e4dfd3" }} />
+              className="w-full rounded-lg px-2.5 py-2 text-xs outline-none resize-none mb-2" style={{ border: "1px solid #d9d1bf" }} />
             {error && <p className="text-xs mb-2" style={{ color: "#b3453f" }}>{error}</p>}
             <button onClick={enviarSugerencia} disabled={enviando || !mensaje.trim()}
               className="w-full flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-50"

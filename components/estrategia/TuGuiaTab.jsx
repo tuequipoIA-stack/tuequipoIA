@@ -109,7 +109,7 @@ export default function TuGuiaTab({ onIrAOferta, onIrAPlan }) {
 
       {/* Cliente, oferta y dolores */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-2">
             <Target size={14} color="#127a79" />
             <span style={{ color: BRAND.navy }} className="text-xs font-semibold">Cliente ideal</span>
@@ -120,7 +120,7 @@ export default function TuGuiaTab({ onIrAOferta, onIrAPlan }) {
             <p style={{ color: "#a89f88" }} className="text-xs">Sin definir todavía.</p>
           )}
         </div>
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-2">
             <Compass size={14} color="#127a79" />
             <span style={{ color: BRAND.navy }} className="text-xs font-semibold">Oferta de valor</span>
@@ -131,7 +131,7 @@ export default function TuGuiaTab({ onIrAOferta, onIrAPlan }) {
             <p style={{ color: "#a89f88" }} className="text-xs">Sin definir todavía.</p>
           )}
         </div>
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-2">
             <Heart size={14} color="#127a79" />
             <span style={{ color: BRAND.navy }} className="text-xs font-semibold">Dolores del cliente</span>
@@ -173,7 +173,7 @@ export default function TuGuiaTab({ onIrAOferta, onIrAPlan }) {
 
       {/* Números en cascada */}
       {numeros.puedeCalcular && (
-        <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={15} color={BRAND.navy} />
             <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Tus números, en cascada</span>
@@ -191,7 +191,7 @@ export default function TuGuiaTab({ onIrAOferta, onIrAPlan }) {
       )}
 
       {/* Avance del plan */}
-      <div className="rounded-xl p-4 mb-6" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-6" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <div className="flex items-center justify-between mb-3">
           <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Avance de tu plan de tareas</span>
           {totalTareas > 0 && <span style={{ color: "#127a79" }} className="text-xs font-semibold">{pctGeneral}% completado</span>}
@@ -235,13 +235,13 @@ export default function TuGuiaTab({ onIrAOferta, onIrAPlan }) {
         </button>
       </div>
 
-      <div className="rounded-xl p-4 mb-5 flex flex-col sm:flex-row gap-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4 mb-5 flex flex-col sm:flex-row gap-2" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <select value={nuevoObjetivo.plazo} onChange={(e) => setNuevoObjetivo({ ...nuevoObjetivo, plazo: e.target.value })}
-          className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
+          className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }}>
           {PLAZOS.map((p) => <option key={p} value={p}>{p}</option>)}
         </select>
         <input value={nuevoObjetivo.texto} onChange={(e) => setNuevoObjetivo({ ...nuevoObjetivo, texto: e.target.value })}
-          placeholder="Objetivo" className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
+          placeholder="Objetivo" className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }} />
         <button onClick={agregarObjetivo} className="rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-1.5 justify-center"
           style={{ background: BRAND.navy, color: BRAND.cream }}>
           <Plus size={14} /> Agregar
@@ -256,7 +256,7 @@ export default function TuGuiaTab({ onIrAOferta, onIrAPlan }) {
             <div style={{ color: "#8a8578" }} className="text-xs font-semibold uppercase tracking-wide mb-2">Objetivos {plazo}es</div>
             <div className="space-y-2">
               {items.map((o) => (
-                <div key={o.id} className="flex items-center gap-2 rounded-lg p-3" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                <div key={o.id} className="flex items-center gap-2 rounded-lg p-3" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                   <button onClick={() => toggleObjetivo(o.id)}
                     className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
                     style={o.completado ? { background: BRAND.teal } : { border: "1.5px solid #d8d2c3" }}>

@@ -65,7 +65,7 @@ export default function PrecioMembresiaCard() {
   };
 
   return (
-    <div className="rounded-xl p-4 mb-5" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4 mb-5" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
       <div style={{ color: BRAND.navy }} className="text-sm font-semibold mb-1">Precio de la membresía</div>
       <p style={{ color: "#8a8578" }} className="text-xs mb-3">
         Se aplica a las suscripciones nuevas que se creen de acá en adelante. No modifica lo que ya le cobra
@@ -87,7 +87,7 @@ export default function PrecioMembresiaCard() {
       ) : (
         <div className="flex items-center gap-2 flex-wrap">
           <input type="number" min="1" value={valor} onChange={(e) => setValor(e.target.value)}
-            className="rounded-lg px-3 py-2 text-sm outline-none w-32" style={{ border: "1px solid #e4dfd3" }} />
+            className="rounded-lg px-3 py-2 text-sm outline-none w-32" style={{ border: "1px solid #d9d1bf" }} />
           <button onClick={guardar} disabled={guardando || !valor || Number(valor) <= 0}
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-50"
             style={{ background: BRAND.teal, color: BRAND.navy }}>

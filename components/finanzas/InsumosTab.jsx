@@ -50,18 +50,18 @@ export default function InsumosTab() {
         Cargá acá tus insumos (harina, telas, envases...) con su costo por unidad. Después los usás para armar el costo de cada producto.
       </p>
 
-      <div className="rounded-xl p-3 mb-4 flex flex-col gap-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-3 mb-4 flex flex-col gap-2" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })}
           onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Ej: Harina, Huevo, Tela..."
-          className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+          className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
         <div className="flex gap-2">
           <select value={form.unidad} onChange={(e) => setForm({ ...form, unidad: e.target.value })}
-            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }}>
+            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }}>
             {UNIDADES_INSUMO.map((u) => <option key={u} value={u}>{u}</option>)}
           </select>
           <MoneyInput value={form.costoUnitario} onChange={(n) => setForm({ ...form, costoUnitario: n })}
             onKeyDown={(e) => e.key === "Enter" && agregar()} placeholder="Costo por unidad"
-            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #e4dfd3" }} />
+            className="rounded-lg px-3 py-2 text-sm outline-none flex-1" style={{ border: "1px solid #d9d1bf" }} />
           <button onClick={agregar} className="rounded-lg px-3 py-2 text-sm font-semibold flex items-center gap-1 shrink-0"
             style={{ background: BRAND.teal, color: BRAND.navy }}>
             <Plus size={14} /> Agregar
@@ -71,7 +71,7 @@ export default function InsumosTab() {
 
       <div className="space-y-2">
         {insumos.map((i) => (
-          <div key={i.id} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+          <div key={i.id} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
             <div>
               <div style={{ color: BRAND.navy }} className="text-sm">{i.nombre}</div>
               <div style={{ color: "#8a8578" }} className="text-xs">{money(i.costoUnitario)} por {i.unidad}</div>

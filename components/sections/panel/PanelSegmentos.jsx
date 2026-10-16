@@ -15,7 +15,7 @@ const MARCA_ESTILO = {
   "Tu Equipo IA": { bg: "#eafbf1", border: "#a3e3c1", text: "#1f7a45" },
 };
 function estiloMarca(marca) {
-  return MARCA_ESTILO[marca] || { bg: "#f3f1ea", border: "#e4dfd3", text: "#4a4740" };
+  return MARCA_ESTILO[marca] || { bg: "#f3f1ea", border: "#d9d1bf", text: "#4a4740" };
 }
 
 function Chip({ children }) {
@@ -158,7 +158,7 @@ function PanelFiltros({
         <button
           onClick={() => setMostrar(!mostrar)}
           className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md font-semibold"
-          style={mostrar ? { background: BRAND.navy, color: "#fff" } : { border: "1px solid #ddd", color: BRAND.navy, background: "#fff" }}
+          style={mostrar ? { background: BRAND.navy, color: "#fff" } : { border: "1px solid #ddd", color: BRAND.navy, background: "#f6f2ea" }}
         >
           <Filter size={14} />
           Filtros
@@ -177,7 +177,7 @@ function PanelFiltros({
       </div>
 
       {mostrar && (
-        <div className="rounded-xl p-4 mt-2" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4 mt-2" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex justify-end mb-1">
             <button onClick={onAplicar} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md text-white" style={{ background: "#1f9e57" }}>
               <Check size={13} />
@@ -630,7 +630,7 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
       <div
         key={seg.id}
         className="rounded-xl overflow-hidden"
-        style={{ background: "#ffffff", border: marcado ? `1px solid ${BRAND.navy}` : "1px solid #e4dfd3", borderLeft: `4px solid ${est.border}` }}
+        style={{ background: "#f6f2ea", border: marcado ? `1px solid ${BRAND.navy}` : "1px solid #d9d1bf", borderLeft: `4px solid ${est.border}` }}
       >
         <div className="w-full flex items-center justify-between flex-wrap gap-2 p-4" style={{ background: abiertoEste ? "#faf9f6" : marcado ? "#f5f9ff" : "transparent" }}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -705,7 +705,7 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
           disabled={actualizando}
           onClick={actualizar}
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md"
-          style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#ffffff" }}
+          style={{ border: `1px solid ${BRAND.navy}`, color: BRAND.navy, background: "#f6f2ea" }}
         >
           <RefreshCw size={13} className={actualizando ? "animate-spin" : undefined} />
           Actualizar
@@ -808,7 +808,7 @@ export default function PanelSegmentos({ segmentos, contactos, recargar, showToa
                 const abiertoEste = grupoAbierto === grupo.id;
                 const procesandoEste = procesandoGrupoId === grupo.id;
                 return (
-                  <div key={grupo.id} className="rounded-xl overflow-hidden" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                  <div key={grupo.id} className="rounded-xl overflow-hidden" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                     <div className="w-full flex items-center justify-between flex-wrap gap-2 p-4" style={{ background: abiertoEste ? "#faf9f6" : "transparent" }}>
                       <button onClick={() => setGrupoAbierto(abiertoEste ? null : grupo.id)} className="flex-1 min-w-0 text-left flex items-center gap-2">
                         <Folder size={15} style={{ color: BRAND.navy, flexShrink: 0 }} />

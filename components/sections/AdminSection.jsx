@@ -30,7 +30,7 @@ function SugerenciasTab() {
   return (
     <div className="space-y-3">
       {sugerencias.map((s) => (
-        <div key={s.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div key={s.id} className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center justify-between mb-1.5">
             <span style={{ color: BRAND.navy }} className="text-xs font-semibold">{s.email || "Anónimo"}</span>
             <span style={{ color: "#8a8578" }} className="text-xs">{new Date(s.created_at).toLocaleString("es-AR")}</span>
@@ -85,15 +85,15 @@ export default function AdminSection() {
 
       <div className="flex gap-1.5 mb-5">
         <button onClick={() => setTab("usuarios")} className="px-3 py-1.5 rounded-md text-xs font-medium"
-          style={tab === "usuarios" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={tab === "usuarios" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           Usuarios
         </button>
         <button onClick={() => setTab("metricas")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium"
-          style={tab === "metricas" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={tab === "metricas" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           <BarChart3 size={12} /> Métricas
         </button>
         <button onClick={() => setTab("sugerencias")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium"
-          style={tab === "sugerencias" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#eee9dd", color: "#6b6759" }}>
+          style={tab === "sugerencias" ? { background: BRAND.navy, color: BRAND.cream } : { background: "#e2dbcc", color: "#6b6759" }}>
           <MessageSquare size={12} /> Sugerencias
         </button>
       </div>
@@ -114,11 +114,11 @@ export default function AdminSection() {
                 <span style={{ color: "#8b8b9a" }} className="text-xs">Usuarios totales</span>
                 <div style={{ color: BRAND.teal }} className="text-2xl font-semibold">{usuarios.length}</div>
               </div>
-              <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+              <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                 <span style={{ color: "#8a8578" }} className="text-xs">Suscripciones activas</span>
                 <div style={{ color: BRAND.navy }} className="text-2xl font-semibold">{activos}</div>
               </div>
-              <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+              <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                 <span style={{ color: "#8a8578" }} className="text-xs">En período de prueba</span>
                 <div style={{ color: BRAND.navy }} className="text-2xl font-semibold">{enPrueba}</div>
               </div>
@@ -142,7 +142,7 @@ export default function AdminSection() {
               return (
                 <button key={u.id} onClick={() => setSeleccionado(u.id)}
                   className="w-full text-left rounded-xl p-4 flex items-center justify-between hover:opacity-90"
-                  style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                  style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                   <div>
                     <div style={{ color: BRAND.navy }} className="text-sm font-semibold">
                       {u.nombreNegocio || "(sin nombre de negocio)"}

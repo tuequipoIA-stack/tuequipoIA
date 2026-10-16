@@ -133,7 +133,7 @@ export default function AudioAyuda({ texto, audioSrc }) {
         style={
           reproduciendo
             ? { background: BRAND.teal, color: "#ffffff" }
-            : { background: "#eef2fc", color: "#127a79", border: "1px solid #e4dfd3" }
+            : { background: "#eef2fc", color: "#127a79", border: "1px solid #d9d1bf" }
         }
       >
         <Volume2 size={14} />
@@ -149,7 +149,7 @@ export default function AudioAyuda({ texto, audioSrc }) {
       {abierto && (
         <div
           className="absolute left-0 mt-2 w-72 rounded-xl p-3 z-30"
-          style={{ background: "#fafbfc", border: "1px solid #e4dfd3", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
+          style={{ background: "#fafbfc", border: "1px solid #d9d1bf", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
         >
           <div className="flex items-center gap-2.5">
             <button
@@ -161,7 +161,7 @@ export default function AudioAyuda({ texto, audioSrc }) {
             >
               {reproduciendo ? <Pause size={12} /> : <Play size={12} />}
             </button>
-            <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "#e4dfd3" }}>
+            <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "#d9d1bf" }}>
               <div className="h-full" style={{ width: `${progreso}%`, background: "#127a79" }} />
             </div>
             <span className="text-[11px] w-8 text-right shrink-0" style={{ color: "#8a8578" }}>{tiempo}</span>
@@ -181,7 +181,7 @@ export default function AudioAyuda({ texto, audioSrc }) {
           {verTranscripcion && texto && (
             <p
               className="text-[12px] mt-1.5 pt-1.5 leading-relaxed"
-              style={{ color: "#6b6759", borderTop: "1px solid #e4dfd3" }}
+              style={{ color: "#6b6759", borderTop: "1px solid #d9d1bf" }}
             >
               {texto}
             </p>

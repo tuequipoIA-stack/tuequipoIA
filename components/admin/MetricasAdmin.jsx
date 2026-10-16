@@ -7,7 +7,7 @@ import { money } from "@/lib/helpers";
 
 function Stat({ label, valor, color, fondo }) {
   return (
-    <div className="rounded-xl p-4" style={{ background: fondo || "#ffffff", border: fondo ? "none" : "1px solid #e4dfd3" }}>
+    <div className="rounded-xl p-4" style={{ background: fondo || "#ffffff", border: fondo ? "none" : "1px solid #d9d1bf" }}>
       <span style={{ color: fondo ? "#8b8b9a" : "#8a8578" }} className="text-xs">{label}</span>
       <div style={{ color: color || BRAND.navy }} className="text-2xl font-semibold">{valor}</div>
     </div>
@@ -46,7 +46,7 @@ export default function MetricasAdmin() {
         <span style={{ color: BRAND.navy }} className="text-sm font-semibold">Ingresos</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp size={13} color="#127a79" />
             <span style={{ color: "#8a8578" }} className="text-xs">Estimado a cobrar el próximo mes</span>

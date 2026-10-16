@@ -72,11 +72,11 @@ export default function SuscripcionesBoard({ unidadId }) {
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 mb-5">
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div style={{ color: "#8a8578" }} className="text-xs mb-1">Suscripciones</div>
           <div style={{ color: BRAND.navy }} className="text-xl font-semibold">{suscripciones.length}</div>
         </div>
-        <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+        <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
           <div style={{ color: "#8a8578" }} className="text-xs mb-1">MRR activo</div>
           <div style={{ color: BRAND.teal }} className="text-xl font-semibold">{money(mrrActivo)}</div>
         </div>
@@ -97,7 +97,7 @@ export default function SuscripcionesBoard({ unidadId }) {
               <div key={col.id}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => arrastrando && mover(arrastrando, col.id)}
-                className="rounded-xl p-3 shrink-0" style={{ background: "#f0ece2", border: "1px solid #e4dfd3", width: "260px" }}>
+                className="rounded-xl p-3 shrink-0" style={{ background: "#f0ece2", border: "1px solid #d9d1bf", width: "260px" }}>
                 <div className="flex items-center justify-between mb-2 px-1">
                   <span style={{ color: "#6b6759" }} className="text-xs font-semibold uppercase tracking-wide">
                     {col.label} ({items.length})
@@ -110,7 +110,7 @@ export default function SuscripcionesBoard({ unidadId }) {
                       onDragEnd={() => setArrastrando(null)}
                       onClick={() => abrirEditar(s)}
                       className="rounded-lg p-3 cursor-grab active:cursor-grabbing"
-                      style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                      style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                       <div style={{ color: BRAND.navy }} className="text-sm font-semibold">{s.cliente}</div>
                       {s.plan && <div style={{ color: "#8a8578" }} className="text-xs">{s.plan}</div>}
                       {s.monto_mensual > 0 && <div style={{ color: BRAND.teal }} className="text-xs font-semibold mt-1">{money(s.monto_mensual)}</div>}
@@ -127,7 +127,7 @@ export default function SuscripcionesBoard({ unidadId }) {
                       <select value={s.estado_cobro}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) => mover(s.id, e.target.value)}
-                        className="mt-2 text-[10px] px-1.5 py-1 rounded-md font-medium outline-none w-full" style={{ background: "#eee9dd", color: "#6b6759", border: "none" }}>
+                        className="mt-2 text-[10px] px-1.5 py-1 rounded-md font-medium outline-none w-full" style={{ background: "#e2dbcc", color: "#6b6759", border: "none" }}>
                         {CRM_ESTADOS_SUSCRIPCION.map((e) => <option key={e.id} value={e.id}>{e.label}</option>)}
                       </select>
                     </div>

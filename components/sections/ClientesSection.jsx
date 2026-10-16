@@ -66,7 +66,7 @@ export default function ClientesSection() {
         <div className="relative flex-1">
           <Search size={14} color="#a89f88" className="absolute left-3 top-1/2 -translate-y-1/2" />
           <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar por nombre, teléfono o correo..."
-            className="rounded-lg pl-9 pr-3 py-2 text-sm outline-none w-full" style={{ border: "1px solid #e4dfd3" }} />
+            className="rounded-lg pl-9 pr-3 py-2 text-sm outline-none w-full" style={{ border: "1px solid #d9d1bf" }} />
         </div>
         <button onClick={abrirNuevo} className="rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-1.5 justify-center shrink-0"
           style={{ background: BRAND.teal, color: BRAND.navy }}>
@@ -75,7 +75,7 @@ export default function ClientesSection() {
       </div>
 
       {loaded && clientes.length === 0 && (
-        <div className="rounded-xl p-6 text-center mb-4" style={{ background: "#ffffff", border: "1px dashed #d8d2c3" }}>
+        <div className="rounded-xl p-6 text-center mb-4" style={{ background: "#f6f2ea", border: "1px dashed #d8d2c3" }}>
           <Users size={20} color="#b3ab98" className="mx-auto mb-2" />
           <p style={{ color: "#8a8578" }} className="text-sm">Todavía no cargaste clientes.</p>
         </div>
@@ -88,7 +88,7 @@ export default function ClientesSection() {
       {filtrados.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtrados.map((c) => (
-            <div key={c.id} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+            <div key={c.id} className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
               <div className="flex items-start justify-between gap-2 mb-2">
                 <span style={{ color: BRAND.navy }} className="text-sm font-semibold break-words">{c.nombre}</span>
                 <div className="flex items-center gap-2 shrink-0">

@@ -27,14 +27,14 @@ export default function PanelHoy({ contactos, segmentos, onAbrirContacto }) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {metricas.map((m) => (
-          <div key={m.label} className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+          <div key={m.label} className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
             <div style={{ color: "#8a8578" }} className="text-xs mb-1">{m.label}</div>
             <div style={{ color: BRAND.navy }} className="text-2xl font-bold">{m.valor}</div>
           </div>
         ))}
       </div>
 
-      <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+      <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
         <h3 style={{ color: BRAND.navy }} className="text-sm font-semibold mb-3">Seguimientos vencidos</h3>
         {vencidos.length === 0 ? (
           <p style={{ color: "#8a8578" }} className="text-sm">Sin seguimientos vencidos. Al día.</p>

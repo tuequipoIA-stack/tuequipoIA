@@ -215,7 +215,7 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
       {/* Pedile a Vera */}
       <div className="rounded-xl p-4 mb-5 flex items-center justify-between gap-3 flex-wrap" style={{ background: "#eef7f6", border: "1px solid #cfe9e7" }}>
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "#ffffff" }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "#f6f2ea" }}>
             <MessageCircle size={15} color="#127a79" />
           </div>
           <div className="min-w-0">
@@ -224,7 +224,7 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <button onClick={() => copiarFormato(null)} className="text-xs font-bold px-3.5 py-2 rounded-lg" style={{ background: "#ffffff", border: `1px solid ${BRAND.teal}`, color: "#127a79" }}>
+          <button onClick={() => copiarFormato(null)} className="text-xs font-bold px-3.5 py-2 rounded-lg" style={{ background: "#f6f2ea", border: `1px solid ${BRAND.teal}`, color: "#127a79" }}>
             Copiar formato para Vera
           </button>
           <a href={AGENTE_MARKETING_URL} target="_blank" rel="noopener noreferrer" className="text-xs font-bold px-3.5 py-2 rounded-lg" style={{ background: BRAND.teal, color: BRAND.navy }}>
@@ -252,9 +252,9 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
                   {PILARES_CONTENIDO.map((p) => {
                     const piezasPilar = piezas.filter((z) => z.mes === mesKey && z.pilar === p.id);
                     return (
-                      <button key={p.id} onClick={() => abrirDetalle(mesKey, p.id)} className="text-left rounded-xl p-4 flex flex-col" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                      <button key={p.id} onClick={() => abrirDetalle(mesKey, p.id)} className="text-left rounded-xl p-4 flex flex-col" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                         <div className="flex items-start justify-between mb-1.5">
-                          <span className="text-2xl font-bold leading-none" style={{ color: "#e4dfd3" }}>{p.numero}</span>
+                          <span className="text-2xl font-bold leading-none" style={{ color: "#d9d1bf" }}>{p.numero}</span>
                           <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full" style={{ background: "#eef7f6", color: "#127a79" }}>
                             {p.porcentaje} · {p.etiqueta}
                           </span>
@@ -294,18 +294,18 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
         const piezasPilar = piezas.filter((z) => z.mes === detalle.mesKey && z.pilar === detalle.pilarId);
         return (
           <div className="fixed inset-0 z-50 overflow-y-auto" style={{ background: BRAND.cream }}>
-            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4" style={{ background: BRAND.cream, borderBottom: "1px solid #e4dfd3" }}>
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4" style={{ background: BRAND.cream, borderBottom: "1px solid #d9d1bf" }}>
               <button onClick={() => setDetalle(null)} className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#6b6759" }}>
                 <ArrowLeft size={15} /> Volver a {labelMes(detalle.mesKey)}
               </button>
-              <button onClick={() => setDetalle(null)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+              <button onClick={() => setDetalle(null)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                 <X size={15} color="#6b6759" />
               </button>
             </div>
 
             <div className="max-w-2xl mx-auto px-6 py-6 pb-16">
               <div className="flex items-center gap-2.5 mb-1.5">
-                <span className="text-3xl font-extrabold leading-none" style={{ color: "#e4dfd3" }}>{p.numero}</span>
+                <span className="text-3xl font-extrabold leading-none" style={{ color: "#d9d1bf" }}>{p.numero}</span>
                 <span style={{ color: BRAND.navy }} className="text-xl font-bold">{p.titulo}</span>
               </div>
               <p style={{ color: "#6b6759" }} className="text-sm leading-relaxed mb-6 max-w-lg">{p.texto}</p>
@@ -317,11 +317,11 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
                 const calEntry = calendario.find((cc) => cc.id === pz.calendarioId);
                 return (
                   <div key={pz.id} data-pieza-id={pz.id} className="rounded-xl p-4 mb-3 group"
-                    style={{ background: "#ffffff", border: "1px solid #e4dfd3", boxShadow: pz.id === destacadaId ? `0 0 0 3px ${BRAND.teal}66` : "none", transition: "box-shadow .3s ease" }}>
+                    style={{ background: "#f6f2ea", border: "1px solid #d9d1bf", boxShadow: pz.id === destacadaId ? `0 0 0 3px ${BRAND.teal}66` : "none", transition: "box-shadow .3s ease" }}>
                     <div className="flex items-center justify-between mb-2.5">
                       {editando ? (
                         <select value={editValores.tipo} onChange={(e) => setEditValores({ ...editValores, tipo: e.target.value })}
-                          className="text-xs rounded-lg px-2 py-1 outline-none" style={{ border: "1px solid #e4dfd3" }}>
+                          className="text-xs rounded-lg px-2 py-1 outline-none" style={{ border: "1px solid #d9d1bf" }}>
                           {TIPOS_PUBLICACION.map((t) => <option key={t}>{t}</option>)}
                         </select>
                       ) : (
@@ -340,11 +340,11 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
                     {editando ? (
                       <>
                         <input value={editValores.titulo} onChange={(e) => setEditValores({ ...editValores, titulo: e.target.value })}
-                          className="w-full text-sm font-bold rounded-lg px-2.5 py-1.5 outline-none mb-2" style={{ color: BRAND.navy, border: "1px solid #e4dfd3" }} />
+                          className="w-full text-sm font-bold rounded-lg px-2.5 py-1.5 outline-none mb-2" style={{ color: BRAND.navy, border: "1px solid #d9d1bf" }} />
                         <textarea value={editValores.copy} onChange={(e) => setEditValores({ ...editValores, copy: e.target.value })} rows={3}
-                          className="w-full text-xs rounded-lg px-2.5 py-1.5 outline-none resize-none mb-2" style={{ border: "1px solid #e4dfd3" }} />
+                          className="w-full text-xs rounded-lg px-2.5 py-1.5 outline-none resize-none mb-2" style={{ border: "1px solid #d9d1bf" }} />
                         <input value={editValores.link} onChange={(e) => setEditValores({ ...editValores, link: e.target.value })} placeholder="Link (opcional)"
-                          className="w-full text-xs rounded-lg px-2.5 py-1.5 outline-none" style={{ border: "1px solid #e4dfd3" }} />
+                          className="w-full text-xs rounded-lg px-2.5 py-1.5 outline-none" style={{ border: "1px solid #d9d1bf" }} />
                       </>
                     ) : (
                       <>
@@ -361,13 +361,13 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
                     <div className="flex items-center gap-2.5 flex-wrap mt-2.5 pt-2.5" style={{ borderTop: "1px solid #f0ece2" }}>
                       {calEntry ? (
                         <>
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ color: BRAND.navy, background: "#ffffff", border: `1.5px solid ${c.bg}` }}>
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ color: BRAND.navy, background: "#f6f2ea", border: `1.5px solid ${c.bg}` }}>
                             <span className="w-1.5 h-1.5 rounded-full" style={{ background: c.bg }} /> Programado: {fechaCorta(calEntry.fecha)} · {calEntry.hora}
                           </span>
                           <button onClick={() => quitarProgramacion(pz)} className="text-[11px] font-semibold underline" style={{ color: "#a89f88" }}>Quitar</button>
                         </>
                       ) : (
-                        <button onClick={() => toggleProgramar(pz)} className="text-xs font-bold px-3 py-1.5 rounded-lg" style={{ background: "#ffffff", border: "1px solid #e4dfd3", color: "#6b6759" }}>
+                        <button onClick={() => toggleProgramar(pz)} className="text-xs font-bold px-3 py-1.5 rounded-lg" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf", color: "#6b6759" }}>
                           📅 Programar
                         </button>
                       )}
@@ -376,9 +376,9 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
                     {progAbierto && (
                       <div className="flex items-center gap-2 flex-wrap mt-2.5">
                         <input type="date" value={programarValores.fecha} onChange={(e) => setProgramarValores({ ...programarValores, fecha: e.target.value })}
-                          className="text-xs rounded-lg px-2.5 py-1.5 outline-none" style={{ border: "1px solid #e4dfd3", color: BRAND.navy }} />
+                          className="text-xs rounded-lg px-2.5 py-1.5 outline-none" style={{ border: "1px solid #d9d1bf", color: BRAND.navy }} />
                         <input type="time" value={programarValores.hora} onChange={(e) => setProgramarValores({ ...programarValores, hora: e.target.value })}
-                          className="text-xs rounded-lg px-2.5 py-1.5 outline-none" style={{ border: "1px solid #e4dfd3", color: BRAND.navy }} />
+                          className="text-xs rounded-lg px-2.5 py-1.5 outline-none" style={{ border: "1px solid #d9d1bf", color: BRAND.navy }} />
                         <button onClick={() => confirmarProgramacion(pz)} className="text-xs font-bold px-3 py-1.5 rounded-lg" style={{ background: BRAND.teal, color: BRAND.navy }}>Confirmar</button>
                         <button onClick={() => setProgramarAbierto(null)} className="text-xs font-semibold px-2 py-1.5" style={{ color: "#8a8578" }}>Cancelar</button>
                       </div>
@@ -390,12 +390,12 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
                 <p className="text-xs text-center py-6" style={{ color: "#a89f88" }}>Todavía no hay piezas cargadas para este pilar.</p>
               )}
 
-              <div className="rounded-xl p-4 mb-3 flex items-center justify-between gap-3 flex-wrap" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+              <div className="rounded-xl p-4 mb-3 flex items-center justify-between gap-3 flex-wrap" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                 <span className="text-xs max-w-sm leading-relaxed" style={{ color: "#6b6759" }}>
                   Pedile a Vera ideas de contenido para este pilar y pegá la respuesta abajo, en “+ Agregar publicación”.
                 </span>
                 <div className="flex gap-2 shrink-0">
-                  <button onClick={() => copiarFormato(p.id)} className="text-xs font-bold px-3.5 py-2 rounded-lg" style={{ background: "#ffffff", border: `1px solid ${BRAND.teal}`, color: "#127a79" }}>
+                  <button onClick={() => copiarFormato(p.id)} className="text-xs font-bold px-3.5 py-2 rounded-lg" style={{ background: "#f6f2ea", border: `1px solid ${BRAND.teal}`, color: "#127a79" }}>
                     Copiar formato para Vera
                   </button>
                   <a href={AGENTE_MARKETING_URL} target="_blank" rel="noopener noreferrer" className="text-xs font-bold px-3.5 py-2 rounded-lg" style={{ background: BRAND.teal, color: BRAND.navy }}>
@@ -410,25 +410,25 @@ Tema que quiero tocar: [completá acá qué querés comunicar]`;
                 </button>
               )}
               {formAbierto && (
-                <div className="rounded-xl p-4" style={{ background: "#ffffff", border: "1px solid #e4dfd3" }}>
+                <div className="rounded-xl p-4" style={{ background: "#f6f2ea", border: "1px solid #d9d1bf" }}>
                   <label className="text-[11px] font-semibold block mb-1" style={{ color: "#8a8578" }}>Pegá acá la respuesta de Vera (opcional)</label>
                   <textarea value={pegado} onChange={(e) => setPegado(e.target.value)} rows={3} placeholder={"Tipo: Reel\nTítulo: ...\nCopy: ...\nLink: ..."}
-                    className="w-full rounded-lg px-3 py-2 text-xs outline-none resize-none mb-2" style={{ border: "1px solid #e4dfd3" }} />
+                    className="w-full rounded-lg px-3 py-2 text-xs outline-none resize-none mb-2" style={{ border: "1px solid #d9d1bf" }} />
                   <button onClick={() => interpretarPegado(detalle.pilarId, detalle.mesKey)} className="text-xs font-bold px-3.5 py-2 rounded-lg mb-3" style={{ background: BRAND.navy, color: BRAND.teal }}>
                     Interpretar y completar
                   </button>
                   <div className="text-center text-[10px] font-bold uppercase tracking-wide mb-3" style={{ color: "#a89f88" }}>— o completá manualmente —</div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-                    <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }}>
+                    <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }}>
                       {TIPOS_PUBLICACION.map((t) => <option key={t}>{t}</option>)}
                     </select>
                     <input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Título / hook"
-                      className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #e4dfd3" }} />
+                      className="rounded-lg px-3 py-2 text-sm outline-none" style={{ border: "1px solid #d9d1bf" }} />
                   </div>
                   <textarea value={form.copy} onChange={(e) => setForm({ ...form, copy: e.target.value })} rows={3} placeholder="Copy / guion..."
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-2" style={{ border: "1px solid #e4dfd3" }} />
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none mb-2" style={{ border: "1px solid #d9d1bf" }} />
                   <input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="Link (opcional)"
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #e4dfd3" }} />
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3" style={{ border: "1px solid #d9d1bf" }} />
                   <div className="flex gap-2">
                     <button onClick={() => agregarManual(detalle.pilarId, detalle.mesKey)} className="text-sm font-semibold px-4 py-2 rounded-lg" style={{ background: BRAND.teal, color: BRAND.navy }}>
                       Agregar

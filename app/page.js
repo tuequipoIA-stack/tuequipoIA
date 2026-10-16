@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle, Menu } from "lucide-react";
-import { BRAND, EQUIPO_HABILITADO, CRM_HABILITADO } from "@/lib/constants";
+import { BRAND, EQUIPO_HABILITADO, ESTRATEGIA_MARKETING } from "@/lib/constants";
+import { C } from "@/lib/theme";
+import EstrategiaMarketingNav from "@/components/EstrategiaMarketingNav";
 import LogoMark from "@/components/LogoMark";
 import * as storage from "@/lib/storage";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
@@ -19,7 +21,6 @@ import RecursosSection from "@/components/sections/RecursosSection";
 import MarketingSection from "@/components/sections/MarketingSection";
 import VentasSection from "@/components/sections/VentasSection";
 import ClientesSection from "@/components/sections/ClientesSection";
-import FinanzasSection from "@/components/sections/FinanzasSection";
 import EstrategiaSection from "@/components/sections/EstrategiaSection";
 import TableroSection from "@/components/sections/TableroSection";
 import PerfilSection from "@/components/sections/PerfilSection";
@@ -43,7 +44,15 @@ function AppShell({ isAdmin, bloqueado }) {
   const { unidadId, unidadActual } = useUnidad();
   const { loadData, saveData } = useUnidadStorage();
   const [business, setBusiness] = useState(null);
-  const [section, setSection] = useState(isAdmin ? "admin" : "dashboard");
+  const [section, setSectionState] = useState(isAdmin ? "admin" : "dashboard");
+  // Subsección elegida desde el menú (ej. Marketing → "pilares").
+  const [subvista, setSubvista] = useState(null);
+  const setSection = (id, sub) => {
+    const sec = ESTRATEGIA_MARKETING.secciones.find((s) => s.id === id);
+    setSubvista(sec ? sub || sec.subs[0].id : null);
+    setSectionState(id);
+  };
+  const esEstMkt = ESTRATEGIA_MARKETING.secciones.some((s) => s.id === section);
   // Drawer del menú lateral en pantallas chicas (celular/tablet angosta).
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -61,7 +70,6 @@ function AppShell({ isAdmin, bloqueado }) {
 
   const enPerfil = section === "perfil";
   const restringirContenido = bloqueado && !enPerfil;
-  const mostrarCrm = CRM_HABILITADO && (business?.crmModos?.length > 0);
 
   if (!unidadId && !isAdmin) {
     return <PantallaCarga />;
@@ -100,20 +108,20 @@ function AppShell({ isAdmin, bloqueado }) {
         </span>
       </div>
       <div className="flex-1 flex min-h-0">
-        <Sidebar active={section} onChange={setSection} isAdmin={isAdmin} mostrarCrm={mostrarCrm}
+        <Sidebar active={section} subvista={subvista} onChange={setSection} isAdmin={isAdmin}
           mobileOpen={mobileNavOpen} onCloseMobile={() => setMobileNavOpen(false)} />
-        <div style={{ background: BRAND.cream }} className="flex-1 h-full overflow-y-auto p-4 md:p-6 relative">
+        <div style={{ background: C.bg }} className="flex-1 h-full overflow-y-auto p-4 md:p-6 relative">
           <HelpButton />
+          {esEstMkt && <EstrategiaMarketingNav seccion={section} subvista={subvista} onIr={(id) => setSection(id)} />}
           <div key={`${section}-${unidadId}`} className="seccion-animada"
             style={restringirContenido ? { filter: "grayscale(1) opacity(0.5)", pointerEvents: "none", userSelect: "none" } : undefined}>
             {section === "equipo" && EQUIPO_HABILITADO && <EquipoSection business={business} />}
-            {section === "recursos" && <RecursosSection isAdmin={isAdmin} />}
-            {section === "marketing" && <MarketingSection />}
+            {section === "recursos" && <RecursosSection isAdmin={isAdmin} vista={subvista} onVista={setSubvista} />}
+            {section === "marketing" && <MarketingSection vista={subvista} onVista={setSubvista} />}
             {section === "ventas" && <VentasSection business={business} />}
             {section === "clientes" && <ClientesSection />}
-            {section === "crm" && mostrarCrm && <CrmSection business={business} />}
-            {section === "finanzas" && <FinanzasSection business={business} />}
-            {section === "estrategia" && <EstrategiaSection business={business} />}
+            {section === "crm" && <CrmSection business={business} />}
+            {section === "estrategia" && <EstrategiaSection business={business} vista={subvista} onVista={setSubvista} />}
             {section === "dashboard" && <DashboardSection business={business} />}
             {section === "tablero" && <TableroSection />}
             {section === "perfil" && <PerfilSection business={business} onBusinessUpdate={setBusiness} />}
