@@ -14,8 +14,8 @@ Los números pueden venir en palabras ("la cinco" = 5). Respondé SOLO con JSON 
 No inventes cambios que la persona no dijo. Redactá los textos breves, en español, empezando con mayúscula.`;
 
 const PROMPTS = {
-  organizacion: `Contexto: tablero de tareas. La persona dicta tareas para hacer. Cada tarea puede pertenecer a una empresa (usá el id de la lista de empresas; null si no corresponde a ninguna) y va a la columna "hoy" si dice que es para hoy, si no a "semana".
-Formato: {"tareas":[{"texto":"...","empresa":"<id>|null","columna":"hoy|semana"}]}`,
+  organizacion: `Contexto: tablero de tareas. La persona dicta tareas para hacer. Cada tarea puede pertenecer a una empresa (usá el id de la lista de empresas; null si no corresponde a ninguna) y va a la columna "hoy" si dice que es para hoy, si no a "semana". Si menciona cuándo hay que hacerla, poné la fecha (YYYY-MM-DD; "hoy" = la fecha de hoy); si no, null.
+Formato: {"tareas":[{"texto":"...","empresa":"<id>|null","columna":"hoy|semana","fecha":"YYYY-MM-DD|null"}]}`,
 
   crm: `Contexto: CRM de oportunidades comerciales. Cada oportunidad tiene un número fijo (num). La persona cuenta cómo avanzaron. Identificá cada oportunidad por número o por nombre de cliente (usá el num de la lista; si no la podés identificar, num: null).
 Tipos de cambio:
@@ -82,7 +82,7 @@ export async function POST(request) {
     // Normalizamos al formato que usan las pantallas de revisión
     let propuesta;
     if (contexto === "organizacion") {
-      propuesta = (json.tareas || []).filter((t) => t?.texto).map((t) => ({ texto: t.texto, empresa: t.empresa || null, columna: t.columna === "hoy" ? "hoy" : "semana", on: true }));
+      propuesta = (json.tareas || []).filter((t) => t?.texto).map((t) => ({ texto: t.texto, empresa: t.empresa || null, columna: t.columna === "hoy" ? "hoy" : "semana", fecha: /^\d{4}-\d{2}-\d{2}$/.test(t.fecha || "") ? t.fecha : null, on: true }));
     } else {
       const lista = contexto === "crm" ? json.oportunidades : json.proyectos;
       propuesta = (lista || []).map((x) => ({ num: x.num ?? null, cambios: (x.cambios || []).map((c) => ({ ...c, on: true })) })).filter((x) => x.cambios.length);
