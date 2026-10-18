@@ -37,6 +37,22 @@ export function aAcumulada(t) {
   return { ...resto, id: t.id, texto: t.texto, empresa: t.empresa || null, hechoEn: t.hechoEn, audio: !!t.audio };
 }
 
+// Ordena por fecha (la más próxima primero), sin importar la empresa.
+// Las tareas sin fecha van al final, en el orden en que se cargaron.
+export function ordenarPorFecha(lista) {
+  return lista
+    .map((t, i) => ({ t, i }))
+    .sort((a, b) => {
+      const fa = a.t.fecha || null;
+      const fb = b.t.fecha || null;
+      if (fa && fb && fa !== fb) return fa < fb ? -1 : 1;
+      if (fa && !fb) return -1;
+      if (!fa && fb) return 1;
+      return a.i - b.i;
+    })
+    .map((x) => x.t);
+}
+
 // ¿La tarea/objetivo pasa el filtro de empresa? ("sin" incluye empresas borradas)
 export function pasaFiltro(item, filtro, porId) {
   if (filtro === "todas") return true;

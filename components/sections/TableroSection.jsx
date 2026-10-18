@@ -142,14 +142,17 @@ export default function TableroSection() {
   };
 
   // --- Tablero: acciones ---
-  const agregarTarea = (texto, empresa) =>
-    guardarTareas([...tareasRef.current, { id: uid(), texto, columna: "semana", empresa: empresa || null }]);
+  const agregarTarea = (texto, empresa, fecha) =>
+    guardarTareas([...tareasRef.current, { id: uid(), texto, columna: "semana", empresa: empresa || null, fecha: fecha || null }]);
 
   const moverTarea = (id, columna) =>
     guardarTareas(tareasRef.current.map((t) => (t.id === id && t.columna !== columna ? conColumna(t, columna) : t)));
 
   const cambiarEmpresaTarea = (id, empresa) =>
     guardarTareas(tareasRef.current.map((t) => (t.id === id ? { ...t, empresa: empresa || null } : t)));
+
+  const cambiarFechaTarea = (id, fecha) =>
+    guardarTareas(tareasRef.current.map((t) => (t.id === id ? { ...t, fecha: fecha || null } : t)));
 
   const eliminarTarea = (id) => guardarTareas(tareasRef.current.filter((t) => t.id !== id));
 
@@ -191,7 +194,7 @@ export default function TableroSection() {
   const eliminarTareaObjetivo = (objetivoId, tareaId) =>
     guardarObjetivos(objetivos.map((o) => (o.id === objetivoId ? { ...o, tareas: (o.tareas || []).filter((t) => t.id !== tareaId) } : o)));
   const transcribirATareaSemana = (tareaObj, empresa) =>
-    guardarTareas([...tareasRef.current, { id: uid(), texto: tareaObj.texto, columna: "semana", empresa: empresa || null }]);
+    guardarTareas([...tareasRef.current, { id: uid(), texto: tareaObj.texto, columna: "semana", empresa: empresa || null, fecha: tareaObj.fecha || null }]);
 
   // --- Audio ---
   const respaldo = (texto) => interpretarOrganizacion(texto, empresas);
@@ -200,7 +203,7 @@ export default function TableroSection() {
     const nuevas = (prop || [])
       .filter((p) => p.on !== false && String(p.texto || "").trim())
       .map((p) => conColumna(
-        { id: uid(), texto: p.texto.trim(), columna: "semana", empresa: porId(p.empresa) ? p.empresa : null, audio: true },
+        { id: uid(), texto: p.texto.trim(), columna: "semana", empresa: porId(p.empresa) ? p.empresa : null, fecha: /^\d{4}-\d{2}-\d{2}$/.test(p.fecha || "") ? p.fecha : null, audio: true },
         p.columna === "hoy" ? "hoy" : "semana"
       ));
     if (!nuevas.length) return;
@@ -230,6 +233,8 @@ export default function TableroSection() {
                 <select value={p.columna === "hoy" ? "hoy" : "semana"} onChange={(ev) => editar(i, { columna: ev.target.value })} className={MINI_CLS} style={MINI}>
                   {columnas.filter((c) => c.id === "semana" || c.id === "hoy").map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                 </select>
+                <input type="date" value={p.fecha || ""} onChange={(ev) => editar(i, { fecha: ev.target.value || null })} title="Fecha"
+                  className={MINI_CLS} style={MINI} />
                 <span className="flex-1" />
                 <button onClick={() => editar(i, { on: false })} title="Descartar" className="px-1 text-sm rounded hover:bg-black/5" style={{ color: C.danger }}>✕</button>
               </div>
@@ -270,7 +275,7 @@ export default function TableroSection() {
       {tab === "bajados" && (
         <TableroBoard columnas={columnas} tareas={visibles(tareas)} empresas={empresas} porId={porId} recien={recien}
           empresaDefault={empresaDefault}
-          onAgregar={agregarTarea} onMover={moverTarea} onEmpresa={cambiarEmpresaTarea} onEliminar={eliminarTarea}
+          onAgregar={agregarTarea} onMover={moverTarea} onEmpresa={cambiarEmpresaTarea} onFecha={cambiarFechaTarea} onEliminar={eliminarTarea}
           onBan={eliminarTareaDefinitiva} onAgregarColumna={agregarColumna} onEliminarColumna={eliminarColumna}
           onAudio={() => setModalAudio(true)} />
       )}
@@ -293,7 +298,7 @@ export default function TableroSection() {
 
       <AudioModal open={modalAudio} onClose={() => setModalAudio(false)}
         titulo="Dictar tareas"
-        intro="Contá lo que tenés que hacer, como en un audio de WhatsApp. El sistema arma las tarjetas, detecta la empresa y si es para hoy o para la semana. Antes de guardar, revisás y corregís."
+        intro="Contá lo que tenés que hacer, como en un audio de WhatsApp. El sistema arma las tarjetas, detecta la empresa, la fecha y si es para hoy o para la semana. Antes de guardar, revisás y corregís."
         ejemplo={AUDIO_EJEMPLO}
         contexto="organizacion"
         datos={{ empresas: empresas.map((e) => ({ id: e.id, nombre: e.nombre })) }}

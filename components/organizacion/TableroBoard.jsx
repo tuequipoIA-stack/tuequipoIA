@@ -4,14 +4,37 @@ import { useState } from "react";
 import { Ban, Plus, Trash2, X, Mic } from "lucide-react";
 import { MAX_COLUMNAS_EXTRA } from "@/lib/constants";
 import { C, COL } from "@/lib/theme";
-import { diasDesde } from "@/lib/fechas";
+import { diasDesde, diasHasta, fechaDia } from "@/lib/fechas";
 import { EmpresaTag, SelectEmpresa } from "@/components/empresas/EmpresasUI";
-import { DIAS_ARCHIVO, COLOR_PLAN_DIARIO, MINI, MINI_CLS } from "./comun";
+import { DIAS_ARCHIVO, COLOR_PLAN_DIARIO, MINI, MINI_CLS, ordenarPorFecha } from "./comun";
 
 const TEAL = "#1AABAA";
 const NAVY = "#1A1A2E";
 
-function TarjetaTarea({ t, col, columnas, empresas, porId, nueva, onMover, onEmpresa, onEliminar, onBan, onDragStart, onDragEnd, arrastrando }) {
+// Etiqueta de fecha de la tarjeta: muestra la fecha y, al tocarla, abre el calendario.
+function FechaChip({ fecha, hecho, onCambiar }) {
+  let txt = "+ Fecha";
+  let st = { background: "transparent", color: C.soft, border: `1px dashed ${C.line}` };
+  if (fecha) {
+    const d = diasHasta(fecha);
+    const rel = d === 0 ? "Hoy" : d === 1 ? "Mañana" : d < 0 ? "Vencida" : null;
+    txt = `📅 ${rel ? `${rel} · ` : ""}${fechaDia(fecha)}`;
+    st = { background: C.chip, color: C.muted, border: "1px solid transparent" };
+    if (!hecho && d < 0) st = { background: "#fde8e6", color: "#c0392b", border: "1px solid transparent" };
+    else if (!hecho && d === 0) st = { background: "#dff4f3", color: "#0f7c7b", border: "1px solid transparent" };
+  }
+  return (
+    <label className="relative inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full cursor-pointer" style={st}
+      title={fecha ? "Cambiar fecha" : "Agregar fecha"}>
+      {txt}
+      <input type="date" value={fecha || ""} onChange={(ev) => onCambiar(ev.target.value || null)}
+        onClick={(ev) => { try { ev.currentTarget.showPicker?.(); } catch {} }}
+        className="absolute inset-0 opacity-0 cursor-pointer w-full" aria-label="Fecha de la tarea" />
+    </label>
+  );
+}
+
+function TarjetaTarea({ t, col, columnas, empresas, porId, nueva, onMover, onEmpresa, onFecha, onEliminar, onBan, onDragStart, onDragEnd, arrastrando }) {
   const esPlanDiario = t.origen === "plan-diario";
   const e = porId(t.empresa);
   const hecho = col.id === "hecho";
@@ -27,6 +50,7 @@ function TarjetaTarea({ t, col, columnas, empresas, porId, nueva, onMover, onEmp
         opacity: arrastrando ? 0.4 : 1,
       }}>
       <div className="flex flex-wrap items-center gap-1">
+        <FechaChip fecha={t.fecha} hecho={hecho} onCambiar={onFecha} />
         <EmpresaTag empresa={e} />
         {t.audio && (
           <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: C.chip, color: C.muted }}>🎙 por audio</span>
@@ -68,9 +92,10 @@ function TarjetaTarea({ t, col, columnas, empresas, porId, nueva, onMover, onEmp
 
 export default function TableroBoard({
   columnas, tareas, empresas, porId, recien, empresaDefault,
-  onAgregar, onMover, onEmpresa, onEliminar, onBan, onAgregarColumna, onEliminarColumna, onAudio,
+  onAgregar, onMover, onEmpresa, onFecha, onEliminar, onBan, onAgregarColumna, onEliminarColumna, onAudio,
 }) {
   const [texto, setTexto] = useState("");
+  const [fechaSel, setFechaSel] = useState("");
   const [empresaSel, setEmpresaSel] = useState(empresaDefault);
   const [empresaBase, setEmpresaBase] = useState(empresaDefault);
   const [arrastrando, setArrastrando] = useState(null);
@@ -87,8 +112,9 @@ export default function TableroBoard({
 
   const agregar = () => {
     if (!texto.trim()) return;
-    onAgregar(texto.trim(), empresaSel);
+    onAgregar(texto.trim(), empresaSel, fechaSel || null);
     setTexto("");
+    setFechaSel("");
   };
   const crearColumna = () => {
     if (!nuevaColumna.trim()) return;
@@ -106,6 +132,9 @@ export default function TableroBoard({
           style={{ background: C.card, border: `1px solid ${C.line}`, color: C.ink }} />
         <SelectEmpresa empresas={empresas} value={empresaSel} onChange={setEmpresaSel}
           className="flex-1 sm:flex-none sm:max-w-[190px] rounded-lg px-2.5 py-2 text-[13px] font-semibold" style={{ color: C.ink }} />
+        <input type="date" value={fechaSel} onChange={(e) => setFechaSel(e.target.value)} title="Fecha (opcional)"
+          className="rounded-lg px-2.5 py-2 text-[13px] font-semibold outline-none"
+          style={{ background: C.card, border: `1px solid ${C.line}`, color: fechaSel ? C.ink : C.soft }} />
         <button onClick={agregar} className="rounded-lg px-4 py-2 text-sm font-bold flex items-center gap-1.5" style={{ background: TEAL, color: NAVY }}>
           <Plus size={14} /> Agregar
         </button>
@@ -118,7 +147,9 @@ export default function TableroBoard({
       <div className="flex gap-4 overflow-x-auto pb-2">
         {columnas.map((col) => {
           const color = COL[col.id] || COL.extra;
-          const ts = tareas.filter((t) => t.columna === col.id);
+          // Por hacer: ordenadas por fecha (la más próxima arriba), mezclando empresas.
+          const deCol = tareas.filter((t) => t.columna === col.id);
+          const ts = col.id === "hecho" ? deCol : ordenarPorFecha(deCol);
           return (
             <div key={col.id}
               onDragOver={(e) => e.preventDefault()}
@@ -139,6 +170,7 @@ export default function TableroBoard({
                     nueva={recien.has(t.id)} arrastrando={arrastrando === t.id}
                     onDragStart={() => setArrastrando(t.id)} onDragEnd={() => setArrastrando(null)}
                     onMover={(c) => onMover(t.id, c)} onEmpresa={(emp) => onEmpresa(t.id, emp)}
+                    onFecha={(f) => onFecha(t.id, f)}
                     onEliminar={() => onEliminar(t.id)} onBan={() => onBan(t)} />
                 ))}
                 {ts.length === 0 && <p style={{ color: C.soft }} className="text-xs text-center py-3">Sin tarjetas</p>}
