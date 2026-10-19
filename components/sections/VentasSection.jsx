@@ -7,7 +7,7 @@ import { useEmpresas } from "@/lib/empresas";
 import { C } from "@/lib/theme";
 import { mesSumar } from "@/lib/fechas";
 import { descargarCsv } from "@/lib/exportCsv";
-import { FiltroEmpresas } from "@/components/empresas/EmpresasUI";
+import { FiltroEmpresas, EmpresasModal } from "@/components/empresas/EmpresasUI";
 import AudioModal, { BotonAudio } from "@/components/audio/AudioModal";
 import { interpretarVentas, ejemploVentas } from "@/lib/audio/ventas";
 import { normalizar, entregado, movimientos, horasTot, modeloDe, ESTADOS_HITO } from "@/components/ventas/nuevo/calculos";
@@ -31,7 +31,9 @@ const AUDIO_INTRO =
 
 export default function VentasSection({ business }) {
   const { loadData, saveData, unidadId } = useUnidadStorage();
-  const { empresas, actualizar, porId } = useEmpresas();
+  const empresasApi = useEmpresas();
+  const { empresas, actualizar, porId } = empresasApi;
+  const [modalEmpresas, setModalEmpresas] = useState(false);
 
   const [crudos, setCrudos] = useState([]);
   const [cargado, setCargado] = useState(false);
@@ -217,7 +219,8 @@ export default function VentasSection({ business }) {
       </div>
 
       <div className="mb-3">
-        <FiltroEmpresas empresas={empresas} filtro={filtro} onChange={setFiltro} conteo={conteo} mostrarSin titulo="Ver proyectos de" />
+        <FiltroEmpresas empresas={empresas} filtro={filtro} onChange={setFiltro} conteo={conteo} mostrarSin titulo="Ver proyectos de"
+          onNueva={() => setModalEmpresas(true)} onGestionar={() => setModalEmpresas(true)} />
       </div>
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {tab === "oper" ? (
@@ -282,6 +285,10 @@ export default function VentasSection({ business }) {
         )}
         contarCambios={contarCambiosVentas}
         onAplicar={aplicarAudio} />
+
+      <EmpresasModal open={modalEmpresas} onClose={() => setModalEmpresas(false)} empresasApi={empresasApi}
+        usos={(id) => { const n = proyectos.filter((p) => p.empresa === id).length; return n ? `${n} proy.` : ""; }}
+        onBorrada={(e) => { if (filtro === e.id) setFiltro("todas"); }} />
     </div>
   );
 }
