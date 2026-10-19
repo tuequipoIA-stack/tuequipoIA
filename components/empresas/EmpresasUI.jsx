@@ -80,10 +80,11 @@ export function SelectEmpresa({ empresas, value, onChange, conSin = true, classN
   );
 }
 
-// Modal para ver, crear y borrar empresas (incluye el modelo de ganancia).
+// Modal para ver, crear y borrar empresas (borrar pide confirmación) (incluye el modelo de ganancia).
 // usos(id) → cantidad de cosas que usan la empresa (para mostrar al costado).
-export function EmpresasModal({ open, onClose, empresasApi, usos, soloCrear = false, onCreada }) {
+export function EmpresasModal({ open, onClose, empresasApi, usos, soloCrear = false, onCreada, onBorrada }) {
   const { empresas, crear, eliminar } = empresasApi;
+  const [aBorrar, setABorrar] = useState(null);
   const [nombre, setNombre] = useState("");
   const [color, setColor] = useState(PALETA_EMPRESAS[3]);
   const [modelo, setModelo] = useState("ninguno");
@@ -91,6 +92,8 @@ export function EmpresasModal({ open, onClose, empresasApi, usos, soloCrear = fa
   const [agencia, setAgencia] = useState("25");
   const [hora, setHora] = useState("");
   if (!open) return null;
+
+  const cerrar = () => { setABorrar(null); onClose(); };
 
   const confirmar = async () => {
     if (!nombre.trim()) return;
@@ -103,29 +106,53 @@ export function EmpresasModal({ open, onClose, empresasApi, usos, soloCrear = fa
     setNombre(""); setPct(""); setHora(""); setModelo("ninguno");
     setColor(PALETA_EMPRESAS[(empresas.length + 1) % PALETA_EMPRESAS.length]);
     onCreada?.(nueva);
-    if (soloCrear) onClose();
+    if (soloCrear) cerrar();
   };
 
   const input = { background: C.panel, border: `1px solid ${C.line}`, outline: "none" };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(13,20,32,0.55)" }} onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(13,20,32,0.55)" }} onClick={cerrar}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl p-5 max-h-[88vh] overflow-y-auto" style={{ background: C.panel }}>
         <div className="flex items-start justify-between mb-1">
           <h3 className="text-lg font-semibold" style={{ color: C.ink }}>{soloCrear ? "Nueva empresa" : "Tus empresas"}</h3>
-          <button onClick={onClose} style={{ color: C.soft }}><X size={18} /></button>
+          <button onClick={cerrar} style={{ color: C.soft }}><X size={18} /></button>
         </div>
         <p className="text-xs mb-4" style={{ color: C.soft }}>Se comparten entre Organización, CRM y Ventas.</p>
 
         {!soloCrear && empresas.map((e) => (
-          <div key={e.id} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 mb-2" style={{ background: C.card, border: `1px solid ${C.line}` }}>
-            <span className="w-3.5 h-3.5 rounded shrink-0" style={{ background: e.color }} />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold truncate" style={{ color: C.ink }}>{e.nombre}</div>
-              <div className="text-[11px] truncate" style={{ color: C.soft }}>{MODELOS_GANANCIA.find((m) => m.id === (e.modelo || "ninguno"))?.label}</div>
+          <div key={e.id} className="rounded-xl px-3 py-2.5 mb-2" style={{ background: C.card, border: `1px solid ${aBorrar === e.id ? C.danger : C.line}` }}>
+            <div className="flex items-center gap-2.5">
+              <span className="w-3.5 h-3.5 rounded shrink-0" style={{ background: e.color }} />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold truncate" style={{ color: C.ink }}>{e.nombre}</div>
+                <div className="text-[11px] truncate" style={{ color: C.soft }}>{MODELOS_GANANCIA.find((m) => m.id === (e.modelo || "ninguno"))?.label}</div>
+              </div>
+              {usos && <span className="text-[11px]" style={{ color: C.soft }}>{usos(e.id)}</span>}
+              {aBorrar !== e.id && (
+                <button title="Borrar empresa" onClick={() => setABorrar(e.id)}
+                  className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold"
+                  style={{ color: C.danger, background: tint(C.danger, 0.08) }}>
+                  <Trash2 size={12} /> Borrar
+                </button>
+              )}
             </div>
-            {usos && <span className="text-[11px]" style={{ color: C.soft }}>{usos(e.id)}</span>}
-            <button title="Eliminar empresa (lo asignado queda sin empresa)" onClick={() => eliminar(e.id)} style={{ color: C.danger }}><Trash2 size={13} /></button>
+            {aBorrar === e.id && (
+              <div className="mt-2.5 pt-2.5" style={{ borderTop: `1px solid ${C.line}` }}>
+                <p className="text-xs mb-2" style={{ color: C.ink }}>
+                  ¿Borrar <b>{e.nombre}</b>? Las tareas, objetivos, oportunidades y proyectos que tenía asignados no se pierden: quedan como "Sin empresa".
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <button onClick={() => setABorrar(null)} className="rounded-lg px-3 py-1.5 text-xs font-semibold" style={{ background: C.chip, color: C.muted }}>
+                    Cancelar
+                  </button>
+                  <button onClick={async () => { await eliminar(e.id); setABorrar(null); onBorrada?.(e); }}
+                    className="rounded-lg px-3 py-1.5 text-xs font-bold" style={{ background: C.danger, color: "#fff" }}>
+                    Sí, borrar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
 

@@ -368,7 +368,7 @@ export default function CrmSection() {
       {/* Barra de filtros */}
       <div className="mb-3.5 flex flex-col gap-2.5">
         <FiltroEmpresas empresas={empresas} filtro={filtroEf} onChange={setFiltro} conteo={conteo} mostrarSin
-          onNueva={() => setModalEmpresas("gestionar")} titulo={null} />
+          onNueva={() => setModalEmpresas("gestionar")} onGestionar={() => setModalEmpresas("gestionar")} titulo="Ver oportunidades de" />
         <div className="rounded-xl px-3 py-2.5 flex gap-2 flex-wrap items-center" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
           {tab === "ops" ? (
             <>
@@ -515,6 +515,7 @@ export default function CrmSection() {
           if (modalEmpresas === "desdeForm") setEmpresaNueva(nueva.id);
           avisar("Empresa creada: " + nueva.nombre);
         }}
+        onBorrada={(e) => avisar("Empresa borrada: " + e.nombre)}
       />
 
       <AudioModal
