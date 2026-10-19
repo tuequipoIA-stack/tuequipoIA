@@ -9,6 +9,7 @@ import {
   ESTADOS_HITO, money, num, modeloDe, movimientos, resumenPropio, horasTot, agDe,
 } from "./calculos";
 import { NumBadge, InputDiferido, Bloque, BotonAdd, Resumen, Hint } from "./ui";
+import EditorCompraventa from "@/components/compraventa/EditorCompraventa";
 
 const HINT_HITOS = {
   propio: "Tu proceso: mockup → primer entregable en 1 semana → pruebas → entrega → 2 semanas de acompañamiento.",
@@ -125,6 +126,12 @@ export default function ProyectoDrawer({ proyecto: p, empresa: e, onCambiar, onE
         ]} />
       </Bloque>
     );
+  } else if (modelo === "compraventa") {
+    fin = (
+      <Bloque titulo="Compra · arreglos · venta">
+        <EditorCompraventa cv={p.cv} onCambiar={(cv) => set({ cv })} />
+      </Bloque>
+    );
   } else if (modelo === "propio") {
     const r = resumenPropio(p, e);
     const setCobro = (i, cambios) => set({ cobros: p.cobros.map((c, j) => (j === i ? { ...c, ...cambios } : c)) });
@@ -183,16 +190,18 @@ export default function ProyectoDrawer({ proyecto: p, empresa: e, onCambiar, onE
                 className="flex-1 min-w-0 bg-transparent outline-none text-lg font-bold" style={{ color: C.ink, border: "none" }} />
             </div>
             <div className="flex items-center gap-1 mt-0.5">
-              <InputDiferido value={p.desc} onCommit={(v) => set({ desc: v })} placeholder="Descripción del proyecto"
+              <InputDiferido value={p.desc} onCommit={(v) => set({ desc: v })} placeholder={modelo === "compraventa" ? "Detalle del producto" : "Descripción del proyecto"}
                 className="flex-1 min-w-0 bg-transparent outline-none" style={{ color: C.soft, fontSize: 12.5, border: "none" }} />
-              <span className="shrink-0" style={{ color: C.soft, fontSize: 12 }}>· viene del CRM (ganada)</span>
+              <span className="shrink-0" style={{ color: C.soft, fontSize: 12 }}>· viene del CRM ({modelo === "compraventa" ? "vendido" : "ganada"})</span>
             </div>
           </div>
           <button onClick={onCerrar} style={{ color: C.soft }} className="self-start"><X size={22} /></button>
         </div>
 
         <div className="px-5 pt-4 pb-8 flex flex-col gap-3.5">
-          <Bloque titulo="Próximos pasos y fechas"
+          {modelo === "compraventa" && fin}
+
+          {modelo !== "compraventa" && <Bloque titulo="Próximos pasos y fechas"
             accion={<BotonAdd onClick={() => set({ hitos: [...p.hitos, { n: "Nuevo hito", f: relISO(7), estado: "pendiente" }] })}>+ Hito</BotonAdd>}>
             {p.hitos.map((h, i) => {
               const atr = h.estado !== "hecho" && h.f && diasHasta(h.f) < 0;
@@ -215,7 +224,7 @@ export default function ProyectoDrawer({ proyecto: p, empresa: e, onCambiar, onE
             })}
             {!p.hitos.length && <Hint>Sin hitos. Agregá el primero.</Hint>}
             {HINT_HITOS[modelo] && <Hint className="mt-1.5">{HINT_HITOS[modelo]}</Hint>}
-          </Bloque>
+          </Bloque>}
 
           <Bloque titulo={`Horas ejecutadas · ${horasTot(p)} h${modelo === "propio" ? ` · costo ${money(horasTot(p) * hora, "ARS")}` : ""}`}
             accion={<BotonAdd onClick={() => setFormHora(true)}>+ Cargar horas</BotonAdd>}>
@@ -236,10 +245,10 @@ export default function ProyectoDrawer({ proyecto: p, empresa: e, onCambiar, onE
                 <button onClick={guardarHora} className="rounded-lg px-3 py-1.5 text-[13px] font-bold" style={{ background: "#1AABAA", color: "#1A1A2E" }}>Guardar</button>
               </div>
             )}
-            {modelo !== "propio" && <Hint className="mt-1.5">En {e?.nombre || "este proyecto"} las horas son informativas{modelo !== "ninguno" ? ": tu ganancia es la comisión" : ""}.</Hint>}
+            {modelo !== "propio" && <Hint className="mt-1.5">En {e?.nombre || "este proyecto"} las horas son informativas{modelo === "compraventa" ? ": sirven para ver cuánto tiempo te llevó el arreglo" : modelo !== "ninguno" ? ": tu ganancia es la comisión" : ""}.</Hint>}
           </Bloque>
 
-          {fin}
+          {modelo !== "compraventa" && fin}
 
           <div className="text-right">
             <button onClick={() => { if (window.confirm(`¿Eliminar el proyecto #${p.num} (${p.cliente})? No se puede deshacer.`)) onEliminar(); }}

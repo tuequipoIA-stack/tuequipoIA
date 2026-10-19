@@ -5,6 +5,7 @@ import { C } from "@/lib/theme";
 import { mesKey, mesOffset, mesCorto, mesLargo } from "@/lib/fechas";
 import { money, num, modeloDe, movimientos, resumenPropio, horasTot, agDe, aARS, porMoneda } from "./calculos";
 import { Kpi, NumBadge, Pill, ReglaTag, InputDiferido } from "./ui";
+import { resumenCV } from "@/lib/compraventa";
 
 const inpRegla = { width: 64, border: `1px solid ${C.line}`, background: C.panel, borderRadius: 6, padding: "3px 6px", fontWeight: 700, textAlign: "right", outline: "none", color: C.ink };
 const fmt = (n) => Math.round(n).toLocaleString("es-AR");
@@ -60,8 +61,15 @@ function ReglaCard({ e, actualizar }) {
         <Ej>Ej: proyecto $ 1.800.000 con 34 h → costo $ {fmt(34 * hora)} → <b>ganancia $ {fmt(1800000 - 34 * hora)}</b> (antes de otros costos).</Ej>
       </>
     );
+  } else if (modelo === "compraventa") {
+    cuerpo = (
+      <>
+        Ganancia = precio de venta − precio de compra − arreglos. Se mide cuántos días estuvo invertida la plata (de la compra a la venta) para ver qué rinde más rápido.
+        <Ej>Ej: comprás a $ 1.000.000, arreglás por $ 200.000 y vendés a $ 1.600.000 a los 30 días → <b>ganancia $ 400.000</b> · 33% sobre lo invertido · $ 13.333 por día.</Ej>
+      </>
+    );
   }
-  const titulo = modelo === "propio" ? "desarrollos propios" : "comisión";
+  const titulo = modelo === "propio" ? "desarrollos propios" : modelo === "compraventa" ? "compraventa" : "comisión";
   return (
     <div className="rounded-xl px-3.5 py-3 text-[12.5px] leading-relaxed" style={{ background: C.card, border: `1px solid ${C.line}`, borderTop: `4px solid ${e.color}`, color: C.muted }}>
       <h4 className="text-sm font-bold mb-1.5" style={{ color: C.ink }}>{e.nombre} · {titulo}</h4>
@@ -230,6 +238,63 @@ export default function Ganancias({ grupos, lista, empresas, porId, periodo, tc,
                   })}
                 </tbody>
                 <tfoot><tr><td colSpan={3}>Total</td><td className="r">{totalMonedas(tF)}</td><td /><td /><td className="r vt-verde">{totalMonedas(tCm)}</td><td colSpan={2} /></tr></tfoot>
+              </table></div>
+            </div>
+          );
+        }
+        if (modelo === "compraventa") {
+          const rs = ps.map((p) => resumenCV(p.cv));
+          const tInv = rs.reduce((a, r) => a + r.inversion, 0);
+          const tVen = rs.reduce((a, r) => a + r.venta, 0);
+          const tGan = rs.reduce((a, r) => a + r.ganancia, 0);
+          const tDias = rs.reduce((a, r) => a + (r.diasTotal || 0), 0);
+          const conDias = rs.filter((r) => r.diasTotal != null);
+          const promDias = conDias.length ? Math.round(conDias.reduce((a, r) => a + r.diasTotal, 0) / conDias.length) : null;
+          const p0 = (v) => (v == null ? "—" : `${Math.round(v)}%`);
+          return (
+            <div key={e.id} className="mb-5">
+              {cabecera(e, <ReglaTag>Venta − compra − arreglos · rentabilidad por días invertidos</ReglaTag>)}
+              <div className="grid gap-3 mb-3" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))" }}>
+                <Kpi label="Productos vendidos"><span style={{ fontSize: 20 }}>{ps.length}</span></Kpi>
+                <Kpi label="Ganancia total"><span style={{ fontSize: 20, color: tGan >= 0 ? C.ok : C.danger }}>{money(tGan, "ARS")}</span></Kpi>
+                <Kpi label="Retorno sobre lo invertido"><span style={{ fontSize: 20 }}>{tInv ? Math.round((tGan / tInv) * 100) : 0}%</span></Kpi>
+                <Kpi label="Días promedio compra → venta"><span style={{ fontSize: 20 }}>{promDias ?? "—"}</span></Kpi>
+                <Kpi label="Ganancia por día invertido" sub="ganancia total ÷ días totales"><span style={{ fontSize: 20 }}>{tDias ? money(tGan / tDias, "ARS") : "—"}</span></Kpi>
+              </div>
+              <div className="vt-tabla"><table>
+                <thead><tr><th>N°</th><th>Producto</th><th className="r">Compra</th><th className="r">Arreglos</th><th className="r">Venta</th><th className="r">Ganancia</th><th className="r">Margen</th><th className="r">Retorno</th><th className="r">Días</th><th className="r">$ / día</th><th className="r">Retorno mensual</th><th>Cobro</th></tr></thead>
+                <tbody>
+                  {ps.map((p, i) => {
+                    const r = rs[i];
+                    return (
+                      <tr key={p.num} {...fila(p)}>
+                        <td><NumBadge n={p.num} /></td>
+                        <td className="vt-cli"><b>{p.cliente}</b><small>{p.desc}</small></td>
+                        <td className="r">{money(r.compra, "ARS")}</td>
+                        <td className="r">{r.arreglos ? money(r.arreglos, "ARS") : "—"}</td>
+                        <td className="r">{money(r.venta, "ARS")}</td>
+                        <td className={`r ${r.ganancia >= 0 ? "vt-verde" : "vt-rojo"}`}>{money(r.ganancia, "ARS")}</td>
+                        <td className="r">{p0(r.venta ? r.margen : null)}</td>
+                        <td className="r">{p0(r.inversion ? r.roi : null)}</td>
+                        <td className="r">{r.diasTotal ?? "—"}</td>
+                        <td className="r">{r.gananciaDia == null ? "—" : money(r.gananciaDia, "ARS")}</td>
+                        <td className="r">{p0(r.inversion ? r.roiMensual : null)}</td>
+                        <td>{p.cv.cobrado ? <Pill tipo="ok">Cobrado</Pill> : <Pill tipo="pend">A cobrar</Pill>}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot><tr>
+                  <td colSpan={2}>Total</td>
+                  <td className="r" colSpan={2}>{money(tInv, "ARS")}</td>
+                  <td className="r">{money(tVen, "ARS")}</td>
+                  <td className="r vt-verde">{money(tGan, "ARS")}</td>
+                  <td className="r">{tVen ? Math.round((tGan / tVen) * 100) : 0}%</td>
+                  <td className="r">{tInv ? Math.round((tGan / tInv) * 100) : 0}%</td>
+                  <td className="r">{promDias != null ? `${promDias} prom.` : "—"}</td>
+                  <td className="r">{tDias ? money(tGan / tDias, "ARS") : "—"}</td>
+                  <td colSpan={2} />
+                </tr></tfoot>
               </table></div>
             </div>
           );

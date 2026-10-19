@@ -10,6 +10,8 @@ import {
   money, inp, sel, btnTeal,
 } from "./comun";
 import { NumChip, Bloque, FormBox, Hint } from "./Piezas";
+import EditorCompraventa from "@/components/compraventa/EditorCompraventa";
+import { esCompraventa, etiquetaEtapa, normalizarCV } from "@/lib/compraventa";
 
 const waLink = (t) => "https://wa.me/" + String(t).replace(/\D/g, "");
 
@@ -58,6 +60,12 @@ export default function OportunidadDrawer({ op, empresas, porId, tareas, onClose
 
   if (!op) return null;
   const e = porId(op.empresa) || SIN_EMPRESA;
+  const cvEmp = esCompraventa(e);
+  // Guardar compraventa: el valor de la oportunidad sigue al precio de venta (o al objetivo)
+  const cambiarCV = (cv) => {
+    const c = normalizarCV(cv);
+    onCambiar({ cv: c, valor: c.venta.monto || c.objetivo, moneda: "ARS" });
+  };
   const set = (k) => (ev) => setF((p) => ({ ...p, [k]: ev.target.type === "checkbox" ? ev.target.checked : ev.target.value }));
   const toggle = (id, ini = {}) => { setAbierto((a) => (a === id ? null : id)); setF(ini); };
 
@@ -108,7 +116,7 @@ export default function OportunidadDrawer({ op, empresas, porId, tareas, onClose
           <div className="flex gap-2 items-center flex-wrap mt-2">
             <select value={op.etapa} onChange={(ev) => onEtapa(ev.target.value)} style={sel}>
               {ETAPAS_ORDEN.map((k) => (
-                <option key={k} value={k}>{k === "ganado" ? "✓ " : k === "perdido" ? "✕ " : ""}{ETAPAS[k].l}</option>
+                <option key={k} value={k}>{k === "ganado" ? "✓ " : k === "perdido" ? "✕ " : ""}{etiquetaEtapa(k, e, ETAPAS)}</option>
               ))}
             </select>
             <SelectEmpresa empresas={empresas} value={op.empresa} onChange={(v) => onCambiar({ empresa: v })} style={sel} />
@@ -145,6 +153,14 @@ export default function OportunidadDrawer({ op, empresas, porId, tareas, onClose
         </div>
 
         <div className="flex flex-col gap-3.5" style={{ padding: "16px 20px 30px" }}>
+          {cvEmp && (
+            <Bloque titulo="Compra · arreglos · venta">
+              <EditorCompraventa cv={op.cv} onCambiar={cambiarCV} />
+              {op.etapa !== "ganado" && (
+                <Hint style={{ marginTop: 8 }}>Cuando lo vendas, pasalo a <b>✓ Vendido</b> arriba y se carga solo en Ventas.</Hint>
+              )}
+            </Bloque>
+          )}
           {/* Contactos */}
           <Bloque titulo="Contactos" accion="+ Agregar" onAccion={() => toggle("c")}>
             {op.contactos.length ? op.contactos.map((c, i) => (
