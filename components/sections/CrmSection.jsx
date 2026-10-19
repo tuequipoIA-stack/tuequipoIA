@@ -6,7 +6,8 @@ import { BRAND } from "@/lib/constants";
 import { C } from "@/lib/theme";
 import { useUnidadStorage } from "@/lib/useUnidadStorage";
 import { useEmpresas } from "@/lib/empresas";
-import { asegurarProyectoVenta } from "@/lib/ventas";
+import { asegurarProyectoVenta, sincronizarCompraventa } from "@/lib/ventas";
+import { normalizarCV } from "@/lib/compraventa";
 import { descargarCsv } from "@/lib/exportCsv";
 import { uid } from "@/lib/helpers";
 import { hoyISO, diasHasta, diasDesde, fechaDia } from "@/lib/fechas";
@@ -152,11 +153,24 @@ export default function CrmSection() {
     const n = { ...o, etapa };
     if (etapa === "ganado" || etapa === "perdido") n.cerradaEn = hoyISO();
     else delete n.cerradaEn;
+    // Compraventa: al marcarlo vendido, completa fecha y precio de venta si faltan
+    if (etapa === "ganado" && n.cv) {
+      const cv = normalizarCV(n.cv);
+      if (!cv.venta.f) cv.venta.f = hoyISO();
+      if (!cv.venta.monto) cv.venta.monto = Number(n.valor) || cv.objetivo;
+      n.cv = cv;
+    }
     return n;
   };
 
-  const cambiarOp = (num, cambios) =>
-    guardarOps(opsRef.current.map((o) => (o.num === num ? { ...o, ...cambios } : o)));
+  const cambiarOp = async (num, cambios) => {
+    await guardarOps(opsRef.current.map((o) => (o.num === num ? { ...o, ...cambios } : o)));
+    // Compraventa ya vendida: lo editado en el CRM se refleja en Ventas
+    const o = opsRef.current.find((x) => x.num === num);
+    if (o && o.etapa === "ganado" && cambios.cv) {
+      try { await sincronizarCompraventa(storage, o); } catch (_) {}
+    }
+  };
 
   const cambiarEtapa = async (num, etapa) => {
     const actual = opsRef.current.find((o) => o.num === num);
@@ -196,6 +210,7 @@ export default function CrmSection() {
       contactos: f.contacto.trim() || f.tel.trim() ? [{ n: f.contacto.trim() || "Contacto", r: "", t: f.tel.trim(), m: "" }] : [],
       proximos: f.prox && !ganada ? [{ f: f.prox, m: "Primer seguimiento", h: false }] : [],
       creadaEn: hoyISO(),
+      ...(f.cv ? { cv: f.cv } : {}),
       ...(ganada ? { cerradaEn: hoyISO() } : {}),
     });
     await guardarOps([...opsRef.current, op]);

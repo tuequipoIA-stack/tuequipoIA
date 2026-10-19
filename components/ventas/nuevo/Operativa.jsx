@@ -4,6 +4,7 @@ import { C } from "@/lib/theme";
 import { diasHasta, fechaCorta, mesKey } from "@/lib/fechas";
 import { horasTot, proxHito, modeloDe } from "./calculos";
 import { Kpi, NumBadge, Pill } from "./ui";
+import { resumenCV } from "@/lib/compraventa";
 
 // Pestaña "Operativa": hitos, entregas y horas de cada proyecto, por empresa.
 export default function Operativa({ grupos, lista, recien, onAbrir, cabecera }) {
@@ -25,6 +26,46 @@ export default function Operativa({ grupos, lista, recien, onAbrir, cabecera }) 
 
       {grupos.map(({ empresa: e, proyectos: ps }) => {
         const color = e?.color || C.soft;
+        if (modeloDe(e) === "compraventa") {
+          const rs = ps.map((p) => resumenCV(p.cv));
+          const prom = (k) => {
+            const v = rs.map((r) => r[k]).filter((x) => x != null);
+            return v.length ? Math.round(v.reduce((a, x) => a + x, 0) / v.length) : null;
+          };
+          const d = (x) => (x == null ? "—" : `${x} d`);
+          return (
+            <div key={e.id} className="mb-5">
+              {cabecera(e, <small className="text-xs font-semibold" style={{ color: C.soft }}>{ps.length} {ps.length === 1 ? "producto vendido" : "productos vendidos"}</small>)}
+              <div className="vt-tabla">
+                <table>
+                  <thead>
+                    <tr><th>N°</th><th>Producto</th><th>Compra</th><th>Venta</th><th className="r">Días en arreglo</th><th className="r">Días a la venta</th><th className="r">Días totales</th><th>Cobro</th></tr>
+                  </thead>
+                  <tbody>
+                    {ps.map((p, i) => {
+                      const r = rs[i];
+                      return (
+                        <tr key={p.num} className={`click ${recien.has(p.num) ? "vt-flash" : ""}`} onClick={() => onAbrir(p.num)} style={{ boxShadow: `inset 3px 0 0 ${color}` }}>
+                          <td><NumBadge n={p.num} /></td>
+                          <td className="vt-cli"><b>{p.cliente || "Sin nombre"}</b><small>{p.desc}</small></td>
+                          <td>{p.cv.compra.f ? fechaCorta(p.cv.compra.f) : "—"}</td>
+                          <td>{p.cv.venta.f ? fechaCorta(p.cv.venta.f) : "—"}</td>
+                          <td className="r">{d(r.diasArreglo)}</td>
+                          <td className="r">{d(r.diasVenta)}</td>
+                          <td className="r"><b>{d(r.diasTotal)}</b></td>
+                          <td>{p.cv.cobrado ? <Pill tipo="ok">Cobrado</Pill> : <Pill tipo="pend">A cobrar</Pill>}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  {ps.length > 1 && (
+                    <tfoot><tr><td colSpan={4}>Promedio</td><td className="r">{d(prom("diasArreglo"))}</td><td className="r">{d(prom("diasVenta"))}</td><td className="r">{d(prom("diasTotal"))}</td><td /></tr></tfoot>
+                  )}
+                </table>
+              </div>
+            </div>
+          );
+        }
         return (
           <div key={e?.id || "sin"} className="mb-5">
             {cabecera(e, <small className="text-xs font-semibold" style={{ color: C.soft }}>{ps.length} {ps.length === 1 ? "proyecto" : "proyectos"}</small>)}

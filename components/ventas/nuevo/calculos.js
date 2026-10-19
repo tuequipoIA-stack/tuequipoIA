@@ -1,6 +1,7 @@
 // Cálculos de Ventas (Operativa y Ganancias). Las reglas de ganancia salen
 // de la empresa de cada proyecto (empresa.modelo + pct / agencia / hora).
 import { mesKey, mesOffset, mesSumar, mesCorto } from "@/lib/fechas";
+import { normalizarCV, resumenCV, mesGananciaCV } from "@/lib/compraventa";
 
 export const ESTADOS_HITO = { pendiente: "Pendiente", en_curso: "En curso", hecho: "Hecho" };
 
@@ -39,6 +40,9 @@ export function normalizar(p, e) {
     base.precio = num(p.precio);
     base.cobros = Array.isArray(p.cobros) ? p.cobros.filter((c) => c && esMes(c.mes)).map((c) => ({ mes: c.mes, monto: num(c.monto), ok: !!c.ok })) : [];
     base.otros = Array.isArray(p.otros) ? p.otros.filter(Boolean).map((o) => ({ d: o.d || "", m: num(o.m) })) : [];
+  } else if (modelo === "compraventa") {
+    base.moneda = "ARS";
+    base.cv = normalizarCV(p.cv);
   }
   return base;
 }
@@ -52,6 +56,7 @@ export const proxHito = (p) =>
   p.hitos.filter((h) => h.estado !== "hecho").sort((a, b) => String(a.f).localeCompare(String(b.f)))[0];
 
 export function entregado(p, e) {
+  if (modeloDe(e) === "compraventa") return !!p.cv?.venta?.f && p.cv.cobrado;
   return (
     p.hitos.length > 0 &&
     p.hitos.every((h) => h.estado === "hecho") &&
@@ -84,6 +89,14 @@ export function movimientos(p, e) {
         det: `Ejecutado en ${mesCorto(x.mes)}: ${money(x.monto, p.moneda)} · agencia ${ag}%`,
       };
     });
+  }
+  if (modelo === "compraventa") {
+    const r = resumenCV(p.cv);
+    const mes = mesGananciaCV(p.cv);
+    return [{
+      mes, monto: r.ganancia, moneda: "ARS", ok: r.vendido && p.cv.cobrado,
+      det: `Venta ${Math.round(r.venta).toLocaleString("es-AR")} − inversión ${Math.round(r.inversion).toLocaleString("es-AR")}`,
+    }];
   }
   if (modelo === "propio") {
     const hora = num(e?.hora);
